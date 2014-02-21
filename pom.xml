@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.532</version>
+    </parent>
+ 
+    <artifactId>bitbucket</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>hpi</packaging>
+    <name>Jenkins Bitbucket Plugin</name>
+    <description>integrate Jenkins with BitBucket.</description>
+    <url>https://wiki.jenkins-ci.org/display/JENKINS/BitBucket+Plugin</url>
+
+    <scm>
+        <connection>scm:git:git://github.com/jenkinsci/bitbucket-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/bitbucket-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/bitbucket-plugin</url>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>git</artifactId>
+            <version>2.0.3-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+</project>
+
