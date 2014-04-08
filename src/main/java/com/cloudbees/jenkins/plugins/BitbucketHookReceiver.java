@@ -107,8 +107,9 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         LOGGER.info("Received commit hook notification for "+repo);
 
         JSONArray commits = payload.getJSONArray("commits");
-        String sha1 = commits.getJSONObject(0).getString("raw_node");
-        String branch = commits.getJSONObject(0).getString("branch");
+        int last = commits.size() - 1;
+        String sha1 = commits.getJSONObject(last).getString("raw_node");
+        String branch = commits.getJSONObject(last).getString("branch");
 
         String scm = repo.getString("scm");
         if ("git".equals(scm)) {
@@ -116,12 +117,13 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
             try {
                 URIish remote = new URIish(url);
                 for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
+                    LOGGER.info("considering candidate job " + job.getName());
                     BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
                     if (trigger!=null) {
                         if (match(job.getScm(), remote)) {
                             trigger.onPost(user, remote, sha1, branch);
-                        }
-                    }
+                        } else LOGGER.info("job SCM doesn't match remote repo");
+                    } else LOGGER.info("job hasn't BitBucketTrigger set");
                 }
             } catch (URISyntaxException e) {
                 LOGGER.warning("invalid repository URL " + url);
