@@ -12,6 +12,10 @@ public class BitBucketPushCause extends SCMTrigger.SCMTriggerCause {
 
     private String pushedBy;
 
+    public BitBucketPushCause(String pusher) {
+        this("", pusher);
+    }
+    
     public BitBucketPushCause(String pollingLog, String pusher) {
         super(pollingLog);
         pushedBy = pusher;
