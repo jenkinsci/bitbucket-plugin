@@ -20,10 +20,9 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
     public BitBucketTrigger() {
     }
 
-    public void onPost(String user, URIish repository, String sha1, String branch) {
-        for (GitStatus.Listener listener : Jenkins.getInstance().getExtensionList(GitStatus.Listener.class)) {
-            listener.onNotifyCommit(repository, sha1, new String[] { branch });
-        }
+    public void onPost(AbstractProject<?,?> job, String user) {
+    	BitBucketPushCause cause = new BitBucketPushCause(user);
+    	job.scheduleBuild(cause);	
     }
 
     @Extension
