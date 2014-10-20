@@ -22,7 +22,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
 
     public void onPost(AbstractProject<?,?> job, String user) {
     	BitBucketPushCause cause = new BitBucketPushCause(user);
-    	job.scheduleBuild(cause);	
+    	job.scheduleBuild(cause);
     }
 
     @Extension

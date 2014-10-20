@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.Hudson;
 import hudson.model.UnprotectedRootAction;
+import hudson.plugins.git.BranchSpec;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.scm.SCM;
@@ -11,16 +12,20 @@ import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import org.jenkinsci.plugins.gitclient.Git;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -110,17 +115,21 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         int last = commits.size() - 1;
         String sha1 = commits.getJSONObject(last).getString("raw_node");
         String branch = commits.getJSONObject(last).getString("branch");
-
         String scm = repo.getString("scm");
         if ("git".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
                 URIish remote = new URIish(url);
                 for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                    LOGGER.info("considering candidate job " + job.getName());
-                    BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
+                	LOGGER.info("considering candidate job " + job.getName());
+                    
+                	BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
+                    
+                    GitSCM gitRepo = (GitSCM)job.getScm();
+                    matchBranch(gitRepo, branch);
+ 
                     if (trigger!=null) {
-                        if (match(job.getScm(), remote)) {
+                        if (matchScm(job.getScm(), remote) && matchBranch(gitRepo, branch)) {                     	
                         	trigger.onPost(job, user);
                         } else LOGGER.info("job SCM doesn't match remote repo");
                     } else LOGGER.info("job hasn't BitBucketTrigger set");
@@ -137,7 +146,20 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         }
     }
 
-    private boolean match(SCM scm, URIish url) {
+    private boolean matchBranch(GitSCM gitRepo, String brachToTrigger){
+    	List<BranchSpec> branches = gitRepo.getBranches();                  
+    	Iterator<BranchSpec> iterator = branches.iterator();
+         
+    	while (iterator.hasNext()) {
+    		String branchDefinedInScm = iterator.next().getName().replace("*", "").replace("/", "");
+        	 
+        	 if(branchDefinedInScm.equals(brachToTrigger))
+     			return true;
+     	}
+    	return false;	
+    }
+    
+    private boolean matchScm(SCM scm, URIish url) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
