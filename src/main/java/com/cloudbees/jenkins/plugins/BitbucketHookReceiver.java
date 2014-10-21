@@ -110,7 +110,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         String user = payload.getString("user");
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
         LOGGER.info("Received commit hook notification for "+repo);
-
         JSONArray commits = payload.getJSONArray("commits");
         int last = commits.size() - 1;
         String sha1 = commits.getJSONObject(last).getString("raw_node");
@@ -122,12 +121,9 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
                 URIish remote = new URIish(url);
                 for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
                 	LOGGER.info("considering candidate job " + job.getName());
-                    
                 	BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
-                    
-                    GitSCM gitRepo = (GitSCM)job.getScm();
-                    matchBranch(gitRepo, branch);
- 
+                	GitSCM gitRepo = (GitSCM)job.getScm();
+                	matchBranch(gitRepo, branch);
                     if (trigger!=null) {
                         if (matchScm(job.getScm(), remote) && matchBranch(gitRepo, branch)) {                     	
                         	trigger.onPost(job, user);
