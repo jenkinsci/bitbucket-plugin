@@ -105,7 +105,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 }
 */
     private void processPayload(JSONObject payload) {
-
         JSONObject repo = payload.getJSONObject("repository");
         String user = payload.getString("user");
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
