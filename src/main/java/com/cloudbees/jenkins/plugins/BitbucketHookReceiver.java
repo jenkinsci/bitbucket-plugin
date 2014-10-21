@@ -153,8 +153,8 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     	while (iterator.hasNext()) {
     		String branchDefinedInScm = iterator.next().getName().replace("*", "").replace("/", "");
         	 
-        	 if(branchDefinedInScm.equals(brachToTrigger))
-     			return true;
+    		if(branchDefinedInScm.equals(brachToTrigger))
+    			return true;
      	}
     	return false;	
     }
