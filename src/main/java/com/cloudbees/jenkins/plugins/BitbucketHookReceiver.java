@@ -144,11 +144,14 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     private boolean matchBranch(GitSCM gitRepo, String brachToTrigger){
     	List<BranchSpec> branches = gitRepo.getBranches();                  
     	Iterator<BranchSpec> iterator = branches.iterator();
-         
+    	String[] parts; 
     	while (iterator.hasNext()) {
-    		String branchDefinedInScm = iterator.next().getName().replace("*", "").replace("/", "");
-        	 
-    		if(branchDefinedInScm.equals(brachToTrigger))
+    		//String branchDefinedInScm = iterator.next().getName().replace("*", "").replace("/", "");	    		
+    		parts = iterator.next().getName().split("/");    		
+    		String branchDefinedInScm = parts[parts.length-1];   			
+    		if(branchDefinedInScm.equals("*"))
+    			return true;
+    		else if(branchDefinedInScm.equals(brachToTrigger))
     			return true;
      	}
     	return false;	
