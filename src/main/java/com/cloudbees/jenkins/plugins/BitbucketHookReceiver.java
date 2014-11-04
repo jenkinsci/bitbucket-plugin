@@ -114,18 +114,16 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         String sha1 = commits.getJSONObject(last).getString("raw_node");
         String branch = commits.getJSONObject(last).getString("branch");
         String scm = repo.getString("scm");
+
         if ("git".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
                 URIish remote = new URIish(url);
                 for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                	LOGGER.info("considering candidate job " + job.getName());
                 	BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
-                	GitSCM gitRepo = (GitSCM)job.getScm();
-                	matchBranch(gitRepo, branch);
                     if (trigger!=null) {
-                        if (matchScm(job.getScm(), remote) && matchBranch(gitRepo, branch)) {                     	
-                        	//trigger.onPost(job, user);
+                        LOGGER.info("considering candidate job " + job.getName());
+                        if (matchScm(job.getScm(), remote)) {
                         	trigger.onPost(user);
                         } else LOGGER.info("job SCM doesn't match remote repo");
                     } else LOGGER.info("job hasn't BitBucketTrigger set");
@@ -140,11 +138,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
             // TODO hg
             throw new UnsupportedOperationException("unsupported SCM type " + scm);
         }
-    }
-
-    private boolean matchBranch(GitSCM gitRepo, String brachToTrigger){
-
-    	return true;	
     }
     
     private boolean matchScm(SCM scm, URIish url) {
