@@ -125,7 +125,8 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
                 	matchBranch(gitRepo, branch);
                     if (trigger!=null) {
                         if (matchScm(job.getScm(), remote) && matchBranch(gitRepo, branch)) {                     	
-                        	trigger.onPost(job, user);
+                        	//trigger.onPost(job, user);
+                        	trigger.onPost(user);
                         } else LOGGER.info("job SCM doesn't match remote repo");
                     } else LOGGER.info("job hasn't BitBucketTrigger set");
                 }
@@ -142,18 +143,8 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     }
 
     private boolean matchBranch(GitSCM gitRepo, String brachToTrigger){
-    	List<BranchSpec> branches = gitRepo.getBranches();                  
-    	Iterator<BranchSpec> iterator = branches.iterator();
-    	String[] parts; 
-    	while (iterator.hasNext()) {
-    		parts = iterator.next().getName().split("/");    		
-    		String branchDefinedInScm = parts[parts.length-1];   			
-    		if(branchDefinedInScm.equals("*"))
-    			return true;
-    		else if(brachToTrigger.endsWith(branchDefinedInScm))
-    			return true;
-     	}
-    	return false;	
+
+    	return true;	
     }
     
     private boolean matchScm(SCM scm, URIish url) {
