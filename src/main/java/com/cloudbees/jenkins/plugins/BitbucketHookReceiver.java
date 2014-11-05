@@ -114,7 +114,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         String sha1 = commits.getJSONObject(last).getString("raw_node");
         String branch = commits.getJSONObject(last).getString("branch");
         String scm = repo.getString("scm");
-
         if ("git".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
@@ -151,7 +150,5 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         }
         return false;
     }
-
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
-
 }

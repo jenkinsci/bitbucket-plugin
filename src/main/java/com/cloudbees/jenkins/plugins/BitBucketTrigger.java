@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
@@ -41,7 +40,6 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
     private boolean runPolling() {
         try {
             StreamTaskListener listener = new StreamTaskListener(getLogFile());
-
             try {
                 PrintStream logger = listener.getLogger();
                 long start = System.currentTimeMillis();
@@ -139,8 +137,6 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
         public String getDisplayName() {
             return "Build when a change is pushed to BitBucket";
         }
-
     }
-    
     private static final Logger LOGGER = Logger.getLogger(BitBucketTrigger.class.getName());
 }
