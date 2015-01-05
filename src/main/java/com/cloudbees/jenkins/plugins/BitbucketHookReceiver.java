@@ -121,7 +121,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
                     BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
                     if (trigger!=null) {
                         if (match(job.getScm(), remote)) {
-                        	trigger.onPost(job, user);
+                        	trigger.onPost(user);
                         } else LOGGER.info("job SCM doesn't match remote repo");
                     } else LOGGER.info("job hasn't BitBucketTrigger set");
                 }
