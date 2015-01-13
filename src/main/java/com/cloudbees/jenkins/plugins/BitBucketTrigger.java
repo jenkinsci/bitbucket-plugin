@@ -5,9 +5,11 @@ import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
+import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
+import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
 import org.apache.commons.jelly.XMLOutput;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -34,59 +36,59 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
     /**
      * Called when a POST is made.
      */
-    public void onPost(String pushBy) {
-        if(!IsLogFileInitialized())
-            InitializeLogFile();
-        run(pushBy);
-    }
+    public void onPost(String triggeredByUser) {
+        final String pushBy = triggeredByUser;
+        getDescriptor().queue.execute(new Runnable() {
+            private boolean runPolling() {
+                try {
+                    StreamTaskListener listener = new StreamTaskListener(getLogFile());
+                    try {
+                        PrintStream logger = listener.getLogger();
+                        long start = System.currentTimeMillis();
+                        logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
+                        boolean result = job.poll(listener).hasChanges();
+                        logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
+                        if(result)
+                            logger.println("Changes found");
+                        else
+                            logger.println("No changes");
+                        return result;
+                    } catch (Error e) {
+                        e.printStackTrace(listener.error("Failed to record SCM polling"));
+                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                        throw e;
+                    } catch (RuntimeException e) {
+                        e.printStackTrace(listener.error("Failed to record SCM polling"));
+                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                        throw e;
+                    } finally {
+                        listener.close();
+                    }
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
+                }
+                return false;
+            }
 
-    private boolean runPolling() {
-        try {
-            StreamTaskListener listener = new StreamTaskListener(getLogFile());
-            try {
-                PrintStream logger = listener.getLogger();
-                long start = System.currentTimeMillis();
-                logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                boolean result = job.poll(listener).hasChanges();
-                logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
-                if(result)
-                    logger.println("Changes found");
-                else
-                    logger.println("No changes");
-                return result;
-            } catch (Error e) {
-                e.printStackTrace(listener.error("Failed to record SCM polling"));
-                LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                throw e;
-            } catch (RuntimeException e) {
-                e.printStackTrace(listener.error("Failed to record SCM polling"));
-                LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                throw e;
-            } finally {
-                listener.close();
+            public void run() {
+                if (runPolling()) {
+                    String name = " #"+job.getNextBuildNumber();
+                    BitBucketPushCause cause;
+                    try {
+                        cause = new BitBucketPushCause(getLogFile(), pushBy);
+                    } catch (IOException e) {
+                        LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
+                        cause = new BitBucketPushCause(pushBy);
+                    }
+                    if (job.scheduleBuild(cause)) {
+                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+name);
+                    } else {
+                        LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
+                    }
+                }
             }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-        }
-        return false;
-    }
 
-    public void run(String pushBy) {
-        if (runPolling()) {
-            String name = " #"+job.getNextBuildNumber();
-            BitBucketPushCause cause;
-            try {
-                cause = new BitBucketPushCause(getLogFile(), pushBy);
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
-                cause = new BitBucketPushCause(pushBy);
-            }
-            if (job.scheduleBuild(cause)) {
-                LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+name);
-            } else {
-                LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
-            }
-        }
+        });
     }
 
     /**
@@ -104,43 +106,9 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
         return file.exists();
     }
 
-    /**
-     * Need to initialize the log file otherwise plugin will not detect changes in the initial commit
-     */
-    public void InitializeLogFile() {
-        /*File file = new File(job.getRootDir(),"bitbucket-polling.log");
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
-        try {
-            StreamTaskListener listener = new StreamTaskListener(getLogFile());
-            try {
-                PrintStream logger = listener.getLogger();
-                long start = System.currentTimeMillis();
-                logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                //boolean result = job.poll(listener).hasChanges();
-                logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
-                //if(result)
-                logger.println("Changes found");
-                // else
-                //     logger.println("No changes");
-            } catch (Error e) {
-                e.printStackTrace(listener.error("Failed to record SCM polling"));
-                LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                throw e;
-            } catch (RuntimeException e) {
-                e.printStackTrace(listener.error("Failed to record SCM polling"));
-                LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                throw e;
-            } finally {
-                listener.close();
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-        }
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl)super.getDescriptor();
     }
 
     /**
@@ -177,6 +145,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
 
     @Extension
     public static class DescriptorImpl extends TriggerDescriptor {
+        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Hudson.MasterComputer.threadPoolForRemoting);
 
         @Override
         public boolean isApplicable(Item item) {
