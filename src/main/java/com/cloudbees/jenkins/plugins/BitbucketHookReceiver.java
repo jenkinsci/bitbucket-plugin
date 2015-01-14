@@ -100,7 +100,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 }
 */
     private void processPayload(JSONObject payload) {
-
         JSONObject repo = payload.getJSONObject("repository");
         String user = payload.getString("user");
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
@@ -117,23 +116,23 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
             try {
                 URIish remote = new URIish(url);
                 for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                    LOGGER.info("considering candidate job " + job.getName());
+                    LOGGER.info("Considering candidate job " + job.getName());
                     BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
                     if (trigger!=null) {
                         if (match(job.getScm(), remote)) {
                         	trigger.onPost(user);
-                        } else LOGGER.info("job SCM doesn't match remote repo");
-                    } else LOGGER.info("job hasn't BitBucketTrigger set");
+                        } else LOGGER.info("Job " + job.getName() + " SCM doesn't match remote repo");
+                    } else LOGGER.info("Job "+ job.getName() + " hasn't BitBucketTrigger set");
                 }
             } catch (URISyntaxException e) {
-                LOGGER.warning("invalid repository URL " + url);
+                LOGGER.warning("Invalid repository URL " + url);
             } finally {
                 SecurityContextHolder.setContext(old);
             }
 
         } else {
             // TODO hg
-            throw new UnsupportedOperationException("unsupported SCM type " + scm);
+            throw new UnsupportedOperationException("Unsupported SCM type " + scm);
         }
     }
 

@@ -38,6 +38,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
      */
     public void onPost(String triggeredByUser) {
         final String pushBy = triggeredByUser;
+        LOGGER.info("Checking if job " + job.getName() + " has changes in the SCM");
         getDescriptor().queue.execute(new Runnable() {
             private boolean runPolling() {
                 try {
@@ -48,10 +49,13 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
                         logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
                         boolean result = job.poll(listener).hasChanges();
                         logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
-                        if(result)
+                        if(result) {
                             logger.println("Changes found");
-                        else
+                            LOGGER.info("Changes found for job " + job.getName());
+                        } else {
                             logger.println("No changes");
+                            LOGGER.info("Changes not found for job " + job.getName());
+                        }
                         return result;
                     } catch (Error e) {
                         e.printStackTrace(listener.error("Failed to record SCM polling"));
