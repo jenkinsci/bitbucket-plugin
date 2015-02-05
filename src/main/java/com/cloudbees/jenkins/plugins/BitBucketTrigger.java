@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,6 +91,11 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
             }
 
         });
+    }
+
+    @Override
+    public Collection<? extends Action> getProjectActions() {
+        return Collections.singleton(new BitBucketWebHookPollingAction());
     }
 
     /**
