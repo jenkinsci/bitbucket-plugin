@@ -47,7 +47,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
                     try {
                         PrintStream logger = listener.getLogger();
                         long start = System.currentTimeMillis();
-                        logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
+                        logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date(start)));
                         boolean result = job.poll(listener).hasChanges();
                         logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
                         if(result)
