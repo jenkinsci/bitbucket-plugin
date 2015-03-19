@@ -122,8 +122,12 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
 					if (trigger != null) {
 
+						Set<String> jobBranchesConcernedByPost = getJobBranchesConcernedByPost(job);
+						FilePath workspaceRoot = job.getSomeWorkspace();
+
 						if (match(job.getScm(), remote)
-								&& isJobConcernedByPost(job)) {
+								&& isJobConcernedByPost(workspaceRoot,
+										jobBranchesConcernedByPost)) {
 
 							// tell job that this plugins has triggered it
 							trigger.onPost(user);
@@ -148,14 +152,12 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		}
 	}
 
-	private boolean isJobConcernedByPost(AbstractProject<?, ?> job) {
-
-		Set<String> jobBranchesConcernedByPost = getJobBranchesConcernedByPost(job);
+	public boolean isJobConcernedByPost(FilePath workspaceRoot,
+			Set<String> jobBranchesConcernedByPost) {
 
 		if (jobBranchesConcernedByPost.size() > 0) {
 
 			List<FilePath> jobFolders = new ArrayList<FilePath>();
-			FilePath workspaceRoot = job.getSomeWorkspace();
 			collectFolders(workspaceRoot, jobFolders);
 
 			List<String> manipulatedFilesForBranch;
@@ -231,12 +233,17 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		return result;
 	}
 
-	private void collectFolders(FilePath folder, List<FilePath> result) {
+	public void collectFolders(FilePath folder, List<FilePath> result) {
+
 		try {
-			for (FilePath aPath : folder.list()) {
-				if (aPath.isDirectory()) {
-					result.add(aPath);
-					collectFolders(aPath, result);
+			if (null != folder.listDirectories()
+					&& folder.listDirectories().size() > 0) {
+
+				for (FilePath aPath : folder.listDirectories()) {
+					if (aPath.isDirectory()) {
+						result.add(aPath);
+						collectFolders(aPath, result);
+					}
 				}
 			}
 		} catch (IOException e) {
@@ -246,6 +253,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 			LOGGER.severe(e.getMessage());
 			e.printStackTrace();
 		}
+
 	}
 
 	private boolean match(SCM scm, URIish url) {
