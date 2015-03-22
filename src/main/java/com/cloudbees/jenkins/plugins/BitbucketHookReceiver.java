@@ -9,7 +9,6 @@ import hudson.plugins.git.GitStatus;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 import jenkins.model.Jenkins;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -106,11 +105,6 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
         LOGGER.info("Received commit hook notification for "+repo);
 
-        JSONArray commits = payload.getJSONArray("commits");
-        int last = commits.size() - 1;
-        String sha1 = commits.getJSONObject(last).getString("raw_node");
-        String branch = commits.getJSONObject(last).getString("branch");
-
         String scm = repo.getString("scm");
         if ("git".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
@@ -121,7 +115,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
                     BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
                     if (trigger!=null) {
                         if (match(job.getScm(), remote)) {
-                        	trigger.onPost(job, user);
+                        	trigger.onPost(user);
                         } else LOGGER.info("job SCM doesn't match remote repo");
                     } else LOGGER.info("job hasn't BitBucketTrigger set");
                 }
