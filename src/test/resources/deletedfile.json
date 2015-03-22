@@ -1,0 +1,59 @@
+{
+    "repository": {
+        "website": "",
+        "fork": false,
+        "name": "java",
+        "scm": "git",
+        "owner": "pollentechnology",
+        "absolute_url": "/pollentechnology/java/",
+        "slug": "java",
+        "is_private": true
+    },
+    "truncated": false,
+    "commits": [
+        {
+            "node": "70a79cd08acd",
+            "files": [
+               {
+                    "type": "added",
+                    "file": "gui/rcp4/src/main/java/com/pollentechnology/ui/platypus2/a.txt"
+                }
+            ],
+            "raw_author": "Aurélien Labrosse <aurelien@toto.com>",
+            "utctimestamp": "2015-03-18 15:58:56+00:00",
+            "author": "Aurélien",
+            "timestamp": "2015-03-18 16:58:56",
+            "raw_node": "70a79cd08acd406c682469ba395dc041f0ca1191",
+            "parents": [
+                "f2b6f8a90c75"
+            ],
+            "branch": "deleted",
+            "message": "[TEST] test de déclenchement Jenkins",
+            "revision": null,
+            "size": -1
+        },
+         {
+            "node": "70a79cd08acd",
+            "files": [
+               {
+                    "type": "deleted",
+                    "file": "gui/rcp4/src/main/java/com/pollentechnology/ui/platypus2/b.txt"
+                }
+            ],
+            "raw_author": "Aurélien Labrosse <aurelien@toto.com>",
+            "utctimestamp": "2015-03-18 15:58:56+00:00",
+            "author": "Aurélien",
+            "timestamp": "2015-03-18 16:58:56",
+            "raw_node": "70a79cd08acd406c682469ba395dc041f0ca1191",
+            "parents": [
+                "f2b6f8a90c75"
+            ],
+            "branch": "develop",
+            "message": "[TEST] test de déclenchement Jenkins",
+            "revision": null,
+            "size": -1
+        }
+    ],
+    "canon_url": "https://bitbucket.org",
+    "user": "arcadien"
+}

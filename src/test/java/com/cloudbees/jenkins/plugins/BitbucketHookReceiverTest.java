@@ -29,7 +29,13 @@ public class BitbucketHookReceiverTest {
 
 	@Before
 	public void setUp() {
-		fixture = new BitbucketHookReceiver();
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost();
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
 	}
 
 	private BitbucketHookReceiver getFixture() {

@@ -13,24 +13,7 @@
     "commits": [
         {
             "node": "70a79cd08acd",
-            "files": [
-               {
-                    "type": "modified",
-                    "file": "middleware/1"
-                },
-                 {
-                    "type": "modified",
-                    "file": "core/2"
-                },
-                 {
-                    "type": "modified",
-                    "file": "lib/3"
-                },
-                 {
-                    "type": "added",
-                    "file": "middleware/4"
-                }
-            ],
+            "files": [ ],
             "raw_author": "Aurélien Labrosse <aurelien@toto.com>",
             "utctimestamp": "2015-03-18 15:58:56+00:00",
             "author": "Aurélien",
@@ -44,20 +27,12 @@
             "revision": null,
             "size": -1
         },
-        {
+         {
             "node": "70a79cd08acd",
             "files": [
-                {
-                    "type": "modified",
-                    "file": "middleware/toto/1"
-                },
-                 {
-                    "type": "modified",
-                    "file": "middleware/toto/2/3"
-                },
-                 {
-                    "type": "modified",
-                    "file": "middleware/titi/3"
+               {
+                    "type": "added",
+                    "file": "gui/rcp4/src/main/java/com/pollentechnology/ui/platypus2/b.txt"
                 }
             ],
             "raw_author": "Aurélien Labrosse <aurelien@toto.com>",
@@ -68,7 +43,7 @@
             "parents": [
                 "f2b6f8a90c75"
             ],
-            "branch": "master",
+            "branch": "develop",
             "message": "[TEST] test de déclenchement Jenkins",
             "revision": null,
             "size": -1

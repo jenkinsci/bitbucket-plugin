@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import groovy.json.JsonException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.UnprotectedRootAction;
@@ -17,6 +18,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.logging.Logger;
 
 import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import org.acegisecurity.context.SecurityContext;
@@ -82,13 +85,19 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		if (body.startsWith("payload="))
 			body = body.substring(8);
 
-		LOGGER.fine("Received commit hook notification : " + body);
-		JSONObject payload = JSONObject.fromObject(body);
+		LOGGER.info("Received commit hook notification : " + body);
+		try {
+			JSONObject payload = JSONObject.fromObject(body);
+			manipulatedFiles = Collections
+					.unmodifiableMap(collectManipulatedFiles(payload));
 
-		manipulatedFiles = Collections
-				.unmodifiableMap(collectManipulatedFiles(payload));
+			processPayload(payload);
 
-		processPayload(payload);
+		} catch (JSONException e) {
+			LOGGER.severe("Exception while decoding: " + body);
+			throw e;
+		}
+
 	}
 
 	/**
@@ -175,10 +184,9 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 					try {
 						jobFolderPathName = jobFolder.toURI().getPath();
 						for (String manipulatedFile : manipulatedFilesForBranch) {
-							manipulatedFilePathName = new File(manipulatedFile)
-									.toURI().getPath();
-							if (manipulatedFilePathName
-									.startsWith(jobFolderPathName)) {
+							manipulatedFilePathName = manipulatedFile.substring(0, manipulatedFile.lastIndexOf(File.separator)+1);
+							if (jobFolderPathName
+									.endsWith(manipulatedFilePathName)) {
 								return true;
 							}
 						}
@@ -236,13 +244,18 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 	public void collectFolders(FilePath folder, List<FilePath> result) {
 
 		try {
-			if (null != folder.listDirectories()
+			if (null != folder && null != folder.listDirectories()
 					&& folder.listDirectories().size() > 0) {
 
-				for (FilePath aPath : folder.listDirectories()) {
-					if (aPath.isDirectory()) {
-						result.add(aPath);
-						collectFolders(aPath, result);
+				boolean isGitFolder = folder.toURI().getPath().endsWith(".git"+File.separator);
+				boolean isTargetFolder = folder.toURI().getPath().endsWith("target"+File.separator);
+
+				if (!isGitFolder && !isTargetFolder) {
+					for (FilePath aPath : folder.listDirectories()) {
+						if (aPath.isDirectory()) {
+							result.add(aPath);
+							collectFolders(aPath, result);
+						}
 					}
 				}
 			}
@@ -281,7 +294,8 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		for (BranchSpec aSpec : ((GitSCM) job.getScm()).getBranches()) {
 			jobBranches.add(aSpec.getName());
 		}
-		Set<String> manipulatedFilesBranches = getManipulatedFiles().keySet();
+		Set<String> manipulatedFilesBranches = new HashSet<String>(
+				getManipulatedFiles().keySet());
 		manipulatedFilesBranches.retainAll(jobBranches);
 		return manipulatedFilesBranches;
 	}
