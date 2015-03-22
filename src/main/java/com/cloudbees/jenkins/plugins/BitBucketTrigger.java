@@ -3,16 +3,15 @@ package com.cloudbees.jenkins.plugins;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
-import hudson.model.Hudson;
 import hudson.model.Item;
+import hudson.model.AbstractProject;
+import hudson.model.Hudson;
+import hudson.model.Project;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
-import org.apache.commons.jelly.XMLOutput;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +23,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.commons.jelly.XMLOutput;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 
 /**
@@ -117,7 +119,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl)super.getDescriptor();
     }
-
+    
     /**
      * Action object for {@link Project}. Used to display the polling log.
      */
