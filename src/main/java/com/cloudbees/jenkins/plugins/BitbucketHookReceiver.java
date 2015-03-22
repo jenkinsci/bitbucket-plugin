@@ -315,15 +315,28 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 	 * @return true if at least one manipulated file branch relate to one of job
 	 *         branche(s), false otherwise
 	 */
-	private Set<String> getJobBranchesConcernedByPost(AbstractProject<?, ?> job) {
+	public Set<String> getJobBranchesConcernedByPost(AbstractProject<?, ?> job) {
 		List<String> jobBranches = new ArrayList<String>();
 		for (BranchSpec aSpec : ((GitSCM) job.getScm()).getBranches()) {
-			jobBranches.add(aSpec.getName());
+			jobBranches.add(simplifyRefSpec(aSpec.getName()));
 		}
 		Set<String> manipulatedFilesBranches = new HashSet<String>(
 				getManipulatedFiles().keySet());
 		manipulatedFilesBranches.retainAll(jobBranches);
 		return manipulatedFilesBranches;
+	}
+
+	/**
+	 * Given a Git refspec, return the last part of the path. Ex. with argument
+	 * 'refs/heads/develop', returns 'develop'.
+	 * 
+	 */
+	protected String simplifyRefSpec(String name) {
+		if (name.contains("/")) {
+			return name.substring(name.lastIndexOf('/') + 1);
+		} else {
+			return name;
+		}
 	}
 
 }

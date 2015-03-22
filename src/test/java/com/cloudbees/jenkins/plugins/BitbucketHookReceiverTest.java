@@ -140,6 +140,42 @@ public class BitbucketHookReceiverTest {
 	}
 
 	@Test
+	public void testSimplifyRefSpecWithComplete() {
+
+		String refspec = "refs/heads/develop";
+		String expected = "develop";
+
+		String result = getFixture().simplifyRefSpec(refspec);
+		assertEquals(
+				"A complete refspec must be simplified to cope with Bitbucket POST format",
+				expected, result);
+
+	}
+
+	@Test
+	public void testSimplifyRefSpecWithStarred() {
+
+		String refspec = "*/develop";
+		String expected = "develop";
+
+		String result = getFixture().simplifyRefSpec(refspec);
+		assertEquals("A Jenkins refspec including a star must be simplified",
+				expected, result);
+
+	}
+
+	@Test
+	public void testSimplifyRefSpecWithShort() {
+
+		String refspec = "develop";
+		String expected = "develop";
+
+		String result = getFixture().simplifyRefSpec(refspec);
+		assertEquals("A short refspec must not be truncated", expected, result);
+
+	}
+
+	@Test
 	public void testIsJobConcernedByPostNewFolder() {
 
 		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
