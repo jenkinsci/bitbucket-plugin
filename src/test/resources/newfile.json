@@ -48,7 +48,7 @@
             "parents": [
                 "f2b6f8a90c75"
             ],
-            "branch": "develop",
+            "branch": "master",
             "message": "[TEST] test de déclenchement Jenkins",
             "revision": null,
             "size": -1

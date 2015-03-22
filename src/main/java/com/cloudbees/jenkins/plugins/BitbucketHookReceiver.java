@@ -1,6 +1,5 @@
 package com.cloudbees.jenkins.plugins;
 
-import groovy.json.JsonException;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.UnprotectedRootAction;
@@ -38,7 +37,10 @@ import org.eclipse.jgit.transport.URIish;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * @author Original code by <a href="mailto:nicolas.deloof@gmail.com">Nicolas De
+ *         Loof</a>
+ * @author Added greedy comparison for workspace folders <a
+ *         href="mailto:aurelien@skima.fr">Aurélien Labrosse</a>
  */
 @Extension
 public class BitbucketHookReceiver implements UnprotectedRootAction {
@@ -173,8 +175,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
 			for (String branchName : jobBranchesConcernedByPost) {
 
-				manipulatedFilesForBranch = getManipulatedFiles().get(
-						branchName);
+				manipulatedFilesForBranch = getManipulatedFilesForBranch(branchName);
 
 				String manipulatedFilePathName;
 				String jobFolderPathName;
@@ -184,7 +185,9 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 					try {
 						jobFolderPathName = jobFolder.toURI().getPath();
 						for (String manipulatedFile : manipulatedFilesForBranch) {
-							manipulatedFilePathName = manipulatedFile.substring(0, manipulatedFile.lastIndexOf(File.separator)+1);
+							manipulatedFilePathName = manipulatedFile
+									.substring(0, manipulatedFile
+											.lastIndexOf(File.separator) + 1);
 							if (jobFolderPathName
 									.endsWith(manipulatedFilePathName)) {
 								return true;
@@ -204,6 +207,19 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		LOGGER.info("No commited elements are parts of workspace folders");
 		return false;
 
+	}
+
+	/**
+	 * Convenient method written to avoid a NPE when getting manipulated files
+	 * for a branch which is .. not manipulated
+	 * 
+	 */
+	private List<String> getManipulatedFilesForBranch(String branchName) {
+		if (getManipulatedFiles().containsKey(branchName)) {
+			return getManipulatedFiles().get(branchName);
+		} else {
+			return Collections.emptyList();
+		}
 	}
 
 	/**
@@ -241,14 +257,21 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		return result;
 	}
 
+	/**
+	 * 
+	 * Collect workspace folders, avoiding .git and target/ hierarchies
+	 * 
+	 */
 	public void collectFolders(FilePath folder, List<FilePath> result) {
 
 		try {
 			if (null != folder && null != folder.listDirectories()
 					&& folder.listDirectories().size() > 0) {
 
-				boolean isGitFolder = folder.toURI().getPath().endsWith(".git"+File.separator);
-				boolean isTargetFolder = folder.toURI().getPath().endsWith("target"+File.separator);
+				boolean isGitFolder = folder.toURI().getPath()
+						.endsWith(".git" + File.separator);
+				boolean isTargetFolder = folder.toURI().getPath()
+						.endsWith("target" + File.separator);
 
 				if (!isGitFolder && !isTargetFolder) {
 					for (FilePath aPath : folder.listDirectories()) {
@@ -269,6 +292,9 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
 	}
 
+	/**
+	 * Check if at least one project git URI matches POST commits git URIs
+	 */
 	private boolean match(SCM scm, URIish url) {
 		if (scm instanceof GitSCM) {
 			for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {

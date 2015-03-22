@@ -27,12 +27,18 @@ public class BitbucketHookReceiverTest {
 
 	BitbucketHookReceiver fixture;
 
+	private static final String NEW_FILE_POST = "newfile.json";
+	private static final String DELETE_FILE_POST = "deletedfile.json";
+	private static final String NEW_FOLDER_POST = "newfolder.json";
+	private static final String DELETE_FOLDER_POST = "deletefolder.json";
+	private static final String NEW_FILE_SECOND_COMMIT = "newfileSecondCommit.json";
+
 	@Before
 	public void setUp() {
 		fixture = new BitbucketHookReceiver() {
 			@Override
 			public Map<String, List<String>> getManipulatedFiles() {
-				JSONObject payload = getMockPost();
+				JSONObject payload = getMockPost(NEW_FILE_POST);
 				return getFixture().collectManipulatedFiles(payload);
 			}
 		};
@@ -45,7 +51,7 @@ public class BitbucketHookReceiverTest {
 	@Test
 	public void testCollectManipulatedFiles() {
 
-		JSONObject payload = getMockPost();
+		JSONObject payload = getMockPost(NEW_FILE_POST);
 
 		assertNotNull("Payload must be decoded", payload);
 
@@ -60,9 +66,9 @@ public class BitbucketHookReceiverTest {
 		assertTrue("Json result must contains the 'master' branch",
 				result.containsKey("master"));
 
-		assertEquals("develop commit has 4 files", 4, result.get("develop")
+		assertEquals("develop commit has 1 files", 1, result.get("develop")
 				.size());
-		assertEquals("master commit has 3 files", 3, result.get("master")
+		assertEquals("master commit has 1 files", 1, result.get("master")
 				.size());
 
 	}
@@ -87,8 +93,7 @@ public class BitbucketHookReceiverTest {
 		assertNotNull("The mock workspace must be resolved", mockWorkspaceRoot);
 		getFixture().collectFolders(mockWorkspaceRoot, result);
 
-		assertEquals("The mock workspace contains lib/ and middleware/", 2,
-				result.size());
+		assertEquals("The mock workspace contains 9 folder", 9, result.size());
 	}
 
 	@Test
@@ -112,13 +117,123 @@ public class BitbucketHookReceiverTest {
 
 	}
 
+	@Test
+	public void testIsJobConcernedByPostNewFile() {
+
+		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
+		Set<String> jobBranchesConcernedByPost = new HashSet<String>();
+		jobBranchesConcernedByPost.add("develop");
+
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost(NEW_FILE_POST);
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
+
+		boolean result = fixture.isJobConcernedByPost(mockWorkspaceRoot,
+				jobBranchesConcernedByPost);
+
+		assertTrue(result);
+
+	}
+
+	@Test
+	public void testIsJobConcernedByPostNewFolder() {
+
+		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
+		Set<String> jobBranchesConcernedByPost = new HashSet<String>();
+		jobBranchesConcernedByPost.add("develop");
+
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost(NEW_FOLDER_POST);
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
+
+		boolean result = fixture.isJobConcernedByPost(mockWorkspaceRoot,
+				jobBranchesConcernedByPost);
+
+		assertTrue(result);
+
+	}
+
+	@Test
+	public void testIsJobConcernedByPostDeletedFolder() {
+
+		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
+		Set<String> jobBranchesConcernedByPost = new HashSet<String>();
+		jobBranchesConcernedByPost.add("develop");
+
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost(DELETE_FOLDER_POST);
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
+
+		boolean result = fixture.isJobConcernedByPost(mockWorkspaceRoot,
+				jobBranchesConcernedByPost);
+
+		assertTrue(result);
+
+	}
+
+	@Test
+	public void testIsJobConcernedByPostDeletedFile() {
+
+		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
+		Set<String> jobBranchesConcernedByPost = new HashSet<String>();
+		jobBranchesConcernedByPost.add("develop");
+
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost(DELETE_FILE_POST);
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
+
+		boolean result = fixture.isJobConcernedByPost(mockWorkspaceRoot,
+				jobBranchesConcernedByPost);
+
+		assertTrue(result);
+
+	}
+
+	@Test
+	public void testIsJobConcernedByPostNewFileOnSecondCommit() {
+
+		FilePath mockWorkspaceRoot = getMockWorkspaceRoot();
+		Set<String> jobBranchesConcernedByPost = new HashSet<String>();
+		jobBranchesConcernedByPost.add("develop");
+
+		fixture = new BitbucketHookReceiver() {
+			@Override
+			public Map<String, List<String>> getManipulatedFiles() {
+				JSONObject payload = getMockPost(NEW_FILE_SECOND_COMMIT);
+				return getFixture().collectManipulatedFiles(payload);
+			}
+		};
+
+		boolean result = fixture.isJobConcernedByPost(mockWorkspaceRoot,
+				jobBranchesConcernedByPost);
+
+		assertTrue(result);
+
+	}
+
 	/* utility methods */
 
 	private FilePath getMockWorkspaceRoot() {
 
 		FilePath workspaceRoot = null;
 		String mockWorkspacePath = BitbucketHookReceiverTest.class.getResource(
-				"/mockPost.json").getPath();
+				"/" + NEW_FILE_POST).getPath();
 		mockWorkspacePath = mockWorkspacePath.substring(0,
 				mockWorkspacePath.lastIndexOf('/'))
 				+ File.separator + "workspace" + File.separator;
@@ -129,10 +244,10 @@ public class BitbucketHookReceiverTest {
 		return workspaceRoot;
 	}
 
-	private JSONObject getMockPost() {
+	private JSONObject getMockPost(String mock) {
 		JSONObject payload = null;
 		String mockPostFilePath = BitbucketHookReceiverTest.class.getResource(
-				"/mockPost.json").getPath();
+				"/" + mock).getPath();
 		try {
 			String jsonContent = readFileAsString(mockPostFilePath);
 			payload = (JSONObject) JSONSerializer.toJSON(jsonContent);
