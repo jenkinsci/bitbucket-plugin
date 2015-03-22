@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.554</version>
+        <version>1.605</version>
     </parent>
  
     <artifactId>bitbucket</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.2.pollentechnology</version>
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
