@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.532</version>
+        <version>1.605</version>
     </parent>
  
     <artifactId>bitbucket</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1.2.pollentechnology</version>
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
@@ -44,6 +44,18 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<goals>deploy</goals>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
     <dependencies>
         <dependency>
