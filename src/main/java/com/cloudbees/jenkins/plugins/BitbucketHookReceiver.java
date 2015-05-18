@@ -29,8 +29,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -40,7 +38,7 @@ import org.kohsuke.stapler.StaplerRequest;
  * @author Original code by <a href="mailto:nicolas.deloof@gmail.com">Nicolas De
  *         Loof</a>
  * @author Added greedy comparison for workspace folders <a
- *         href="mailto:aurelien@skima.fr">Aurélien Labrosse</a>
+ *         href="mailto:aurelien@skima.fr">AurÃ©lien Labrosse</a>
  */
 @Extension
 public class BitbucketHookReceiver implements UnprotectedRootAction {
@@ -117,49 +115,67 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 		String url = payload.getString("canon_url")
 				+ repo.getString("absolute_url");
 
-		LOGGER.info("Received commit hook notification for " + repo);
+		LOGGER.info("Received commit hook notification for " + user + "@"
+				+ repo);
 
-		String scm = repo.getString("scm");
+		final String scm = repo.getString("scm");
 		if ("git".equals(scm)) {
-			SecurityContext old = ACL.impersonate(ACL.SYSTEM);
 			try {
-				URIish remote = new URIish(url);
+				final URIish remote = new URIish(url);
+				ACL.impersonate(ACL.SYSTEM, new Runnable() {
 
-				for (AbstractProject<?, ?> job : Jenkins.getInstance()
-						.getAllItems(AbstractProject.class)) {
-					LOGGER.info("considering candidate job " + job.getName());
-					BitBucketTrigger trigger = job
-							.getTrigger(BitBucketTrigger.class);
+					@Override
+					public void run() {
 
-					if (trigger != null) {
+						for (AbstractProject<?, ?> job : Jenkins.getInstance()
+								.getAllItems(AbstractProject.class)) {
 
-						Set<String> jobBranchesConcernedByPost = getJobBranchesConcernedByPost(job);
-						FilePath workspaceRoot = job.getSomeWorkspace();
+							try {
 
-						if (match(job.getScm(), remote)
-								&& isJobConcernedByPost(workspaceRoot,
-										jobBranchesConcernedByPost)) {
+								processJob(job, remote, scm);
 
-							// tell job that this plugins has triggered it
-							trigger.onPost(user);
+							} catch (Exception jobProcessingException) {
+								LOGGER.severe("Something bad occured processing job "
+										+ job.getName());
+								jobProcessingException.printStackTrace();
+							}
 
-						} else {
-							LOGGER.info("job is not concerned by commits in the received POST");
 						}
-					} else {
-						LOGGER.info("job hasn't BitBucketTrigger set");
 					}
-				}
+				});
 			} catch (URISyntaxException e) {
 				LOGGER.warning("invalid repository URL " + url);
-			} finally {
-				SecurityContextHolder.setContext(old);
-			}
 
+			}
 		} else {
 			// TODO hg
 			throw new UnsupportedOperationException("unsupported SCM type "
 					+ scm);
+		}
+	}
+
+	private void processJob(AbstractProject<?, ?> job, URIish remote,
+			String user) {
+		LOGGER.info("considering candidate job " + job.getName());
+		BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
+
+		if (trigger != null) {
+
+			Set<String> jobBranchesConcernedByPost = getJobBranchesConcernedByPost(job);
+			FilePath workspaceRoot = job.getSomeWorkspace();
+
+			if (match(job.getScm(), remote)
+					&& isJobConcernedByPost(workspaceRoot,
+							jobBranchesConcernedByPost)) {
+
+				// tell job that this plugins has triggered it
+				trigger.onPost(user);
+
+			} else {
+				LOGGER.info("job is not concerned by commits in the received POST");
+			}
+		} else {
+			LOGGER.info("job hasn't BitBucketTrigger set");
 		}
 	}
 
