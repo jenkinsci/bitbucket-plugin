@@ -58,7 +58,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         JSONObject payload = JSONObject.fromObject(body);
         processPayload(payload);
     }
-
+    
 /*
 {
     "canon_url": "https://bitbucket.org",
@@ -99,38 +99,33 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 }
 */
     private void processPayload(JSONObject payload) {
-
+    	
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getString("user");
-        String url = payload.getString("canon_url") + repo.getString("absolute_url");
+        JSONObject actor = payload.getJSONObject("actor");
+        String user = actor.getString("username");
+        String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
+        
         LOGGER.info("Received commit hook notification for "+repo);
 
-        String scm = repo.getString("scm");
-        if ("git".equals(scm)) {
-            SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
-            try {
-                URIish remote = new URIish(url);
-                for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                    LOGGER.info("considering candidate job " + job.getName());
-                    BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
-                    if (trigger!=null) {
-                        if (match(job.getScm(), remote)) {
-                        	trigger.onPost(user);
-                        } else LOGGER.info("job SCM doesn't match remote repo");
-                    } else LOGGER.info("job hasn't BitBucketTrigger set");
-                }
-            } catch (URISyntaxException e) {
-                LOGGER.warning("invalid repository URL " + url);
-            } finally {
-                SecurityContextHolder.setContext(old);
+        SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
+        try {
+            URIish remote = new URIish(url);
+            for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
+                LOGGER.info("considering candidate job " + job.getName());
+                BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
+                if (trigger!=null) {
+                    if (match(job.getScm(), remote)) {
+                    	trigger.onPost(user);
+                    } else LOGGER.info("job SCM doesn't match remote repo");
+                } else LOGGER.info("job hasn't BitBucketTrigger set");
             }
-
-        } else {
-            // TODO hg
-            throw new UnsupportedOperationException("unsupported SCM type " + scm);
+        } catch (URISyntaxException e) {
+            LOGGER.warning("invalid repository URL " + url);
+        } finally {
+            SecurityContextHolder.setContext(old);
         }
     }
-
+    
     private boolean match(SCM scm, URIish url) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
