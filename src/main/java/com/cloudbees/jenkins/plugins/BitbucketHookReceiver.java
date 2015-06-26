@@ -58,79 +58,196 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
         JSONObject payload = JSONObject.fromObject(body);
         processPayload(payload);
     }
-
+    
 /*
 {
-    "canon_url": "https://bitbucket.org",
-    "commits": [
-        {
-            "author": "marcus",
-            "branch": "master",
-            "files": [
-                {
-                    "file": "somefile.py",
-                    "type": "modified"
+    "push": {
+        "changes": [{
+            "old": {
+                "type": "branch",
+                "target": {
+                    "date": "2015-06-22T21:47:01+00:00",
+                    "type": "commit",
+                    "author": {
+                        "raw": "author <author@somedomain.com>"
+                    },
+                    "message": "some message\n",
+                    "links": {
+                        "html": {
+                            "href": "https://bitbucket.org/owner/somerepo/commits/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        },
+                        "self": {
+                            "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commit/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        }
+                    },
+                    "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    "parents": [{
+                        "type": "commit",
+                        "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "links": {
+                            "html": {
+                                "href": "https://bitbucket.org/owner/somerepo/commits/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            },
+                            "self": {
+                                "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commit/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            }
+                        }
+                    }]
+                },
+                "name": "master",
+                "links": {
+                    "html": {
+                        "href": "https://bitbucket.org/owner/somerepo/branch/master"
+                    },
+                    "commits": {
+                        "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commits/master"
+                    },
+                    "self": {
+                        "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/refs/branches/master"
+                    }
                 }
-            ],
-            "message": "Added some more things to somefile.py\n",
-            "node": "620ade18607a",
-            "parents": [
-                "702c70160afc"
-            ],
-            "raw_author": "Marcus Bertrand <marcus@somedomain.com>",
-            "raw_node": "620ade18607ac42d872b568bb92acaa9a28620e9",
-            "revision": null,
-            "size": -1,
-            "timestamp": "2012-05-30 05:58:56",
-            "utctimestamp": "2012-05-30 03:58:56+00:00"
-        }
-    ],
-    "repository": {
-        "absolute_url": "/marcus/project-x/",
-        "fork": false,
-        "is_private": true,
-        "name": "Project X",
-        "owner": "marcus",
-        "scm": "git",
-        "slug": "project-x",
-        "website": "https://atlassian.com/"
+            },
+            "closed": false,
+            "links": {
+                "html": {
+                    "href": "https://bitbucket.org/owner/somerepo/branches/compare/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                },
+                "commits": {
+                    "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commits?include=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxexclude=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                },
+                "diff": {
+                    "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/diff/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                }
+            },
+            "forced": false,
+            "new": {
+                "type": "branch",
+                "target": {
+                    "date": "2015-06-22T22:20:08+00:00",
+                    "type": "commit",
+                    "author": {
+                        "raw": "author <author@somedomain.com>"
+                    },
+                    "message": "some message\n",
+                    "links": {
+                        "html": {
+                            "href": "https://bitbucket.org/owner/somerepo/commits/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        },
+                        "self": {
+                            "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commit/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                        }
+                    },
+                    "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                    "parents": [{
+                        "type": "commit",
+                        "hash": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "links": {
+                            "html": {
+                                "href": "https://bitbucket.org/owner/somerepo/commits/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            },
+                            "self": {
+                                "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commit/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                            }
+                        }
+                    }]
+                },
+                "name": "master",
+                "links": {
+                    "html": {
+                        "href": "https://bitbucket.org/owner/somerepo/branch/master"
+                    },
+                    "commits": {
+                        "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/commits/master"
+                    },
+                    "self": {
+                        "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo/refs/branches/master"
+                    }
+                }
+            },
+            "created": false
+        }]
     },
-    "user": "marcus"
+    "actor": {
+        "type": "team",
+        "uuid": "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}",
+        "username": "owner",
+        "display_name": "Owner",
+        "links": {
+            "avatar": {
+                "href": "https://bitbucket.org/account/owner/avatar/32/"
+            },
+            "html": {
+                "href": "https://bitbucket.org/owner"
+            },
+            "self": {
+                "href": "https://bitbucket.org/api/2.0/teams/owner"
+            }
+        }
+    },
+    "repository": {
+        "full_name": "owner/somerepo",
+        "owner": {
+            "type": "team",
+            "uuid": "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}",
+            "username": "owner",
+            "display_name": "Owner",
+            "links": {
+                "avatar": {
+                    "href": "https://bitbucket.org/account/owner/avatar/32/"
+                },
+                "html": {
+                    "href": "https://bitbucket.org/owner"
+                },
+                "self": {
+                    "href": "https://bitbucket.org/api/2.0/teams/owner"
+                }
+            }
+        },
+        "type": "repository",
+        "name": "somerepo",
+        "uuid": "{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}",
+        "links": {
+            "avatar": {
+                "href": "https://bitbucket.org/owner/somerepo/avatar/16/"
+            },
+            "html": {
+                "href": "https://bitbucket.org/owner/somerepo"
+            },
+            "self": {
+                "href": "https://bitbucket.org/api/2.0/repositories/owner/somerepo"
+            }
+        }
+    }
 }
 */
     private void processPayload(JSONObject payload) {
-
+    	
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getString("user");
-        String url = payload.getString("canon_url") + repo.getString("absolute_url");
+        JSONObject actor = payload.getJSONObject("actor");
+        String user = actor.getString("username");
+        String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
+        
         LOGGER.info("Received commit hook notification for "+repo);
 
-        String scm = repo.getString("scm");
-        if ("git".equals(scm)) {
-            SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
-            try {
-                URIish remote = new URIish(url);
-                for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
-                    LOGGER.info("considering candidate job " + job.getName());
-                    BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
-                    if (trigger!=null) {
-                        if (match(job.getScm(), remote)) {
-                        	trigger.onPost(user);
-                        } else LOGGER.info("job SCM doesn't match remote repo");
-                    } else LOGGER.info("job hasn't BitBucketTrigger set");
-                }
-            } catch (URISyntaxException e) {
-                LOGGER.warning("invalid repository URL " + url);
-            } finally {
-                SecurityContextHolder.setContext(old);
+        SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
+        try {
+            URIish remote = new URIish(url);
+            for (AbstractProject<?,?> job : Hudson.getInstance().getAllItems(AbstractProject.class)) {
+                LOGGER.info("considering candidate job " + job.getName());
+                BitBucketTrigger trigger = job.getTrigger(BitBucketTrigger.class);
+                if (trigger!=null) {
+                    if (match(job.getScm(), remote)) {
+                    	trigger.onPost(user);
+                    } else LOGGER.info("job SCM doesn't match remote repo");
+                } else LOGGER.info("job hasn't BitBucketTrigger set");
             }
-
-        } else {
-            // TODO hg
-            throw new UnsupportedOperationException("unsupported SCM type " + scm);
+        } catch (URISyntaxException e) {
+            LOGGER.warning("invalid repository URL " + url);
+        } finally {
+            SecurityContextHolder.setContext(old);
         }
     }
-
+    
     private boolean match(SCM scm, URIish url) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
