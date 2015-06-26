@@ -47,7 +47,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
      * @throws IOException
      */
     public void doIndex(StaplerRequest req) throws IOException {
-        String body = IOUtils.toString(req.getInputStream());
+    	String body = IOUtils.toString(req.getInputStream());
         String contentType = req.getContentType();
         if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
             body = URLDecoder.decode(body);
@@ -56,7 +56,27 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
         LOGGER.fine("Received commit hook notification : " + body);
         JSONObject payload = JSONObject.fromObject(body);
-        processPayload(payload);
+
+        if ("Bitbucket-Webhooks/2.0".equals(req.getHeader("user-agent"))) {
+        	if ("repo:push".equals(req.getHeader("x-event-key"))) {
+            	LOGGER.info("Processing new Webhooks payload");
+        		processWebhookPayload(payload);
+        	}
+    	} else {
+    		LOGGER.info("Processing old POST service payload");
+            processPostServicePayload(payload);
+    	}
+    }
+
+    private void processWebhookPayload(JSONObject payload) {
+    	JSONObject repo = payload.getJSONObject("repository");
+    	LOGGER.info("Received commit hook notification for "+repo);
+
+    	String user = payload.getJSONObject("actor").getString("username");
+    	String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
+    	String scm = repo.has("scm") ? repo.getString("scm") : "git";
+
+    	triggerMatchingJobs(user, url, scm);
     }
 
 /*
@@ -98,14 +118,18 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     "user": "marcus"
 }
 */
-    private void processPayload(JSONObject payload) {
-
+    private void processPostServicePayload(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getString("user");
-        String url = payload.getString("canon_url") + repo.getString("absolute_url");
         LOGGER.info("Received commit hook notification for "+repo);
 
+        String user = payload.getString("user");
+        String url = payload.getString("canon_url") + repo.getString("absolute_url");
         String scm = repo.getString("scm");
+
+        triggerMatchingJobs(user, url, scm);
+    }
+
+    private void triggerMatchingJobs(String user, String url, String scm) {
         if ("git".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
