@@ -45,13 +45,12 @@ public class BitbucketJobProbe {
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
 
                         for (SCM scmTrigger : item.getSCMs()) {
-                            if (match(scmTrigger, remote)) {
+                            if (match(scmTrigger, remote))
                                 bTrigger.onPost(user);
-                            } else LOGGER.info("job SCM doesn't match remote repo");
+                            else LOGGER.info("job SCM doesn't match remote repo");
                         }
-                    } else {
+                    } else
                         LOGGER.info("job hasn't BitBucketTrigger set");
-                    }
                 }
             } catch (URISyntaxException e) {
                 LOGGER.warning("invalid repository URL " + url);
