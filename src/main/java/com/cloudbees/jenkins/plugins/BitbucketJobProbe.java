@@ -8,6 +8,7 @@ import hudson.scm.SCM;
 import hudson.security.ACL;
 
 import java.net.URISyntaxException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import hudson.triggers.Trigger;
@@ -29,7 +30,7 @@ public class BitbucketJobProbe {
                 URIish remote = new URIish(url);
                 for (Job<?,?> job : Hudson.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
-                    LOGGER.info("considering candidate job " + job.getName());
+                    LOGGER.log(Level.FINE, "Considering candidate job {0}", job.getName());
 
                     if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                         ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
@@ -41,26 +42,27 @@ public class BitbucketJobProbe {
                         }
                     }
                     if (bTrigger != null) {
-                        LOGGER.info("Considering to poke " + job.getFullDisplayName());
+                        LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
 
                         for (SCM scmTrigger : item.getSCMs()) {
-                            if (match(scmTrigger, remote))
+                            if (match(scmTrigger, remote)) {
+                                LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
                                 bTrigger.onPost(user);
-                            else LOGGER.info(job.getName() + " SCM doesn't match remote repo " + remote);
+                            } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
                         }
                     } else
-                        LOGGER.info(job.getName() + " hasn't BitBucketTrigger set");
+                        LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());
                 }
             } catch (URISyntaxException e) {
-                LOGGER.warning("invalid repository URL " + url);
+                LOGGER.log(Level.WARNING, "Invalid repository URL {0}" + url);
             } finally {
                 SecurityContextHolder.setContext(old);
             }
 
         } else {
             // TODO hg
-            throw new UnsupportedOperationException("unsupported SCM type " + scm);
+            throw new UnsupportedOperationException("Unsupported SCM type " + scm);
         }
     }
 
