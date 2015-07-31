@@ -30,9 +30,9 @@ public class BitbucketJobProbe {
                 for (Job<?,?> job : Hudson.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
                     LOGGER.info("considering candidate job " + job.getName());
-                    ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
 
                     if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+                        ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
                         for (Trigger trigger : pJob.getTriggers().values()) {
                             if (trigger instanceof BitBucketTrigger) {
                                 bTrigger = (BitBucketTrigger) trigger;
@@ -47,10 +47,10 @@ public class BitbucketJobProbe {
                         for (SCM scmTrigger : item.getSCMs()) {
                             if (match(scmTrigger, remote))
                                 bTrigger.onPost(user);
-                            else LOGGER.info("job SCM doesn't match remote repo");
+                            else LOGGER.info(job.getName() + " SCM doesn't match remote repo " + remote);
                         }
                     } else
-                        LOGGER.info("job hasn't BitBucketTrigger set");
+                        LOGGER.info(job.getName() + " hasn't BitBucketTrigger set");
                 }
             } catch (URISyntaxException e) {
                 LOGGER.warning("invalid repository URL " + url);
