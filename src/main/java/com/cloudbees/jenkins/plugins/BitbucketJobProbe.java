@@ -55,7 +55,7 @@ public class BitbucketJobProbe {
                         LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());
                 }
             } catch (URISyntaxException e) {
-                LOGGER.log(Level.WARNING, "Invalid repository URL {0}" + url);
+                LOGGER.log(Level.WARNING, "Invalid repository URL {0}", url);
             } finally {
                 SecurityContextHolder.setContext(old);
             }
