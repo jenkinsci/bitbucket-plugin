@@ -1,6 +1,5 @@
 package com.cloudbees.jenkins.plugins;
 
-import hudson.model.Hudson;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
@@ -28,7 +27,7 @@ public class BitbucketJobProbe {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
                 URIish remote = new URIish(url);
-                for (Job<?,?> job : Hudson.getInstance().getAllItems(Job.class)) {
+                for (Job<?,?> job : Jenkins.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
                     LOGGER.log(Level.FINE, "Considering candidate job {0}", job.getName());
 
