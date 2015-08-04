@@ -69,18 +69,6 @@
             <version>2.0.22-beta</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-job</artifactId>
-            <version>1.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <artifactId>workflow-cps</artifactId>
-            <version>1.4</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>
