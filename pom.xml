@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>1.554</version>
+        <version>1.580.1</version> <!-- minimun required version to work with Workflow 1.4 SCMTriggerItem was added in 1.568. 1.580.x is the next LTS after that-->
     </parent>
  
     <artifactId>bitbucket</artifactId>
@@ -58,10 +58,10 @@
 	</build>
 
     <dependencies>
-        <dependency>
+        <dependency> <!-- minimun required version to work with Workflow 1.4 GitSCM step-->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-            <version>2.0.3</version>
+            <version>2.3.5</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

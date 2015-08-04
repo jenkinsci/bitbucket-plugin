@@ -3,14 +3,16 @@ package com.cloudbees.jenkins.plugins;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.AbstractProject;
 import hudson.model.Action;
 import hudson.model.Hudson;
 import hudson.model.Item;
+import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
+import jenkins.model.ParameterizedJobMixIn;
+import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -29,7 +31,7 @@ import java.util.logging.Logger;
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
-public class BitBucketTrigger extends Trigger<AbstractProject> {
+public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
     @DataBoundConstructor
     public BitBucketTrigger() {
@@ -48,7 +50,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
                         PrintStream logger = listener.getLogger();
                         long start = System.currentTimeMillis();
                         logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = job.poll(listener).hasChanges();
+                        boolean result = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job).poll(listener).hasChanges();
                         logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
                         if(result)
                             logger.println("Changes found");
@@ -82,8 +84,13 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
                         LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
                         cause = new BitBucketPushCause(pushBy);
                     }
-                    if (job.scheduleBuild(cause)) {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+name);
+                    ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
+                        @Override protected Job asJob() {
+                            return job;
+                        }
+                    };
+                    if (pJob.scheduleBuild(cause)) {
+                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+ name);
                     } else {
                         LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
                     }
@@ -122,7 +129,7 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
      * Action object for {@link Project}. Used to display the polling log.
      */
     public final class BitBucketWebHookPollingAction implements Action {
-        public AbstractProject<?,?> getOwner() {
+        public Job<?,?> getOwner() {
             return job;
         }
 
@@ -156,7 +163,8 @@ public class BitBucketTrigger extends Trigger<AbstractProject> {
 
         @Override
         public boolean isApplicable(Item item) {
-            return item instanceof AbstractProject;
+            return item instanceof Job && SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(item) != null
+                    && item instanceof ParameterizedJobMixIn.ParameterizedJob;
         }
 
         @Override
