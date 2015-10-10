@@ -5,6 +5,7 @@ import hudson.model.UnprotectedRootAction;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
@@ -19,6 +20,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public class BitbucketHookReceiver implements UnprotectedRootAction {
 
     private final BitbucketPayloadProcessor payloadProcessor = new BitbucketPayloadProcessor();
+    private final String BITBUCKET_HOOK_URL = "bitbucket-hook";
 
     public String getIconFileName() {
         return null;
@@ -29,7 +31,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     }
 
     public String getUrlName() {
-        return "bitbucket-hook";
+        return BITBUCKET_HOOK_URL;
     }
 
     /**
@@ -39,16 +41,21 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
      */
     public void doIndex(StaplerRequest req) throws IOException {
         String body = IOUtils.toString(req.getInputStream());
-        String contentType = req.getContentType();
-        if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
-            body = URLDecoder.decode(body);
+        if (!body.isEmpty() && req.getRequestURI().contains("/" + BITBUCKET_HOOK_URL + "/")) {
+            String contentType = req.getContentType();
+            if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
+                body = URLDecoder.decode(body);
+            }
+            if (body.startsWith("payload=")) body = body.substring(8);
+
+            LOGGER.log(Level.FINE, "Received commit hook notification : {0}", body);
+            JSONObject payload = JSONObject.fromObject(body);
+
+            payloadProcessor.processPayload(payload, req);
+        } else {
+            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. You might no have configured correctly the WebHook on BitBucket with the last slash `http://<JENKINS-URL>/bitbucket-hook/`");
         }
-        if (body.startsWith("payload=")) body = body.substring(8);
 
-        LOGGER.fine("Received commit hook notification : " + body);
-        JSONObject payload = JSONObject.fromObject(body);
-
-        payloadProcessor.processPayload(payload, req);
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
