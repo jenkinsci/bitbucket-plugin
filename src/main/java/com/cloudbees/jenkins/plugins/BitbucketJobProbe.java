@@ -68,8 +68,8 @@ public class BitbucketJobProbe {
         }
     }
 
-    private boolean hasBeenTriggered(List<SCM> smcTriggered, SCM scmTrigger) {
-        for (SCM scm : smcTriggered) {
+    private boolean hasBeenTriggered(List<SCM> scmTriggered, SCM scmTrigger) {
+        for (SCM scm : scmTriggered) {
             if (scm.equals(scmTrigger)) {
                 return true;
             }
