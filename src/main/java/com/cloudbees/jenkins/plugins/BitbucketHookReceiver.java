@@ -8,16 +8,22 @@ import java.net.URLDecoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import hudson.security.csrf.CrumbExclusion;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 @Extension
-public class BitbucketHookReceiver implements UnprotectedRootAction {
+public class BitbucketHookReceiver extends CrumbExclusion implements UnprotectedRootAction {
 
     private final BitbucketPayloadProcessor payloadProcessor = new BitbucketPayloadProcessor();
     private final String BITBUCKET_HOOK_URL = "bitbucket-hook";
@@ -60,4 +66,14 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
 
+    @Override
+    public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
+            throws IOException, ServletException {
+        String pathInfo = req.getPathInfo();
+        if (pathInfo != null && pathInfo.startsWith("/"+BITBUCKET_HOOK_URL)) {
+            chain.doFilter(req, resp);
+            return true;
+        }
+        return false;
+    }
 }
