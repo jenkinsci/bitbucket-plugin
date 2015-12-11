@@ -8,16 +8,10 @@ import java.net.URLDecoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import hudson.security.csrf.CrumbExclusion;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerRequest;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
