@@ -23,10 +23,10 @@ import javax.servlet.http.HttpServletResponse;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 @Extension
-public class BitbucketHookReceiver extends CrumbExclusion implements UnprotectedRootAction {
+public class BitbucketHookReceiver implements UnprotectedRootAction {
 
     private final BitbucketPayloadProcessor payloadProcessor = new BitbucketPayloadProcessor();
-    private final String BITBUCKET_HOOK_URL = "bitbucket-hook";
+    public static final String BITBUCKET_HOOK_URL = "bitbucket-hook";
 
     public String getIconFileName() {
         return null;
@@ -65,15 +65,4 @@ public class BitbucketHookReceiver extends CrumbExclusion implements Unprotected
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
-
-    @Override
-    public boolean process(HttpServletRequest req, HttpServletResponse resp, FilterChain chain)
-            throws IOException, ServletException {
-        String pathInfo = req.getPathInfo();
-        if (pathInfo != null && pathInfo.startsWith("/"+BITBUCKET_HOOK_URL)) {
-            chain.doFilter(req, resp);
-            return true;
-        }
-        return false;
-    }
 }
