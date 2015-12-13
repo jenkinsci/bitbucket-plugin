@@ -20,7 +20,7 @@ import org.kohsuke.stapler.StaplerRequest;
 public class BitbucketHookReceiver implements UnprotectedRootAction {
 
     private final BitbucketPayloadProcessor payloadProcessor = new BitbucketPayloadProcessor();
-    private final String BITBUCKET_HOOK_URL = "bitbucket-hook";
+    public static final String BITBUCKET_HOOK_URL = "bitbucket-hook";
 
     public String getIconFileName() {
         return null;
@@ -59,5 +59,4 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
-
 }
