@@ -7,8 +7,6 @@ import hudson.scm.SCM;
 import hudson.security.ACL;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,11 +43,9 @@ public class BitbucketJobProbe {
                     if (bTrigger != null) {
                         LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
-                        List<SCM> scmTriggered = new ArrayList<SCM>();
                         for (SCM scmTrigger : item.getSCMs()) {
-                            if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
+                            if (match(scmTrigger, remote)) {
                                 LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
-                                scmTriggered.add(scmTrigger);
                                 bTrigger.onPost(user);
                             } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
                         }
@@ -66,15 +62,6 @@ public class BitbucketJobProbe {
             // TODO hg
             throw new UnsupportedOperationException("Unsupported SCM type " + scm);
         }
-    }
-
-    private boolean hasBeenTriggered(List<SCM> scmTriggered, SCM scmTrigger) {
-        for (SCM scm : scmTriggered) {
-            if (scm.equals(scmTrigger)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private boolean match(SCM scm, URIish url) {
