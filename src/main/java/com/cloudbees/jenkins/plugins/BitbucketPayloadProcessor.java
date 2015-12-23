@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;

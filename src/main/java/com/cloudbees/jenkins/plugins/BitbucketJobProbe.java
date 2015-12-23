@@ -110,7 +110,7 @@ public class BitbucketJobProbe {
             && Objects.equal(notifyUri.getPath(), repositoryUri.getPath())
             && Objects.equal(notifyUri.getQuery(), repositoryUri.getQuery());
         } catch (URISyntaxException ex) {
-            LOGGER.log(Level.SEVERE, "Could not parse repository uri: {0}, {1}", repository, ex);
+            LOGGER.log(Level.SEVERE, "Could not parse repository uri: {0}, {1}", new Object[]{repository, ex});
         }
         return result;
     }
