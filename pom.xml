@@ -18,8 +18,8 @@
         <connection>scm:git:git://github.com/jenkinsci/bitbucket-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/bitbucket-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/bitbucket-plugin</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.6</maven.compiler.source>
@@ -69,7 +69,12 @@
             <version>2.0.22-beta</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>job-dsl</artifactId>
+            <version>1.40</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
 </project>
-
