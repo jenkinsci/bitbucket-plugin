@@ -52,9 +52,11 @@ public class BitbucketPayloadProcessorTest {
                     .element("href", url)));
 
         payloadProcessor.processPayload(payload, request);
+
         verify(probe).triggerMatchingJobs(user, url, "git");
 
         payloadProcessor.processPayload(hgLoad, request);
+
         verify(probe).triggerMatchingJobs(user, url, "hg");
     }
 
