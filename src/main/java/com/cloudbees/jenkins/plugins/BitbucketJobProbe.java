@@ -92,7 +92,7 @@ public class BitbucketJobProbe {
             try {
                 URI hgUri = new URI(((MercurialSCM) scm).getSource());
                 String remote = url.toString();
-                if (almostMatches(hgUri, remote)) {
+                if (looselyMatches(hgUri, remote)) {
                     return true;
                 }
             } catch (URISyntaxException ex) {
@@ -102,7 +102,7 @@ public class BitbucketJobProbe {
         return false;
     }
 
-    private boolean almostMatches(URI notifyUri, String repository) {
+    private boolean looselyMatches(URI notifyUri, String repository) {
         boolean result = false;
         try {
             URI repositoryUri = new URI(repository);
