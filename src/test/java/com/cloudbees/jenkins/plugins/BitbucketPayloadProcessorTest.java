@@ -43,9 +43,21 @@ public class BitbucketPayloadProcessorTest {
                     .element("html", new JSONObject()
                         .element("href", url))));
 
+        JSONObject hgLoad = new JSONObject()
+            .element("scm", "hg")
+            .element("owner", new JSONObject()
+                .element("username", user))
+            .element("links", new JSONObject()
+                .element("html", new JSONObject()
+                    .element("href", url)));
+
         payloadProcessor.processPayload(payload, request);
-        
+
         verify(probe).triggerMatchingJobs(user, url, "git");
+
+        payloadProcessor.processPayload(hgLoad, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "hg");
     }
 
     @Test

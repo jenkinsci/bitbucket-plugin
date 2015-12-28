@@ -3,10 +3,12 @@ package com.cloudbees.jenkins.plugins;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
+import hudson.plugins.mercurial.MercurialSCM;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 
 import java.net.URISyntaxException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -21,11 +23,12 @@ import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
+import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
 
     public void triggerMatchingJobs(String user, String url, String scm) {
-        if ("git".equals(scm)) {
+        if ("git".equals(scm) || "hg".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
                 URIish remote = new URIish(url);
@@ -63,7 +66,6 @@ public class BitbucketJobProbe {
             }
 
         } else {
-            // TODO hg
             throw new UnsupportedOperationException("Unsupported SCM type " + scm);
         }
     }
@@ -81,12 +83,36 @@ public class BitbucketJobProbe {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
-                    if (GitStatus.looselyMatches(urIish, url))
+                    if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
+                    }
                 }
+            }
+        } else if (scm instanceof MercurialSCM) {
+            try {
+                URI hgUri = new URI(((MercurialSCM) scm).getSource());
+                String remote = url.toString();
+                if (looselyMatches(hgUri, remote)) {
+                    return true;
+                }
+            } catch (URISyntaxException ex) {
+                LOGGER.log(Level.SEVERE, "Could not parse jobSource uri: {0} ", ex);
             }
         }
         return false;
+    }
+
+    private boolean looselyMatches(URI notifyUri, String repository) {
+        boolean result = false;
+        try {
+            URI repositoryUri = new URI(repository);
+            result = Objects.equal(notifyUri.getHost(), repositoryUri.getHost())
+            && Objects.equal(notifyUri.getPath(), repositoryUri.getPath())
+            && Objects.equal(notifyUri.getQuery(), repositoryUri.getQuery());
+        } catch (URISyntaxException ex) {
+            LOGGER.log(Level.SEVERE, "Could not parse repository uri: {0}, {1}", new Object[]{repository, ex});
+        }
+        return result;
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketJobProbe.class.getName());

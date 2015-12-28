@@ -6,7 +6,7 @@
         <artifactId>plugin</artifactId>
         <version>1.580.1</version> <!-- minimun required version to work with Workflow 1.4 SCMTriggerItem was added in 1.568. 1.580.x is the next LTS after that-->
     </parent>
- 
+
     <artifactId>bitbucket</artifactId>
     <version>1.1.4-SNAPSHOT</version>
     <packaging>hpi</packaging>
@@ -62,6 +62,11 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
             <version>2.3.5</version>
+        </dependency>
+        <dependency> <!-- minimun required version to work with Workflow 1.4 GitSCM step-->
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>mercurial</artifactId>
+            <version>1.54</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
