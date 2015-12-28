@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>bitbucket</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.1.4</version>
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
@@ -18,7 +18,7 @@
         <connection>scm:git:git://github.com/jenkinsci/bitbucket-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/bitbucket-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/bitbucket-plugin</url>
-        <tag>HEAD</tag>
+        <tag>bitbucket-1.1.4</tag>
     </scm>
 
     <properties>
