@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,7 +22,7 @@ public class BitbucketPayloadProcessor {
 
     public void processPayload(JSONObject payload, HttpServletRequest request) {
         if ("Bitbucket-Webhooks/2.0".equals(request.getHeader("user-agent"))) {
-            if ("repo:push".equals(request.getHeader("x-event-key"))) {
+            if (triggerLogic(request)) {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayload(payload);
             }
@@ -29,6 +30,10 @@ public class BitbucketPayloadProcessor {
             LOGGER.log(Level.INFO, "Processing old POST service payload");
             processPostServicePayload(payload);
         }
+    }
+
+    private boolean triggerLogic(HttpServletRequest request) {
+        return Arrays.asList("repo:push", "pullrequest:created", "pullrequest:updated").contains(request.getHeader("x-event-key"));
     }
 
     private void processWebhookPayload(JSONObject payload) {

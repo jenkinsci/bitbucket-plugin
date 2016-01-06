@@ -61,6 +61,40 @@ public class BitbucketPayloadProcessorTest {
     }
 
     @Test
+    public void testWebhookPayloadWhenPullRequestIsCreated() {
+        // Set headers so that payload processor will parse as new Webhook payload
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("pullrequest:created");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/test_user/test_repo";
+
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("username", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("html", new JSONObject()
+                                        .element("href", url))));
+
+        JSONObject hgLoad = new JSONObject()
+                .element("scm", "hg")
+                .element("owner", new JSONObject()
+                        .element("username", user))
+                .element("links", new JSONObject()
+                        .element("html", new JSONObject()
+                                .element("href", url)));
+
+        payloadProcessor.processPayload(payload, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "git");
+
+        payloadProcessor.processPayload(hgLoad, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "hg");
+    }
+
+    @Test
     public void testProcessPostServicePayload() {
         // Ensure header isn't set so that payload processor will parse as old POST service payload
         when(request.getHeader("user-agent")).thenReturn(null);
