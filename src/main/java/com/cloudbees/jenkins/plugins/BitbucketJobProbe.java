@@ -27,6 +27,11 @@ import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
 
+    @Deprecated
+    public void triggerMatchingJobs(String user, String url, String scm) {
+        triggerMatchingJobs(user, url, scm, "");
+    }
+
     public void triggerMatchingJobs(String user, String url, String scm, String payload) {
         if ("git".equals(scm) || "hg".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);

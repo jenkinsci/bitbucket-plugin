@@ -41,6 +41,14 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     /**
      * Called when a POST is made.
      */
+    @Deprecated
+    public void onPost(String triggeredByUser) {
+        onPost(triggeredByUser, "");
+    }
+
+    /**
+     * Called when a POST is made.
+     */
     public void onPost(String triggeredByUser, final String payload) {
         final String pushBy = triggeredByUser;
         getDescriptor().queue.execute(new Runnable() {
