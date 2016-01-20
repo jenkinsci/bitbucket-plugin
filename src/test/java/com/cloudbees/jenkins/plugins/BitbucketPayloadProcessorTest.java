@@ -53,11 +53,11 @@ public class BitbucketPayloadProcessorTest {
 
         payloadProcessor.processPayload(payload, request);
 
-        verify(probe).triggerMatchingJobs(user, url, "git");
+        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
 
         payloadProcessor.processPayload(hgLoad, request);
 
-        verify(probe).triggerMatchingJobs(user, url, "hg");
+        verify(probe).triggerMatchingJobs(user, url, "hg", hgLoad.toString());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class BitbucketPayloadProcessorTest {
 
         payloadProcessor.processPayload(payload, request);
 
-        verify(probe).triggerMatchingJobs("old_user", "https://staging.bitbucket.org/old_user/old_repo", "git");
+        verify(probe).triggerMatchingJobs("old_user", "https://staging.bitbucket.org/old_user/old_repo", "git", payload.toString());
     }
 
 }

@@ -27,7 +27,12 @@ import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
 
+    @Deprecated
     public void triggerMatchingJobs(String user, String url, String scm) {
+        triggerMatchingJobs(user, url, scm, "");
+    }
+
+    public void triggerMatchingJobs(String user, String url, String scm, String payload) {
         if ("git".equals(scm) || "hg".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
@@ -53,7 +58,7 @@ public class BitbucketJobProbe {
                             if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
                                 LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
                                 scmTriggered.add(scmTrigger);
-                                bTrigger.onPost(user);
+                                bTrigger.onPost(user, payload);
                             } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
                         }
                     } else

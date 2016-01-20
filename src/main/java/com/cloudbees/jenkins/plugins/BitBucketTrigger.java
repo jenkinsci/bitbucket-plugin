@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.Action;
+import hudson.model.CauseAction;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Job;
@@ -40,7 +41,15 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     /**
      * Called when a POST is made.
      */
+    @Deprecated
     public void onPost(String triggeredByUser) {
+        onPost(triggeredByUser, "");
+    }
+
+    /**
+     * Called when a POST is made.
+     */
+    public void onPost(String triggeredByUser, final String payload) {
         final String pushBy = triggeredByUser;
         getDescriptor().queue.execute(new Runnable() {
             private boolean runPolling() {
@@ -89,6 +98,8 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                             return job;
                         }
                     };
+                    BitBucketPayload bitBucketPayload = new BitBucketPayload(payload);
+                    pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
                     if (pJob.scheduleBuild(cause)) {
                         LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+ name);
                     } else {

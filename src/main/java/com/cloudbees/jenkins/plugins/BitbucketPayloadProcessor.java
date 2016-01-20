@@ -40,14 +40,14 @@ public class BitbucketPayloadProcessor {
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
-            probe.triggerMatchingJobs(user, url, scm);
+            probe.triggerMatchingJobs(user, url, scm, payload.toString());
         } else if (payload.has("scm")) {
             LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
             String user = payload.getJSONObject("owner").getString("username");
             String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = payload.has("scm") ? payload.getString("scm") : "hg";
 
-            probe.triggerMatchingJobs(user, url, scm);
+            probe.triggerMatchingJobs(user, url, scm, payload.toString());
         }
 
     }
@@ -99,7 +99,7 @@ public class BitbucketPayloadProcessor {
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
         String scm = repo.getString("scm");
 
-        probe.triggerMatchingJobs(user, url, scm);
+        probe.triggerMatchingJobs(user, url, scm, payload.toString());
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketPayloadProcessor.class.getName());
