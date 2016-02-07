@@ -47,7 +47,9 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 	 */
 	public void onPost(String triggeredByUser, final String payload) {
 		final String pushBy = triggeredByUser;
-		getDescriptor().queue.execute(new Runnable() {
+		SequentialExecutionQueue queue = new SequentialExecutionQueue(Hudson.MasterComputer.threadPoolForRemoting);
+
+		queue.execute(new Runnable() {
 			@Override
 			public void run() {
 				String name = " #" + job.getNextBuildNumber();
@@ -72,7 +74,6 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 					LOGGER.info("SCM changes detected in " + job.getName() + ". Job is already in the queue");
 				}
 			}
-
 		});
 	}
 
@@ -94,11 +95,6 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 	public boolean IsLogFileInitialized() {
 		File file = new File(job.getRootDir(), "bitbucket-polling.log");
 		return file.exists();
-	}
-
-	@Override
-	public DescriptorImpl getDescriptor() {
-		return (DescriptorImpl) super.getDescriptor();
 	}
 
 	/**
@@ -138,7 +134,6 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
 	@Extension
 	public static class DescriptorImpl extends TriggerDescriptor {
-		private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Hudson.MasterComputer.threadPoolForRemoting);
 
 		@Override
 		public boolean isApplicable(Item item) {
