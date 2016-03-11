@@ -7,6 +7,15 @@
             </f:optionalBlock>
             <f:optionalBlock name="pullRequestTriggerConfig" title="Trigger on Pull Request events"
                              checked="${instance.pullRequestTriggerConfig != null}">
+                <f:advanced>
+                    <f:nested>
+                        <f:checkbox name="triggerOnlyIfAllReviewersApproved"
+                                    title="Trigger only if all reviewers have approved"
+                                    checked="${instance.pullRequestTriggerConfig.triggerOnlyIfAllReviewersApproved}">
+
+                        </f:checkbox>
+                    </f:nested>
+                </f:advanced>
             </f:optionalBlock>
         </table>
     </f:nested>

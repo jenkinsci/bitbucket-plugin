@@ -52,11 +52,13 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                             @Override
                             public void onPollSuccess(PollingResult pollingResult) {
                                 PullRequestTriggerHandler pullRequestTriggerHandler =
-                                        new PullRequestTriggerHandler(pullRequestTriggerConfig);
+                                        new PullRequestTriggerHandler(pullRequestTriggerConfig,
+                                                (PullRequestPayload) bitBucketPayload,
+                                                getLogFile());
 
                                 BitBucketPushCause cause;
                                 try {
-                                    cause = pullRequestTriggerHandler.getCause(getLogFile(), (PullRequestPayload) bitBucketPayload);
+                                    cause = pullRequestTriggerHandler.getCause();
 
                                     if (pullRequestTriggerHandler.shouldScheduleJob()) {
                                         scheduleJob(cause, bitBucketPayload);
