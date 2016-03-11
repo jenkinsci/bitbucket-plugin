@@ -1,0 +1,13 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:nested>
+        <table>
+            <f:optionalBlock name="repositoryTriggerConfig" title="Trigger on Repository events"
+                             checked="${instance.repositoryTriggerConfig != null}">
+            </f:optionalBlock>
+            <f:optionalBlock name="pullRequestTriggerConfig" title="Trigger on Pull Request events"
+                             checked="${instance.pullRequestTriggerConfig != null}">
+            </f:optionalBlock>
+        </table>
+    </f:nested>
+</j:jelly>

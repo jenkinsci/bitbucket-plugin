@@ -1,5 +1,7 @@
 package com.cloudbees.jenkins.plugins;
 
+import com.cloudbees.jenkins.plugins.config.PullRequestTriggerConfig;
+import com.cloudbees.jenkins.plugins.config.RepositoryTriggerConfig;
 import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
 import hudson.Extension;
 import hudson.Util;
@@ -31,11 +33,15 @@ import java.util.logging.Logger;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
+    public RepositoryTriggerConfig repositoryTriggerConfig;
+    public PullRequestTriggerConfig pullRequestTriggerConfig;
 
     @DataBoundConstructor
-    public BitBucketTrigger() {
+    public BitBucketTrigger(RepositoryTriggerConfig repositoryTriggerConfig,
+                            PullRequestTriggerConfig pullRequestTriggerConfig) {
+        this.repositoryTriggerConfig = repositoryTriggerConfig;
+        this.pullRequestTriggerConfig = pullRequestTriggerConfig;
     }
-
     /**
      * Called when a POST is made.
      */
