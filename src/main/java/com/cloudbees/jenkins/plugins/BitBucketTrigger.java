@@ -42,13 +42,6 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
         this.repositoryTriggerConfig = repositoryTriggerConfig;
         this.pullRequestTriggerConfig = pullRequestTriggerConfig;
     }
-    /**
-     * Called when a POST is made.
-     */
-    @Deprecated
-    public void onPost(String triggeredByUser) {
-        onPost(triggeredByUser, "");
-    }
 
     /**
      * Called when a POST is made.
