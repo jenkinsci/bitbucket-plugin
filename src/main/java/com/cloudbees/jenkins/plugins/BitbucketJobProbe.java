@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
@@ -26,53 +27,59 @@ import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
-
-    @Deprecated
-    public void triggerMatchingJobs(String user, String url, String scm) {
-        triggerMatchingJobs(user, url, scm, "");
-    }
-
-    public void triggerMatchingJobs(String user, String url, String scm, String payload) {
-        if ("git".equals(scm) || "hg".equals(scm)) {
+    public void triggetMatchingJobs(BitbucketEvent bitbucketEvent, BitBucketPayload bitBucketPayload) {
+        if("git".equals(bitBucketPayload.getScm()) || "hg".equals(bitBucketPayload.getScm())) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
+
             try {
-                URIish remote = new URIish(url);
+                URIish remote = new URIish(bitBucketPayload.getScmUrl());
+
                 for (Job<?,?> job : Jenkins.getInstance().getAllItems(Job.class)) {
-                    BitBucketTrigger bTrigger = null;
                     LOGGER.log(Level.FINE, "Considering candidate job {0}", job.getName());
 
-                    if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
-                        ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-                        for (Trigger trigger : pJob.getTriggers().values()) {
-                            if (trigger instanceof BitBucketTrigger) {
-                                bTrigger = (BitBucketTrigger) trigger;
-                                break;
+                    BitBucketTrigger bitbucketTrigger = getBitBucketTrigger(job);
+                    if (bitbucketTrigger != null) {
+                        LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
+
+                        SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
+
+                        List<SCM> scmTriggered = new ArrayList<SCM>();
+
+                        for (SCM scmTrigger : item.getSCMs()) {
+                            if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
+//                                LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
+
+                                scmTriggered.add(scmTrigger);
+
+                                bitbucketTrigger.onPost(bitbucketEvent, bitBucketPayload);
+                            } else {
+                                LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
                             }
                         }
                     }
-                    if (bTrigger != null) {
-                        LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
-                        SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
-                        List<SCM> scmTriggered = new ArrayList<SCM>();
-                        for (SCM scmTrigger : item.getSCMs()) {
-                            if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-                                LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
-                                scmTriggered.add(scmTrigger);
-                                bTrigger.onPost(user, payload);
-                            } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
-                        }
-                    } else
-                        LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());
                 }
             } catch (URISyntaxException e) {
-                LOGGER.log(Level.WARNING, "Invalid repository URL {0}", url);
+                LOGGER.log(Level.WARNING, "Invalid repository URL {0}", bitBucketPayload.getScm());
             } finally {
                 SecurityContextHolder.setContext(old);
             }
 
         } else {
-            throw new UnsupportedOperationException("Unsupported SCM type " + scm);
+            throw new UnsupportedOperationException("Unsupported SCM type " + bitBucketPayload.getScm());
         }
+    }
+
+    private BitBucketTrigger getBitBucketTrigger(Job<?, ?> job) {
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+            ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
+            for (Trigger trigger : pJob.getTriggers().values()) {
+                if (trigger instanceof BitBucketTrigger) {
+                    return (BitBucketTrigger) trigger;
+                }
+            }
+        }
+
+        return null;
     }
 
     private boolean hasBeenTriggered(List<SCM> scmTriggered, SCM scmTrigger) {
