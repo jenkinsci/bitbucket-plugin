@@ -1,13 +1,11 @@
 package com.cloudbees.jenkins.plugins;
 
+import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.Action;
-import hudson.model.CauseAction;
-import hudson.model.Hudson;
-import hudson.model.Item;
-import hudson.model.Job;
+import hudson.model.*;
+import hudson.scm.PollingResult;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
@@ -49,66 +47,50 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     /**
      * Called when a POST is made.
      */
-    public void onPost(String triggeredByUser, final String payload) {
-        final String pushBy = triggeredByUser;
-        getDescriptor().queue.execute(new Runnable() {
-            private boolean runPolling() {
-                try {
-                    StreamTaskListener listener = new StreamTaskListener(getLogFile());
-                    try {
-                        PrintStream logger = listener.getLogger();
-                        long start = System.currentTimeMillis();
-                        logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job).poll(listener).hasChanges();
-                        logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
-                        if(result)
-                            logger.println("Changes found");
-                        else
-                            logger.println("No changes");
-                        return result;
-                    } catch (Error e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                        throw e;
-                    } catch (RuntimeException e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                        throw e;
-                    } finally {
-                        listener.close();
-                    }
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                }
-                return false;
-            }
+    public void onPost(final BitbucketEvent bitbucketEvent, final BitBucketPayload bitBucketPayload) {
+        if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName())) {
+            if(pullRequestTriggerConfig != null) {
+                BitbucketPollingRunnable bitbucketPollingRunnable = new BitbucketPollingRunnable(job,
+                        getLogFile(),
+                        new BitbucketPollingRunnable.BitbucketPollResultListener() {
+                            @Override
+                            public void onPollSuccess(PollingResult pollingResult) {
+                                String name = " #"+job.getNextBuildNumber();
 
-            public void run() {
-                if (runPolling()) {
-                    String name = " #"+job.getNextBuildNumber();
-                    BitBucketPushCause cause;
-                    try {
-                        cause = new BitBucketPushCause(getLogFile(), pushBy);
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
-                        cause = new BitBucketPushCause(pushBy);
-                    }
-                    ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
-                        @Override protected Job asJob() {
-                            return job;
-                        }
-                    };
-                    BitBucketPayload bitBucketPayload = new BitBucketPayload(payload);
-                    pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
-                    if (pJob.scheduleBuild(cause)) {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+ name);
-                    } else {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
-                    }
-                }
-            }
+                                BitBucketPushCause cause;
 
-        });
+                                try {
+                                    cause = new BitBucketPushCause(getLogFile(), bitBucketPayload.getUser());
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.WARNING, "Failed to parse the polling log",e);
+                                    cause = new BitBucketPushCause(bitBucketPayload.getUser());
+                                }
+
+                                ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
+                                    @Override protected Job asJob() {
+                                        return job;
+                                    }
+                                };
+
+                                pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
+                                if (pJob.scheduleBuild(cause)) {
+                                    LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+ name);
+                                } else {
+                                    LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
+                                }
+                            }
+
+                            @Override
+                            public void onPollError(Throwable throwable) {
+
+                            }
+                        });
+
+                getDescriptor().queue.execute(bitbucketPollingRunnable);
+            } else {
+                LOGGER.info(bitbucketEvent.getName() + " received but job " + job.getName() + " is not configured to handle it");
+            }
+        }
     }
 
     @Override
