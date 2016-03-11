@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * @version 1.1.5
  */
 public class BitBucketPayload extends InvisibleAction implements EnvironmentContributingAction {
-    private final @Nonnull JSONObject payload;
+    protected final @Nonnull JSONObject payload;
     private String scm;
     private String user;
     private String scmUrl;
@@ -51,14 +51,6 @@ public class BitBucketPayload extends InvisibleAction implements EnvironmentCont
     @Override
     public void buildEnvVars(AbstractBuild<?, ?> abstractBuild, EnvVars envVars) {
         envVars.put("BITBUCKET_PAYLOAD", payload.toString());
-
-        JSONObject jsonObject = JSONObject.fromObject(payload);
-        JSONObject pullRequest = jsonObject.getJSONObject("pullrequest");
-        JSONObject source = pullRequest.getJSONObject("source");
-
-        String branch = source.getJSONObject("branch").getString("name");
-        envVars.put("BITBUCKET_BRANCH", branch);
-
         LOGGER.log(Level.FINEST, "Injecting BITBUCKET_PAYLOAD: {0}", payload);
     }
 
