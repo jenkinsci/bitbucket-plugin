@@ -8,9 +8,9 @@ import com.cloudbees.jenkins.plugins.BitbucketJobProbe;
  */
 public class BitbucketPayloadProcessorFactory {
     public BitbucketPayloadProcessor create(BitbucketEvent bitbucketEvent) {
-        if(BitbucketEvent.EVENTS.REPOSITORY.equals(bitbucketEvent.getKey())) {
+        if(BitbucketEvent.EVENT.REPOSITORY.equals(bitbucketEvent.getName())) {
             return new RepositoryPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
-        } else if(BitbucketEvent.EVENTS.PULL_REQUEST.equals(bitbucketEvent.getKey())) {
+        } else if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName())) {
             return new PullRequestPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
         }
 
@@ -18,9 +18,9 @@ public class BitbucketPayloadProcessorFactory {
     }
 
     public BitbucketPayloadProcessor create(BitbucketJobProbe probe, BitbucketEvent bitbucketEvent) {
-        if(BitbucketEvent.EVENTS.REPOSITORY.equals(bitbucketEvent.getKey())) {
+        if(BitbucketEvent.EVENT.REPOSITORY.equals(bitbucketEvent.getName())) {
             return new RepositoryPayloadProcessor(probe, bitbucketEvent);
-        } else if(BitbucketEvent.EVENTS.PULL_REQUEST.equals(bitbucketEvent.getKey())) {
+        } else if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName())) {
             return new PullRequestPayloadProcessor(probe, bitbucketEvent);
         } else {
 //            TODO
