@@ -50,9 +50,12 @@ public class BitbucketEventTest {
         BitbucketEvent bitbucketEvent = createEvent(event, action);
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void testUnknownAction() {
+        String event = "repo";
+        String action = "fake";
 
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
     }
 
     private BitbucketEvent createEvent(String event, String action) {
