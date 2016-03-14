@@ -1,5 +1,6 @@
-package com.cloudbees.jenkins.plugins;
+package com.cloudbees.jenkins.plugins.processor;
 
+import com.cloudbees.jenkins.plugins.*;
 import net.sf.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,12 +20,12 @@ public class PullRequestPayloadProcessorTest {
     @Mock private HttpServletRequest request;
     @Mock private BitbucketJobProbe probe;
 
-    private BitbucketPayloadProcessor payloadProcessor;
-
-    @Before
-    public void setUp() {
-        payloadProcessor = new BitbucketPayloadProcessor(probe);
-    }
+    private com.cloudbees.jenkins.plugins.BitbucketPayloadProcessor payloadProcessor;
+//
+//    @Before
+//    public void setUp() {
+//        payloadProcessor = new BitbucketPayloadProcessor(probe);
+//    }
 
     @Test
     public void testProcessPullRequestApprovalWebhook() {
