@@ -13,7 +13,8 @@ public class BitbucketEvent {
         String PUSH = "push";
     }
 
-    interface PULL_REQUEST_ACTIONS {
+    public interface PULL_REQUEST_ACTIONS {
+        String CREATED = "created";
         String APPROVED = "approved";
     }
 
@@ -45,6 +46,8 @@ public class BitbucketEvent {
             }
         } else if(EVENT.PULL_REQUEST.equals(name)) {
             if(PULL_REQUEST_ACTIONS.APPROVED.equals(action)) {
+                return true;
+            } else if(PULL_REQUEST_ACTIONS.CREATED.equals(action)) {
                 return true;
             }
         }
