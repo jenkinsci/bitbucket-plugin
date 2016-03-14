@@ -7,9 +7,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 /**
  * Created by Shyri Villar on 11/03/2016.
@@ -32,7 +30,40 @@ public class BitbucketEventTest {
     }
 
     @Test
+    public void testRepositoryEventPushAction() {
+        String event = "repo";
+        String action = "push";
+
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
+
+        assertEquals(event, bitbucketEvent.getName());
+        assertEquals(action, bitbucketEvent.getAction());
+    }
+
+    @Test
     public void testPullRequestEvent() {
+        String event = "pullrequest";
+        String action = "approved";
+
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
+
+        assertEquals(event, bitbucketEvent.getName());
+        assertEquals(action, bitbucketEvent.getAction());
+    }
+
+    @Test
+    public void testPullRequestEventApprovedCreated() {
+        String event = "pullrequest";
+        String action = "created";
+
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
+
+        assertEquals(event, bitbucketEvent.getName());
+        assertEquals(action, bitbucketEvent.getAction());
+    }
+
+    @Test
+    public void testPullRequestEventApprovedAction() {
         String event = "pullrequest";
         String action = "approved";
 
