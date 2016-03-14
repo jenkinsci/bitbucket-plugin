@@ -1,0 +1,5 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+    <f:dropdownDescriptorSelector field="actionFilter" title="Select an Action" descriptors="${descriptor.actionDescriptors}">
+    </f:dropdownDescriptorSelector>
+</j:jelly>
