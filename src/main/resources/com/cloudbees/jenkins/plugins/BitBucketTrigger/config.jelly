@@ -1,22 +1,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:nested>
-        <table>
-            <f:optionalBlock name="repositoryTriggerConfig" title="Trigger on Repository events"
-                             checked="${instance.repositoryTriggerConfig != null}">
-            </f:optionalBlock>
-            <f:optionalBlock name="pullRequestTriggerConfig" title="Trigger on Pull Request events"
-                             checked="${instance.pullRequestTriggerConfig != null}">
-                <f:advanced>
-                    <f:nested>
-                        <f:checkbox name="triggerOnlyIfAllReviewersApproved"
-                                    title="Trigger only if all reviewers have approved"
-                                    checked="${instance.pullRequestTriggerConfig.triggerOnlyIfAllReviewersApproved}">
-
-                        </f:checkbox>
-                    </f:nested>
-                </f:advanced>
-            </f:optionalBlock>
-        </table>
-    </f:nested>
+    <f:entry title="${%Triggers}">
+        <f:hetero-list name="triggers" items="${instance.triggers}" hasHeader="true"
+                       descriptors="${descriptor.triggerDescriptors}"
+                       targetType="${com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter.class}" />
+    </f:entry>
 </j:jelly>

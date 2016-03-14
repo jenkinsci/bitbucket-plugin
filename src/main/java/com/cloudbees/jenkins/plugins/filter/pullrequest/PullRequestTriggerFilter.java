@@ -12,8 +12,10 @@ import java.util.List;
  * Created by Shyri Villar on 14/03/2016.
  */
 public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
+    public PullRequestActionFilter actionFilter;
     @DataBoundConstructor
-    public PullRequestTriggerFilter() {
+    public PullRequestTriggerFilter(PullRequestActionFilter actionFilter) {
+        this.actionFilter = actionFilter;
     }
 
     @Extension
@@ -24,5 +26,9 @@ public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
             // you may want to filter this list of descriptors here, if you are being very fancy
             return Jenkins.getInstance().getDescriptorList(PullRequestActionFilter.class);
         }
+    }
+
+    public PullRequestActionFilter getActionFilter() {
+        return actionFilter;
     }
 }
