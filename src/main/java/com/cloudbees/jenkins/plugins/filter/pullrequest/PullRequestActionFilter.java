@@ -4,7 +4,7 @@ import hudson.model.AbstractDescribableImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * Created by isvillar on 14/03/2016.
+ * Created by Shyri Villar on 14/03/2016.
  */
 public class PullRequestActionFilter extends AbstractDescribableImpl<PullRequestActionFilter> {
 }

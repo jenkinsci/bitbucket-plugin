@@ -1,5 +1,8 @@
 package com.cloudbees.jenkins.plugins.filter;
 
+import com.cloudbees.jenkins.plugins.BitBucketPushCause;
+import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.processor.BitbucketPayloadProcessor;
 import hudson.model.AbstractDescribableImpl;
 
 /**
@@ -8,6 +11,8 @@ import hudson.model.AbstractDescribableImpl;
 public abstract class BitbucketTriggerFilter extends AbstractDescribableImpl<BitbucketTriggerFilter> {
 
 
+    public abstract boolean shouldScheduleJob(BitBucketPayload bitbucketPayload);
+    public abstract BitBucketPushCause getCause();
 //    public static DescriptorExtensionList<BitbucketTriggerConfig, BitbucketTriggerFilterDescriptor> all() {
 //        return Jenkins.getInstance().getDescriptorList(BitbucketTriggerConfig.class);
 //    }

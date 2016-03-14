@@ -4,7 +4,7 @@ import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import hudson.model.Descriptor;
 
 /**
- * Created by isvillar on 14/03/2016.
+ * Created by Shyri Villar on 14/03/2016.
  */
 public abstract class PullRequestActionDescriptor extends Descriptor<PullRequestActionFilter> {
 }
