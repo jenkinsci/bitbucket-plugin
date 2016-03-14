@@ -2,7 +2,7 @@ package com.cloudbees.jenkins.plugins.filter;
 
 import com.cloudbees.jenkins.plugins.BitbucketEvent;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerMatcherBitbucket;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class FilterMatcher {
                                                                 BitbucketTriggerFilter triggerFilter) {
         if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName()) &&
                 triggerFilter instanceof PullRequestTriggerFilter) {
-            return new PullRequestTriggerMatcherBitbucket();
+            return new PullRequestTriggerMatcher();
         }
 
         return null;
