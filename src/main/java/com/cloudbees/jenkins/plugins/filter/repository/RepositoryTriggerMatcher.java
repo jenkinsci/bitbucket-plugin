@@ -12,8 +12,10 @@ public class RepositoryTriggerMatcher implements BitbucketEventTriggerMatcher {
     public boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter) {
         if(triggerFilter.getActionFilter() instanceof RepositoryAnyActionFilter) {
             return true;
+        } else if(triggerFilter.getActionFilter() instanceof RepositoryPushActionFilter &&
+                BitbucketEvent.REPOSITORY_ACTIONS.PUSH.equals(bitbucketEvent.getAction())) {
+            return true;
         }
-
         return true;
     }
 }

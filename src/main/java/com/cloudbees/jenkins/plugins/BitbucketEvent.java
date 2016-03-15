@@ -9,7 +9,7 @@ public class BitbucketEvent {
         String PULL_REQUEST = "pullrequest";
     }
 
-    interface REPOSITORY_ACTIONS {
+    public interface REPOSITORY_ACTIONS {
         String PUSH = "push";
     }
 
