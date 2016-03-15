@@ -23,12 +23,20 @@ public class BitbucketPayload extends InvisibleAction implements EnvironmentCont
 
     public BitbucketPayload(@Nonnull JSONObject payload) {
         this.payload = payload;
-        JSONObject repository = payload.getJSONObject("repository");
-        JSONObject actor = payload.getJSONObject("actor");
 
-        this.user = actor.getString("username");
-        this.scm = repository.has("scm") ? repository.getString("scm") : "git";
-        this.scmUrl = repository.getJSONObject("links").getJSONObject("html").getString("href");
+        if (payload.has("repository")) {
+            JSONObject repository = payload.getJSONObject("repository");
+            JSONObject actor = payload.getJSONObject("actor");
+
+            this.user = actor.getString("username");
+            this.scm = repository.has("scm") ? repository.getString("scm") : "git";
+            this.scmUrl = repository.getJSONObject("links").getJSONObject("html").getString("href");
+        } else if (payload.has("scm")) {
+            LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
+            this.user = payload.getJSONObject("owner").getString("username");
+            this.scmUrl = payload.getJSONObject("links").getJSONObject("html").getString("href");
+            this.scm = payload.has("scm") ? payload.getString("scm") : "hg";
+        }
     }
 
     @Nonnull

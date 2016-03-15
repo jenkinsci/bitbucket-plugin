@@ -16,13 +16,8 @@ public class PullRequestPayloadProcessor extends BitbucketPayloadProcessor {
 
     @Override
     public void processPayload(JSONObject payload) {
-        if (payload.has("repository")) {
-            BitbucketPayload bitbucketPayload = buildPayloadForJobs(payload);
-            jobProbe.triggetMatchingJobs(bitbucketEvent, bitbucketPayload);
-
-        } else if (payload.has("scm")) {
-//            probe.triggerMatchingJobs(user, url, scm, payload.toString()); TODO
-        }
+        BitbucketPayload bitbucketPayload = buildPayloadForJobs(payload);
+        jobProbe.triggetMatchingJobs(bitbucketEvent, bitbucketPayload);
     }
 
     private BitbucketPayload buildPayloadForJobs(JSONObject payload) {
