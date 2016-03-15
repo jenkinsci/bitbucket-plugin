@@ -1,6 +1,5 @@
 package com.cloudbees.jenkins.plugins.filter.pullrequest;
 
-import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import hudson.model.Descriptor;
 
 /**
