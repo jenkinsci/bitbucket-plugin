@@ -1,10 +1,11 @@
 package com.cloudbees.jenkins.plugins;
 
-import com.cloudbees.jenkins.plugins.config.PullRequestTriggerConfig;
-import com.cloudbees.jenkins.plugins.config.RepositoryTriggerConfig;
+import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
+import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
+import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilterDescriptor;
+import com.cloudbees.jenkins.plugins.filter.FilterMatcher;
 import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
-import com.cloudbees.jenkins.plugins.payload.PullRequestPayload;
-import com.cloudbees.jenkins.plugins.trigger.PullRequestTriggerHandler;
+
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
@@ -13,6 +14,7 @@ import hudson.scm.PollingResult;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.SequentialExecutionQueue;
+import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -30,59 +33,55 @@ import java.util.logging.Logger;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
-    public RepositoryTriggerConfig repositoryTriggerConfig;
-    public PullRequestTriggerConfig pullRequestTriggerConfig;
+    public List<BitbucketTriggerFilter> triggers;
 
     @DataBoundConstructor
-    public BitBucketTrigger(RepositoryTriggerConfig repositoryTriggerConfig,
-                            PullRequestTriggerConfig pullRequestTriggerConfig) {
-        this.repositoryTriggerConfig = repositoryTriggerConfig;
-        this.pullRequestTriggerConfig = pullRequestTriggerConfig;
+    public BitBucketTrigger(List<BitbucketTriggerFilter> triggers) {
+        this.triggers = triggers;
     }
 
     /**
      * Called when a POST is made.
      */
     public void onPost(final BitbucketEvent bitbucketEvent, final BitBucketPayload bitBucketPayload) {
-        if (BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName())) {
-            if (pullRequestTriggerConfig != null) {
+        FilterMatcher filterMatcher = new FilterMatcher();
+
+        final List<BitbucketTriggerFilter> matchingFilters = filterMatcher.getMatchingFilters(bitbucketEvent, triggers);
+
+        if(matchingFilters != null) {
+            if(matchingFilters.size() > 0) {
                 BitbucketPollingRunnable bitbucketPollingRunnable = new BitbucketPollingRunnable(job,
-                        getLogFile(),
-                        new BitbucketPollingRunnable.BitbucketPollResultListener() {
-                            @Override
-                            public void onPollSuccess(PollingResult pollingResult) {
-                                PullRequestTriggerHandler pullRequestTriggerHandler =
-                                        new PullRequestTriggerHandler(pullRequestTriggerConfig,
-                                                (PullRequestPayload) bitBucketPayload,
-                                                getLogFile());
-
-                                BitBucketPushCause cause;
+                    getLogFile(),
+                    new BitbucketPollingRunnable.BitbucketPollResultListener() {
+                        @Override
+                        public void onPollSuccess(PollingResult pollingResult) {
+                            for (BitbucketTriggerFilter filter : matchingFilters) {
+                                BitbucketTriggerCause cause;
                                 try {
-                                    cause = pullRequestTriggerHandler.getCause();
+                                    cause = filter.getCause(getLogFile(), bitBucketPayload);
 
-                                    if (pullRequestTriggerHandler.shouldScheduleJob()) {
+                                    if (filter.shouldScheduleJob(bitBucketPayload)) {
                                         scheduleJob(cause, bitBucketPayload);
+                                        return;
                                     }
 
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
                             }
+                        }
 
-                            @Override
-                            public void onPollError(Throwable throwable) {
+                        @Override
+                        public void onPollError(Throwable throwable) {
 
-                            }
-                        });
-
+                        }
+                    });
                 getDescriptor().queue.execute(bitbucketPollingRunnable);
-            } else {
-                LOGGER.info(bitbucketEvent.getName() + " received but job " + job.getName() + " is not configured to handle it");
             }
         }
     }
 
-    private void scheduleJob(BitBucketPushCause cause, BitBucketPayload bitBucketPayload) {
+    private void scheduleJob(BitbucketTriggerCause cause, BitBucketPayload bitBucketPayload) {
         ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
             @Override
             protected Job asJob() {
@@ -170,6 +169,17 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
         public String getDisplayName() {
             return "Build when a change is pushed to BitBucket";
         }
+
+
+        public List<BitbucketTriggerFilterDescriptor> getTriggerDescriptors() {
+            // you may want to filter this list of descriptors here, if you are being very fancy
+            return Jenkins.getInstance().getDescriptorList(BitbucketTriggerFilter.class);
+        }
+
+    }
+
+    public List<BitbucketTriggerFilter> getTriggers() {
+        return triggers;
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitBucketTrigger.class.getName());
