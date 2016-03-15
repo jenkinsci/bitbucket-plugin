@@ -3,6 +3,7 @@ package com.cloudbees.jenkins.plugins.filter;
 import com.cloudbees.jenkins.plugins.BitbucketEvent;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerMatcher;
+import com.cloudbees.jenkins.plugins.filter.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,9 @@ public class FilterMatcher {
         if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName()) &&
                 triggerFilter instanceof PullRequestTriggerFilter) {
             return new PullRequestTriggerMatcher().matchesAction(bitbucketEvent, triggerFilter);
+        } else if(BitbucketEvent.EVENT.REPOSITORY.equals(bitbucketEvent.getName()) &&
+                triggerFilter instanceof com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter) {
+            return new RepositoryTriggerMatcher().matchesAction(bitbucketEvent, triggerFilter);
         }
 
         return false;

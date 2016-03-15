@@ -14,6 +14,5 @@ import java.io.IOException;
 public abstract class BitbucketTriggerFilter extends AbstractDescribableImpl<BitbucketTriggerFilter> {
     public abstract boolean shouldScheduleJob(BitBucketPayload bitbucketPayload);
     public abstract BitbucketTriggerCause getCause(File pollingLog, BitBucketPayload pullRequestPayload) throws IOException;
-    public abstract PullRequestActionFilter getActionFilter();
-
+    public abstract AbstractDescribableImpl getActionFilter();
 }
