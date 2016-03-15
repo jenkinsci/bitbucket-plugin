@@ -20,10 +20,7 @@ public class FilterMatcher {
             filteredList = new ArrayList<BitbucketTriggerFilter>();
 
             for(BitbucketTriggerFilter triggerFilter : triggerFilterList) {
-                BitbucketEventTriggerMatcher eventTriggerMatcher =
-                        getEventTriggerMatcher(bitbucketEvent, triggerFilter);
-
-                if(eventTriggerMatcher != null && eventTriggerMatcher.matchesAction()) {
+                if(matchesEventAndAction(bitbucketEvent, triggerFilter)) {
                     filteredList.add(triggerFilter);
                 }
             }
@@ -32,13 +29,13 @@ public class FilterMatcher {
         return filteredList;
     }
 
-    private BitbucketEventTriggerMatcher getEventTriggerMatcher(BitbucketEvent bitbucketEvent,
+    private boolean matchesEventAndAction(BitbucketEvent bitbucketEvent,
                                                                 BitbucketTriggerFilter triggerFilter) {
         if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName()) &&
                 triggerFilter instanceof PullRequestTriggerFilter) {
-            return new PullRequestTriggerMatcher();
+            return new PullRequestTriggerMatcher().matchesAction(bitbucketEvent, triggerFilter);
         }
 
-        return null;
+        return false;
     }
 }

@@ -3,7 +3,7 @@
     <f:entry>
         <f:checkbox name="triggerOnlyIfAllReviewersApproved"
                     title="Trigger only if all reviewers have approved"
-                    checked="">
+                    checked="${instance.triggerOnlyIfAllReviewersApproved}">
         </f:checkbox>
     </f:entry>
 </j:jelly>
