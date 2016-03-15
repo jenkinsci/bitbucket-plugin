@@ -2,9 +2,7 @@ package com.cloudbees.jenkins.plugins.filter.pullrequest;
 
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.cause.pullrequest.PullRequestApprovedCause;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestActionFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestActionDescriptor;
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -23,12 +21,12 @@ public class PullRequestAnyActionFilter extends PullRequestActionFilter {
     }
 
     @Override
-    public boolean shouldTriggerBuild(BitBucketPayload bitbucketPayload) {
+    public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
         return true;
     }
 
     @Override
-    public BitbucketTriggerCause getCause(File pollingLog, BitBucketPayload pullRequestPayload) throws IOException {
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
         return new PullRequestApprovedCause(pollingLog, pullRequestPayload);
     }
 

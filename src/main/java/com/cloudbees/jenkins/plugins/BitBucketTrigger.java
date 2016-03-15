@@ -4,7 +4,7 @@ import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilterDescriptor;
 import com.cloudbees.jenkins.plugins.filter.FilterMatcher;
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 
 import hudson.Extension;
 import hudson.Util;
@@ -43,7 +43,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     /**
      * Called when a POST is made.
      */
-    public void onPost(final BitbucketEvent bitbucketEvent, final BitBucketPayload bitBucketPayload) {
+    public void onPost(final BitbucketEvent bitbucketEvent, final BitbucketPayload bitbucketPayload) {
         FilterMatcher filterMatcher = new FilterMatcher();
 
         final List<BitbucketTriggerFilter> matchingFilters = filterMatcher.getMatchingFilters(bitbucketEvent, triggers);
@@ -58,10 +58,10 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                             for (BitbucketTriggerFilter filter : matchingFilters) {
                                 BitbucketTriggerCause cause;
                                 try {
-                                    cause = filter.getCause(getLogFile(), bitBucketPayload);
+                                    cause = filter.getCause(getLogFile(), bitbucketPayload);
 
-                                    if (filter.shouldScheduleJob(bitBucketPayload)) {
-                                        scheduleJob(cause, bitBucketPayload);
+                                    if (filter.shouldScheduleJob(bitbucketPayload)) {
+                                        scheduleJob(cause, bitbucketPayload);
                                         return;
                                     }
 
@@ -81,7 +81,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
         }
     }
 
-    private void scheduleJob(BitbucketTriggerCause cause, BitBucketPayload bitBucketPayload) {
+    private void scheduleJob(BitbucketTriggerCause cause, BitbucketPayload bitbucketPayload) {
         ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
             @Override
             protected Job asJob() {
@@ -89,7 +89,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
             }
         };
 
-        pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
+        pJob.scheduleBuild2(5, new CauseAction(cause), bitbucketPayload);
         if (pJob.scheduleBuild(cause)) {
             String name = " #" + job.getNextBuildNumber();
             LOGGER.info("SCM changes detected in " + job.getName() + ". Triggering " + name);

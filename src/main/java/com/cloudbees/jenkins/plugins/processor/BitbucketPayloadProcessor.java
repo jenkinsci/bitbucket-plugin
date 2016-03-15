@@ -5,7 +5,7 @@ import com.cloudbees.jenkins.plugins.BitbucketJobProbe;
 import net.sf.json.JSONObject;
 
 /**
- * Created by isvillar on 11/03/2016.
+ * Created by Shyri Villar on 11/03/2016.
  */
 public abstract class BitbucketPayloadProcessor {
     protected final BitbucketJobProbe jobProbe;

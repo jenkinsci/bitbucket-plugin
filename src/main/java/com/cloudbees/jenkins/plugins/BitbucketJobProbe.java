@@ -1,6 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
@@ -27,12 +27,12 @@ import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
-    public void triggetMatchingJobs(BitbucketEvent bitbucketEvent, BitBucketPayload bitBucketPayload) {
-        if("git".equals(bitBucketPayload.getScm()) || "hg".equals(bitBucketPayload.getScm())) {
+    public void triggetMatchingJobs(BitbucketEvent bitbucketEvent, BitbucketPayload bitbucketPayload) {
+        if("git".equals(bitbucketPayload.getScm()) || "hg".equals(bitbucketPayload.getScm())) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
 
             try {
-                URIish remote = new URIish(bitBucketPayload.getScmUrl());
+                URIish remote = new URIish(bitbucketPayload.getScmUrl());
 
                 for (Job<?,?> job : Jenkins.getInstance().getAllItems(Job.class)) {
                     LOGGER.log(Level.FINE, "Considering candidate job {0}", job.getName());
@@ -47,11 +47,9 @@ public class BitbucketJobProbe {
 
                         for (SCM scmTrigger : item.getSCMs()) {
                             if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-//                                LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
-
                                 scmTriggered.add(scmTrigger);
 
-                                bitbucketTrigger.onPost(bitbucketEvent, bitBucketPayload);
+                                bitbucketTrigger.onPost(bitbucketEvent, bitbucketPayload);
                             } else {
                                 LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
                             }
@@ -59,13 +57,13 @@ public class BitbucketJobProbe {
                     }
                 }
             } catch (URISyntaxException e) {
-                LOGGER.log(Level.WARNING, "Invalid repository URL {0}", bitBucketPayload.getScm());
+                LOGGER.log(Level.WARNING, "Invalid repository URL {0}", bitbucketPayload.getScm());
             } finally {
                 SecurityContextHolder.setContext(old);
             }
 
         } else {
-            throw new UnsupportedOperationException("Unsupported SCM type " + bitBucketPayload.getScm());
+            throw new UnsupportedOperationException("Unsupported SCM type " + bitbucketPayload.getScm());
         }
     }
 

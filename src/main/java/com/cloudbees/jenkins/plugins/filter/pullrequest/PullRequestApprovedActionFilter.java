@@ -2,7 +2,7 @@ package com.cloudbees.jenkins.plugins.filter.pullrequest;
 
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.cause.pullrequest.PullRequestApprovedCause;
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 import hudson.Extension;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -24,7 +24,7 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
     }
 
     @Override
-    public boolean shouldTriggerBuild(BitBucketPayload bitbucketPayload) {
+    public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
         if(triggerOnlyIfAllReviewersApproved) {
             if(!allReviewersHaveApproved(bitbucketPayload)) {
                 LOGGER.info("Not triggered because not all reviewers have approved the pull request");
@@ -36,7 +36,7 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
     }
 
     @Override
-    public BitbucketTriggerCause getCause(File pollingLog, BitBucketPayload pullRequestPayload) throws IOException {
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
         return new PullRequestApprovedCause(pollingLog, pullRequestPayload);
     }
 
@@ -50,7 +50,7 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
         return triggerOnlyIfAllReviewersApproved;
     }
 
-    private boolean allReviewersHaveApproved(BitBucketPayload pullRequestPayload) {
+    private boolean allReviewersHaveApproved(BitbucketPayload pullRequestPayload) {
         JSONObject pullRequestJSON = pullRequestPayload.getPayload().getJSONObject("pullrequest");
         JSONArray participants = pullRequestJSON.getJSONArray("participants");
 

@@ -2,7 +2,7 @@ package com.cloudbees.jenkins.plugins.filter.repository;
 
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.cause.repository.RepositoryCause;
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 import hudson.Extension;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -19,13 +19,13 @@ public class RepositoryPushActionFilter extends RepositoryActionFilter {
     }
 
     @Override
-    public boolean shouldTriggerBuild(BitBucketPayload bitbucketPayload) {
+    public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
         return true;
     }
 
     @Override
-    public BitbucketTriggerCause getCause(File pollingLog, BitBucketPayload bitBucketPayload) throws IOException {
-        return new RepositoryCause(pollingLog, bitBucketPayload);
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
+        return new RepositoryCause(pollingLog, bitbucketPayload);
     }
 
     @Extension

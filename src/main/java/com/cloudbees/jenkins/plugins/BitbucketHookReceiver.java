@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import com.cloudbees.jenkins.plugins.processor.BitbucketPayloadProcessor;
 import com.cloudbees.jenkins.plugins.processor.BitbucketPayloadProcessorFactory;
 import hudson.Extension;
 import hudson.model.UnprotectedRootAction;
@@ -54,10 +55,13 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
             if ("Bitbucket-Webhooks/2.0".equals(req.getHeader("user-agent"))) {
                 BitbucketEvent bitbucketEvent = new BitbucketEvent(req.getHeader("x-event-key"));
-                com.cloudbees.jenkins.plugins.processor.BitbucketPayloadProcessor bitbucketPayloadProcessor = payloadProcessorFactory.create(bitbucketEvent);
+                BitbucketPayloadProcessor bitbucketPayloadProcessor = payloadProcessorFactory.create(bitbucketEvent);
                 bitbucketPayloadProcessor.processPayload(payload);
             } else {
-                // TODO Process old POST
+                LOGGER.log(Level.INFO, "Processing old POST service payload");
+                BitbucketPayloadProcessor bitbucketPayloadProcessor =
+                        payloadProcessorFactory.createOldProcessor(new BitbucketEvent("repo:push"));
+                bitbucketPayloadProcessor.processPayload(payload);
             }
         } else {
             LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. You might no have configured correctly the WebHook on BitBucket with the last slash `http://<JENKINS-URL>/bitbucket-hook/`");

@@ -15,13 +15,13 @@ import java.util.logging.Logger;
  * @since January 9, 2016
  * @version 1.1.5
  */
-public class BitBucketPayload extends InvisibleAction implements EnvironmentContributingAction {
+public class BitbucketPayload extends InvisibleAction implements EnvironmentContributingAction {
     protected final @Nonnull JSONObject payload;
-    private String scm;
-    private String user;
-    private String scmUrl;
+    protected String scm;
+    protected String user;
+    protected String scmUrl;
 
-    public BitBucketPayload(@Nonnull JSONObject payload) {
+    public BitbucketPayload(@Nonnull JSONObject payload) {
         this.payload = payload;
         JSONObject repository = payload.getJSONObject("repository");
         JSONObject actor = payload.getJSONObject("actor");
@@ -54,5 +54,5 @@ public class BitBucketPayload extends InvisibleAction implements EnvironmentCont
         LOGGER.log(Level.FINEST, "Injecting BITBUCKET_PAYLOAD: {0}", payload);
     }
 
-    private static final Logger LOGGER = Logger.getLogger(BitBucketPayload.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BitbucketPayload.class.getName());
 }

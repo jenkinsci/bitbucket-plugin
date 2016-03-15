@@ -17,39 +17,39 @@ import static org.mockito.Mockito.when;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PullRequestPayloadProcessorTest {
-    @Mock private HttpServletRequest request;
-    @Mock private BitbucketJobProbe probe;
-
-    private com.cloudbees.jenkins.plugins.BitbucketPayloadProcessor payloadProcessor;
+//    @Mock private HttpServletRequest request;
+//    @Mock private BitbucketJobProbe probe;
+//
+//    private PullRequestPayloadProcessor pullRequestPayloadProcessor;
 //
 //    @Before
 //    public void setUp() {
-//        payloadProcessor = new BitbucketPayloadProcessor(probe);
+//        pullRequestPayloadProcessor = new PullRequestPayloadProcessor(probe);
 //    }
-
-    @Test
-    public void testProcessPullRequestApprovalWebhook() {
-        // Set headers so that payload processor will parse as new Webhook payload
-        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
-        when(request.getHeader("x-event-key")).thenReturn("pullrequest:approval");
-
-        String user = "test_user";
-        String url = "https://bitbucket.org/test_user/test_repo";
-
-        JSONObject payload = new JSONObject()
-                .element("actor", new JSONObject()
-                        .element("username", user))
-                .element("repository", new JSONObject()
-                        .element("links", new JSONObject()
-                                .element("html", new JSONObject()
-                                        .element("href", url))));
-
-        JSONObject hgLoad = new JSONObject()
-                .element("scm", "hg")
-                .element("owner", new JSONObject()
-                        .element("username", user))
-                .element("links", new JSONObject()
-                        .element("html", new JSONObject()
-                                .element("href", url)));
-    }
+//
+//    @Test
+//    public void testProcessPullRequestApprovalWebhook() {
+//        // Set headers so that payload processor will parse as new Webhook payload
+//        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+//        when(request.getHeader("x-event-key")).thenReturn("pullrequest:approval");
+//
+//        String user = "test_user";
+//        String url = "https://bitbucket.org/test_user/test_repo";
+//
+//        JSONObject payload = new JSONObject()
+//                .element("actor", new JSONObject()
+//                        .element("username", user))
+//                .element("repository", new JSONObject()
+//                        .element("links", new JSONObject()
+//                                .element("html", new JSONObject()
+//                                        .element("href", url))));
+//
+//        JSONObject hgLoad = new JSONObject()
+//                .element("scm", "hg")
+//                .element("owner", new JSONObject()
+//                        .element("username", user))
+//                .element("links", new JSONObject()
+//                        .element("html", new JSONObject()
+//                                .element("href", url)));
+//    }
 }

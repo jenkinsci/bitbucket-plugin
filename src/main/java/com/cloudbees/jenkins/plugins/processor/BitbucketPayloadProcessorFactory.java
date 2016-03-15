@@ -22,12 +22,12 @@ public class BitbucketPayloadProcessorFactory {
             return new RepositoryPayloadProcessor(probe, bitbucketEvent);
         } else if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName())) {
             return new PullRequestPayloadProcessor(probe, bitbucketEvent);
-        } else {
-//            TODO
-//            LOGGER.log(Level.INFO, "Processing old POST service payload");
-//            processPostServicePayload(payload);
         }
 
         return null;
+    }
+
+    public BitbucketPayloadProcessor createOldProcessor(BitbucketEvent bitbucketEvent) {
+        return new OldPostPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
     }
 }

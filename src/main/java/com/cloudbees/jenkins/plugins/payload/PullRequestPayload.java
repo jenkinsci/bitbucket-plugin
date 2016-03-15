@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 /**
  * Created by Shryi Villar on 11/03/2016.
  */
-public class PullRequestPayload extends BitBucketPayload {
+public class PullRequestPayload extends BitbucketPayload {
     public PullRequestPayload(@Nonnull JSONObject payload) {
         super(payload);
     }

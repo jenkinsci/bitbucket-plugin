@@ -3,7 +3,7 @@ package com.cloudbees.jenkins.plugins.filter.pullrequest;
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilterDescriptor;
-import com.cloudbees.jenkins.plugins.payload.BitBucketPayload;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 import hudson.Extension;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -25,12 +25,12 @@ public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
 
 
     @Override
-    public boolean shouldScheduleJob(BitBucketPayload bitbucketPayload) {
+    public boolean shouldScheduleJob(BitbucketPayload bitbucketPayload) {
         return actionFilter.shouldTriggerBuild(bitbucketPayload);
     }
 
     @Override
-    public BitbucketTriggerCause getCause(File pollingLog, BitBucketPayload pullRequestPayload) throws IOException {
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
         return actionFilter.getCause(pollingLog, pullRequestPayload);
     }
 
