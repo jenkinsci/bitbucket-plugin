@@ -14,7 +14,7 @@ public class BitbucketPayloadProcessorFactory {
             return new PullRequestPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
         }
 
-        throw new RuntimeException(); //TODO
+        throw new UnsupportedOperationException("Bitbucket event " + bitbucketEvent.getName() + " not supported");
     }
 
     public BitbucketPayloadProcessor create(BitbucketJobProbe probe, BitbucketEvent bitbucketEvent) {
