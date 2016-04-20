@@ -1,0 +1,9 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+    <f:entry>
+        <f:checkbox name="triggerOnlyIfAllReviewersApproved"
+                    title="Trigger only if all reviewers have approved"
+                    checked="${instance.triggerOnlyIfAllReviewersApproved}">
+        </f:checkbox>
+    </f:entry>
+</j:jelly>
