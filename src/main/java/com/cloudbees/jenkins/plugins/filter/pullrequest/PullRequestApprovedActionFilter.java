@@ -57,12 +57,20 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
         boolean allApproved = true;
 
         for(int i = 0; i < participants.size(); i++) {
-            if(!participants.getJSONObject(i).getBoolean("approved")) {
-                allApproved = false;
+            JSONObject participant = participants.getJSONObject(i);
+            if(isReviewer(participant)) {
+                if (!participant.getBoolean("approved")) {
+                    allApproved = false;
+                }
             }
         }
 
         return allApproved;
+    }
+
+    private boolean isReviewer(JSONObject pullRequestParticipant) {
+        String role = pullRequestParticipant.getString("role");
+        return "REVIEWER".equals(role);
     }
 
     private static final Logger LOGGER = Logger.getLogger(PullRequestApprovedActionFilter.class.getName());
