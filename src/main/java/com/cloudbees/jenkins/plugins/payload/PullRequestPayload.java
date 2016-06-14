@@ -46,9 +46,13 @@ public class PullRequestPayload extends BitbucketPayload {
 
         JSONObject pullRequest = payload.getJSONObject("pullrequest");
         JSONObject source = pullRequest.getJSONObject("source");
+        JSONObject destination = pullRequest.getJSONObject("destination");
 
         String branch = source.getJSONObject("branch").getString("name");
         envVars.put("BITBUCKET_BRANCH", branch);
+
+        String targetBranch = destination.getJSONObject("branch").getString("name");
+        envVars.put("BITBUCKET_TARGET_BRANCH", targetBranch);
 
         String pullRequestUrl = pullRequest.getJSONObject("links").getJSONObject("html").getString("href");
         envVars.put("PULL_REQUEST_LINK", pullRequestUrl);

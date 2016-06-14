@@ -32,6 +32,10 @@ import hudson.Extension;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import net.sf.json.JSONObject;
+import java.util.regex.Pattern;
+import java.util.StringTokenizer;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -43,16 +47,21 @@ import java.util.List;
  */
 public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
     public PullRequestActionFilter actionFilter;
+    public String pullRequestTargetBranch;
 
     @DataBoundConstructor
-    public PullRequestTriggerFilter(PullRequestActionFilter actionFilter) {
+    public PullRequestTriggerFilter(PullRequestActionFilter actionFilter, String pullRequestTargetBranch) {
         this.actionFilter = actionFilter;
+        setPullRequestTargetBranch(pullRequestTargetBranch);
     }
 
 
     @Override
     public boolean shouldScheduleJob(BitbucketPayload bitbucketPayload) {
-        return actionFilter.shouldTriggerBuild(bitbucketPayload);
+        if (destinationMatchesTarget(bitbucketPayload)) {
+          return actionFilter.shouldTriggerBuild(bitbucketPayload);
+        }
+        return false;
     }
 
     @Override
@@ -72,6 +81,57 @@ public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
 
     public PullRequestActionFilter getActionFilter() {
         return actionFilter;
+    }
+
+    public void setPullRequestTargetBranch(String pullRequestTargetBranch) {
+      if(pullRequestTargetBranch == null)
+            throw new IllegalArgumentException();
+        else if(pullRequestTargetBranch.length() == 0)
+            this.pullRequestTargetBranch = "**";
+        else
+            this.pullRequestTargetBranch = pullRequestTargetBranch.trim();
+    }
+
+    public String getPullRequestTargetBranch() {
+        return pullRequestTargetBranch;
+    }
+
+    protected boolean destinationMatchesTarget(BitbucketPayload pullRequestPayload) {
+        JSONObject pullRequest = pullRequestPayload.getPayload().getJSONObject("pullrequest");
+        JSONObject destination = pullRequest.getJSONObject("destination");
+
+        for (String target: pullRequestTargetBranch.split(",")) {
+          target = target.trim();
+          Pattern pattern = getPattern(target);
+          String name = destination.getJSONObject("branch").getString("name");
+          if (pattern.matcher(name).matches()) {
+            return true;
+          }
+        }
+
+        return false;
+    }
+
+    protected Pattern getPattern(String input) {
+        StringBuilder builder = new StringBuilder();
+        StringTokenizer tokenizer = new StringTokenizer(input, "*", true);
+        boolean previousWildcard = false;
+        while (tokenizer.hasMoreTokens()) {
+            String token = tokenizer.nextToken();
+            if (token.equals("*")) {
+                if (previousWildcard) {
+                    builder.append(".*");
+                    previousWildcard = false;
+                }
+                else {
+                    previousWildcard = true;
+                }
+            }
+            else {
+                builder.append(Pattern.quote(token));
+            }
+        }
+        return Pattern.compile(builder.toString());
     }
 
 }

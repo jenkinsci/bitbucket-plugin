@@ -71,7 +71,6 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
         public String getDisplayName() { return "Approved"; }
     }
 
-
     public boolean getTriggerOnlyIfAllReviewersApproved() {
         return triggerOnlyIfAllReviewersApproved;
     }

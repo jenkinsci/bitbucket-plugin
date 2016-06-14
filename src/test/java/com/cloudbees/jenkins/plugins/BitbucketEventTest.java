@@ -84,6 +84,28 @@ public class BitbucketEventTest {
     }
 
     @Test
+    public void testPullRequestEventUpdatedAction() {
+        String event = "pullrequest";
+        String action = "updated";
+
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
+
+        assertEquals(event, bitbucketEvent.getName());
+        assertEquals(action, bitbucketEvent.getAction());
+    }
+
+    @Test
+    public void testPullRequestEventMergedAction() {
+        String event = "pullrequest";
+        String action = "merged";
+
+        BitbucketEvent bitbucketEvent = createEvent(event, action);
+
+        assertEquals(event, bitbucketEvent.getName());
+        assertEquals(action, bitbucketEvent.getAction());
+    }
+
+    @Test
     public void testPullRequestEventApprovedAction() {
         String event = "pullrequest";
         String action = "approved";
