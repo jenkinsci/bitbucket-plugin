@@ -128,6 +128,10 @@ public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
                 }
             }
             else {
+                if (previousWildcard) {
+                    builder.append("[^/]*");
+                    previousWildcard = false;
+                }
                 builder.append(Pattern.quote(token));
             }
         }
