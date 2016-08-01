@@ -15,7 +15,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Created by Shyri Villar on 11/03/2016.
+ * Bitbucket Polling
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class BitbucketPollingRunnable implements Runnable{
     Job job;

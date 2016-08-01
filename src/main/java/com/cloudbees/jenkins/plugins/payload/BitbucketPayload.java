@@ -11,9 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Inject the payload received by BitBucket into the build through $BITBUCKET_PAYLOAD so it can be processed
- * @since January 9, 2016
- * @version 1.1.5
+ * Represents the Bitbucket payload
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class BitbucketPayload extends InvisibleAction implements EnvironmentContributingAction {
     protected final @Nonnull JSONObject payload;

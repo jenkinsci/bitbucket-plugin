@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Shyri Villar on 14/03/2016.
+ * The base {@link AbstractDescribableImpl} class for {@link @PullRequestActionFilter}
+ * @since August 1, 2016
+ * @version 2.0
  */
 public abstract class PullRequestActionFilter extends AbstractDescribableImpl<PullRequestActionFilter> {
     public abstract boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload);

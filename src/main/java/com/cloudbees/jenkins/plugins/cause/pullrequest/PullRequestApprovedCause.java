@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by isvillar on 15/03/2016.
+ * The {@link PullRequestApprovedCause} which represents a type of {@link BitbucketTriggerCause}
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class PullRequestApprovedCause extends BitbucketTriggerCause {
     public PullRequestApprovedCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {

@@ -3,7 +3,9 @@ package com.cloudbees.jenkins.plugins.filter.repository;
 import hudson.model.Descriptor;
 
 /**
- * Created by isvillar on 15/03/2016.
+ * The base {@Descriptor} for {@link RepositoryActionDescriptor}
+ * @since August 1, 2016
+ * @version 2.0
  */
 public abstract class RepositoryActionDescriptor extends Descriptor<RepositoryActionFilter> {
 }

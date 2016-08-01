@@ -5,8 +5,9 @@ import com.cloudbees.jenkins.plugins.filter.BitbucketEventTriggerMatcher;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 
 /**
- * Created by Shyri Villar on 14/03/2016.
- *
+ * {link @code PullRequestTriggerMatcher} for {link @BitbucketEventTriggerMatcher}
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
     @Override

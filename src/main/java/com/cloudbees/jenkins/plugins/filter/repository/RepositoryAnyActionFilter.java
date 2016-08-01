@@ -10,7 +10,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by isvillar on 15/03/2016.
+ * The filter for RepositoryAnyAction
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class RepositoryAnyActionFilter extends RepositoryActionFilter {
     @DataBoundConstructor

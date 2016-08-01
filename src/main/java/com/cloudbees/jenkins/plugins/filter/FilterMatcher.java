@@ -9,10 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Shyri Villar on 14/03/2016.
+ * Filter matcher
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class FilterMatcher {
 
+    /**
+     * Gets the list of {@link BitbucketTriggerFilter} which matches with the event
+     *
+     * @return the list of {@link BitbucketTriggerFilter} which matches with the event
+     */
     public List<BitbucketTriggerFilter> getMatchingFilters(BitbucketEvent bitbucketEvent,
                                                            List<BitbucketTriggerFilter> triggerFilterList) {
         List<BitbucketTriggerFilter> filteredList = null;
@@ -30,6 +37,11 @@ public class FilterMatcher {
         return filteredList;
     }
 
+    /**
+     * Returns {@code true} if the event and action matches
+     *
+     * @return {@code true} if the event and action matches
+     */
     private boolean matchesEventAndAction(BitbucketEvent bitbucketEvent,
                                                                 BitbucketTriggerFilter triggerFilter) {
         if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName()) &&

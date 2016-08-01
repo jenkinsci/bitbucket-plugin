@@ -5,7 +5,9 @@ import net.sf.json.JSONObject;
 import javax.annotation.Nonnull;
 
 /**
- * Created by isvillar on 15/03/2016.
+ * The legacy version of the Bitbucket
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class OldPostBitbucketPayload extends BitbucketPayload {
 

@@ -4,9 +4,16 @@ import com.cloudbees.jenkins.plugins.BitbucketEvent;
 import com.cloudbees.jenkins.plugins.BitbucketJobProbe;
 
 /**
- * Created by isvillar on 11/03/2016.
+ * The factory for the {@link BitbucketPayloadProcessor}
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class BitbucketPayloadProcessorFactory {
+    /**
+     * Creates a {@link BitbucketPayloadProcessor} based on the {@link BitbucketEvent}
+     *
+     * @return {@link BitbucketPayloadProcessor}
+     */
     public BitbucketPayloadProcessor create(BitbucketEvent bitbucketEvent) {
         if(BitbucketEvent.EVENT.REPOSITORY.equals(bitbucketEvent.getName())) {
             return new RepositoryPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
@@ -27,6 +34,11 @@ public class BitbucketPayloadProcessorFactory {
         return null;
     }
 
+    /**
+     * Creates a {@link BitbucketPayloadProcessor} based on the {@link BitbucketEvent}
+     *
+     * @return {@link BitbucketPayloadProcessor}
+     */
     public BitbucketPayloadProcessor createOldProcessor(BitbucketEvent bitbucketEvent) {
         return new OldPostPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
     }
