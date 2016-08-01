@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * Created by Shyri Villar on 14/03/2016.
+ * The filter for PullRequestCreatedActionFilter
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class PullRequestCreatedActionFilter extends PullRequestActionFilter {
 

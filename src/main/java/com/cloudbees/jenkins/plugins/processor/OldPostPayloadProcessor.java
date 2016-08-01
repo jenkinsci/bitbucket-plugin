@@ -7,7 +7,9 @@ import com.cloudbees.jenkins.plugins.payload.OldPostBitbucketPayload;
 import net.sf.json.JSONObject;
 
 /**
- * Created by Shyri Villar on 15/03/2016.
+ * Old post payload processor
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class OldPostPayloadProcessor extends BitbucketPayloadProcessor {
     public OldPostPayloadProcessor(BitbucketJobProbe jobProbe, BitbucketEvent bitbucketEvent) {

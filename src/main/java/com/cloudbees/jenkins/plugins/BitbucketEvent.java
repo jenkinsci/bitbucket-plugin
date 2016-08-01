@@ -1,7 +1,9 @@
 package com.cloudbees.jenkins.plugins;
 
 /**
- * Created by isvillar on 11/03/2016.
+ * Bitbucket events
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class BitbucketEvent {
     public interface EVENT {
@@ -39,6 +41,11 @@ public class BitbucketEvent {
         }
     }
 
+    /**
+     * Returns {@code true} if the action is defined
+     *
+     * @return {@code true} if the action is defined
+     */
     private boolean checkAction(String action) {
         if(EVENT.REPOSITORY.equals(name)) {
             if (REPOSITORY_ACTIONS.PUSH.equals(action)) {
@@ -63,6 +70,11 @@ public class BitbucketEvent {
         return action;
     }
 
+    /**
+     * Returns {@code true} if the event is defined
+     *
+     * @return {@code true} if the event is defined
+     */
     private boolean checkValidEvent(String name) {
         if(EVENT.REPOSITORY.equals(name)
             || EVENT.PULL_REQUEST.equals(name)) {

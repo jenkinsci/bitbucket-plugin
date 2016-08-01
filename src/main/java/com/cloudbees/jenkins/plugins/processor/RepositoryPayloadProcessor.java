@@ -7,7 +7,9 @@ import com.cloudbees.jenkins.plugins.payload.RepositoryPayload;
 import net.sf.json.JSONObject;
 
 /**
- * Created by Shyri Villar on 11/03/2016.
+ * Repository payload processor
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class RepositoryPayloadProcessor extends BitbucketPayloadProcessor{
     public RepositoryPayloadProcessor(BitbucketJobProbe probe, BitbucketEvent bitbucketEvent) {

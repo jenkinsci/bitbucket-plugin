@@ -7,7 +7,9 @@ import net.sf.json.JSONObject;
 import javax.annotation.Nonnull;
 
 /**
- * Created by Shryi Villar on 11/03/2016.
+ * Represents the payload of the pull request
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class PullRequestPayload extends BitbucketPayload {
     public PullRequestPayload(@Nonnull JSONObject payload) {

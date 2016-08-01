@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by Shyri Villar on 14/03/2016.
+ * The base {link BitbucketTriggerFilter} for pull requests
+ * @since August 1, 2016
+ * @version 2.0
  */
 public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
     public PullRequestActionFilter actionFilter;

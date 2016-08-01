@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * The base {@link BitbucketTriggerCause} for {@link SCMTrigger.SCMTriggerCause}
+ * @since August 1, 2016
+ * @version 1.1.6
  */
 public abstract class BitbucketTriggerCause extends SCMTrigger.SCMTriggerCause {
     protected BitbucketPayload bitbucketPayload;
