@@ -4,6 +4,8 @@ import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilterDescriptor;
 import com.cloudbees.jenkins.plugins.filter.FilterMatcher;
+import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
+import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
 import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 
 import hudson.Extension;
@@ -22,7 +24,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -39,7 +43,18 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     public BitBucketTrigger(List<BitbucketTriggerFilter> triggers) {
         this.triggers = triggers;
     }
-
+    
+    @Override
+    public Object readResolve() throws ObjectStreamException {
+        super.readResolve();
+        if (triggers == null) {
+            RepositoryPushActionFilter repositoryPushActionFilter = new RepositoryPushActionFilter();
+            RepositoryTriggerFilter repositoryTriggerFilter = new RepositoryTriggerFilter(repositoryPushActionFilter);
+            triggers = new ArrayList<BitbucketTriggerFilter>();
+            triggers.add(repositoryTriggerFilter);
+        }
+        return this;
+    }
     /**
      * Called when a POST is made.
      */
