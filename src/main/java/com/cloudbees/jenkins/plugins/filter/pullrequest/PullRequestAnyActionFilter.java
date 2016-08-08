@@ -39,11 +39,9 @@ import java.io.IOException;
  * @version 2.0
  */
 public class PullRequestAnyActionFilter extends PullRequestActionFilter {
-    public boolean triggerOnlyIfAllReviewersApproved;
 
     @DataBoundConstructor
-    public PullRequestAnyActionFilter(boolean triggerOnlyIfAllReviewersApproved) {
-        this.triggerOnlyIfAllReviewersApproved = triggerOnlyIfAllReviewersApproved;
+    public PullRequestAnyActionFilter() {
     }
 
     @Override
