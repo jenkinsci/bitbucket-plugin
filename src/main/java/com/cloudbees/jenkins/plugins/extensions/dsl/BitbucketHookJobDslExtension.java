@@ -76,9 +76,9 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
     }
 
     @DslExtensionMethod(context = TriggerContext.class)
-    public Object bitbucketPullRequestAnyAction() {
+    public Object bitbucketPullRequestAnyAction(boolean onlyIfReviewersApproved) {
         List<BitbucketTriggerFilter> triggers;
-        PullRequestAnyActionFilter pullRequestAnyActionFilter = new PullRequestAnyActionFilter();
+        PullRequestAnyActionFilter pullRequestAnyActionFilter = new PullRequestAnyActionFilter(onlyIfReviewersApproved);
         PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestAnyActionFilter);
         triggers = new ArrayList<BitbucketTriggerFilter>();
         triggers.add(pullRequestTriggerFilter);
