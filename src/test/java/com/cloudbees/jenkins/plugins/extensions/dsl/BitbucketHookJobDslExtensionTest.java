@@ -26,11 +26,9 @@ package com.cloudbees.jenkins.plugins.extensions.dsl;
 
 import com.cloudbees.jenkins.plugins.BitBucketTrigger;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestAnyActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestApprovedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestCreatedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.repository.RepositoryAnyActionFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
 import hudson.model.Cause;
@@ -100,37 +98,6 @@ public class BitbucketHookJobDslExtensionTest {
     }
 
     @Test
-    public void testBitbucketRepositoryAnyAction() throws Exception {
-        TopLevelItem topLevelItem = jenkinsRule.getInstance().createProjectFromXML("whatever",
-                new ByteArrayInputStream((getJobDSLTrigger("freeStyleJob('test-job') { triggers{ bitbucketRepositoryAnyAction() } }\n")).getBytes()));
-        if (topLevelItem instanceof FreeStyleProject) {
-            FreeStyleProject freeStyleProject = (FreeStyleProject) topLevelItem;
-            Future<FreeStyleBuild> build = freeStyleProject.scheduleBuild2(0, new Cause.UserCause());
-            build.get(); //// let mock build finish
-        }
-        TopLevelItem whateverTopLevelItem =jenkinsRule.getInstance().getItem("test-job");
-        if (whateverTopLevelItem instanceof FreeStyleProject) {
-            FreeStyleProject whateverFreeStyleProject = (FreeStyleProject) whateverTopLevelItem;
-            Map<TriggerDescriptor, Trigger<?>> triggers = whateverFreeStyleProject.getTriggers();
-            assertEquals(triggers.size(), 1);
-            for (Map.Entry<TriggerDescriptor, Trigger<?>> entry : triggers.entrySet()) {
-                if(entry.getValue() instanceof BitBucketTrigger) {
-                    BitBucketTrigger bitBucketTrigger = (BitBucketTrigger) entry.getValue();
-                    List<BitbucketTriggerFilter> bitbucketTriggerFilters = bitBucketTrigger.getTriggers();
-                    assertEquals(bitbucketTriggerFilters.size(), 1);
-                    for (BitbucketTriggerFilter bitbucketTriggerFilter : bitbucketTriggerFilters) {
-                        assertEquals(bitbucketTriggerFilter instanceof RepositoryTriggerFilter, true);
-                        if (bitbucketTriggerFilter instanceof  RepositoryTriggerFilter) {
-                            RepositoryTriggerFilter repositoryTriggerFilter = (RepositoryTriggerFilter) bitbucketTriggerFilter;
-                            assertEquals(repositoryTriggerFilter.getActionFilter() instanceof RepositoryAnyActionFilter, true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
     public void testBitbucketRepositoryPushAction() throws Exception {
         TopLevelItem topLevelItem = jenkinsRule.getInstance().createProjectFromXML("whatever",
                 new ByteArrayInputStream((getJobDSLTrigger("freeStyleJob('test-job') { triggers{ bitbucketRepositoryPushAction() } }\n")).getBytes()));
@@ -154,37 +121,6 @@ public class BitbucketHookJobDslExtensionTest {
                         if (bitbucketTriggerFilter instanceof  RepositoryTriggerFilter) {
                             RepositoryTriggerFilter repositoryTriggerFilter = (RepositoryTriggerFilter) bitbucketTriggerFilter;
                             assertEquals(repositoryTriggerFilter.getActionFilter() instanceof RepositoryPushActionFilter, true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testBitbucketPullRequestAnyAction() throws Exception {
-        TopLevelItem topLevelItem = jenkinsRule.getInstance().createProjectFromXML("whatever",
-                new ByteArrayInputStream((getJobDSLTrigger("freeStyleJob('test-job') { triggers{ bitbucketPullRequestAnyAction() } }\n")).getBytes()));
-        if (topLevelItem instanceof FreeStyleProject) {
-            FreeStyleProject freeStyleProject = (FreeStyleProject) topLevelItem;
-            Future<FreeStyleBuild> build = freeStyleProject.scheduleBuild2(0, new Cause.UserCause());
-            build.get(); //// let mock build finish
-        }
-        TopLevelItem whateverTopLevelItem =jenkinsRule.getInstance().getItem("test-job");
-        if (whateverTopLevelItem instanceof FreeStyleProject) {
-            FreeStyleProject whateverFreeStyleProject = (FreeStyleProject) whateverTopLevelItem;
-            Map<TriggerDescriptor, Trigger<?>> triggers = whateverFreeStyleProject.getTriggers();
-            assertEquals(triggers.size(), 1);
-            for (Map.Entry<TriggerDescriptor, Trigger<?>> entry : triggers.entrySet()) {
-                if(entry.getValue() instanceof BitBucketTrigger) {
-                    BitBucketTrigger bitBucketTrigger = (BitBucketTrigger) entry.getValue();
-                    List<BitbucketTriggerFilter> bitbucketTriggerFilters = bitBucketTrigger.getTriggers();
-                    assertEquals(bitbucketTriggerFilters.size(), 1);
-                    for (BitbucketTriggerFilter bitbucketTriggerFilter : bitbucketTriggerFilters) {
-                        assertEquals(bitbucketTriggerFilter instanceof PullRequestTriggerFilter, true);
-                        if (bitbucketTriggerFilter instanceof PullRequestTriggerFilter) {
-                            PullRequestTriggerFilter pullRequestTriggerFilter = (PullRequestTriggerFilter) bitbucketTriggerFilter;
-                            assertEquals(pullRequestTriggerFilter.getActionFilter() instanceof PullRequestAnyActionFilter, true);
                         }
                     }
                 }

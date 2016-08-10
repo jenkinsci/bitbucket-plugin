@@ -26,11 +26,9 @@ package com.cloudbees.jenkins.plugins.extensions.dsl;
 
 import com.cloudbees.jenkins.plugins.BitBucketTrigger;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestAnyActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestApprovedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestCreatedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.repository.RepositoryAnyActionFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
 import hudson.Extension;
@@ -52,17 +50,7 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
     @Deprecated
     @DslExtensionMethod(context = TriggerContext.class)
     public Object bitbucketPush() {
-        return bitbucketRepositoryAnyAction();
-    }
-
-    @DslExtensionMethod(context = TriggerContext.class)
-    public Object bitbucketRepositoryAnyAction() {
-        List<BitbucketTriggerFilter> triggers;
-        RepositoryAnyActionFilter repositoryAnyActionFilter = new RepositoryAnyActionFilter();
-        RepositoryTriggerFilter repositoryTriggerFilter = new RepositoryTriggerFilter(repositoryAnyActionFilter);
-        triggers = new ArrayList<BitbucketTriggerFilter>();
-        triggers.add(repositoryTriggerFilter);
-        return new BitBucketTrigger(triggers);
+        return bitbucketRepositoryPushAction();
     }
 
     @DslExtensionMethod(context = TriggerContext.class)
@@ -72,16 +60,6 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
         RepositoryTriggerFilter repositoryTriggerFilter = new RepositoryTriggerFilter(repositoryPushActionFilter);
         triggers = new ArrayList<BitbucketTriggerFilter>();
         triggers.add(repositoryTriggerFilter);
-        return new BitBucketTrigger(triggers);
-    }
-
-    @DslExtensionMethod(context = TriggerContext.class)
-    public Object bitbucketPullRequestAnyAction() {
-        List<BitbucketTriggerFilter> triggers;
-        PullRequestAnyActionFilter pullRequestAnyActionFilter = new PullRequestAnyActionFilter();
-        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestAnyActionFilter);
-        triggers = new ArrayList<BitbucketTriggerFilter>();
-        triggers.add(pullRequestTriggerFilter);
         return new BitBucketTrigger(triggers);
     }
 
