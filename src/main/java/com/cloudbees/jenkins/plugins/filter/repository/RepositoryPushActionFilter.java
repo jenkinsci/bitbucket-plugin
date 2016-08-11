@@ -58,4 +58,5 @@ public class RepositoryPushActionFilter extends RepositoryActionFilter {
     public static class ActionFilterDescriptorImpl extends RepositoryActionDescriptor {
         public String getDisplayName() { return "Push"; }
     }
+
 }

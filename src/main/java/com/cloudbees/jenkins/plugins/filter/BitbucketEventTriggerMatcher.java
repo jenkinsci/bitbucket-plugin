@@ -38,4 +38,5 @@ public interface BitbucketEventTriggerMatcher {
      * @return {@code true} if the event received by Bitbucket matches any action defined in the plugin
      */
     boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter);
+
 }

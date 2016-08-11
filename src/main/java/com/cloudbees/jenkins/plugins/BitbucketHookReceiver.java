@@ -40,7 +40,8 @@ import org.apache.commons.io.IOUtils;
 import org.kohsuke.stapler.StaplerRequest;
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * BitbucketHookReceiver which processes HTTP POST packages to $JENKINS_URL/bitbucket-hook
+ * @version 1.0
  */
 @Extension
 public class BitbucketHookReceiver implements UnprotectedRootAction {

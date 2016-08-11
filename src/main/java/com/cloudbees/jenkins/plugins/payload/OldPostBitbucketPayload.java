@@ -44,4 +44,5 @@ public class OldPostBitbucketPayload extends BitbucketPayload {
         this.scmUrl = payload.getString("canon_url") + repo.getString("absolute_url");
         this.scm = repo.getString("scm");
     }
+
 }

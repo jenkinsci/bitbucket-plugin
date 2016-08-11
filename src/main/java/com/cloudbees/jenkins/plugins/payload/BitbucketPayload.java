@@ -87,4 +87,5 @@ public class BitbucketPayload extends InvisibleAction implements EnvironmentCont
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketPayload.class.getName());
+
 }

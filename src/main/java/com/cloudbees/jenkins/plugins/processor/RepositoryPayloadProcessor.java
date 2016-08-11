@@ -49,4 +49,5 @@ public class RepositoryPayloadProcessor extends BitbucketPayloadProcessor{
     private BitbucketPayload buildPayloadForJobs(JSONObject payload) {
         return new RepositoryPayload(payload);
     }
+
 }

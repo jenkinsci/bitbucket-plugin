@@ -32,4 +32,5 @@ import hudson.model.Descriptor;
  * @version 2.0
  */
 public abstract class RepositoryActionDescriptor extends Descriptor<RepositoryActionFilter> {
+
 }

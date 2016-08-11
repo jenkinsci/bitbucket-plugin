@@ -53,7 +53,6 @@ public class BitbucketHookJobDslExtensionTest {
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
 
-
     public String getJobDSLTrigger(String trigger) {
         return "<project>\n"
         + "<builders>\n"

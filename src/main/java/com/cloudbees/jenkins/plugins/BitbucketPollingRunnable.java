@@ -95,4 +95,5 @@ public class BitbucketPollingRunnable implements Runnable{
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketPollingRunnable.class.getName());
+
 }

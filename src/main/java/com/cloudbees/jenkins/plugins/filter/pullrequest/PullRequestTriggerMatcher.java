@@ -42,4 +42,5 @@ public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
         }
         return false;
     }
+
 }

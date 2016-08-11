@@ -58,7 +58,8 @@ import java.util.logging.Logger;
 
 
 /**
- * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
+ * Processes the HTTP POST requests received by {@link BitbucketHookReceiver}
+ * @version 1.0
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     public List<BitbucketTriggerFilter> triggers;

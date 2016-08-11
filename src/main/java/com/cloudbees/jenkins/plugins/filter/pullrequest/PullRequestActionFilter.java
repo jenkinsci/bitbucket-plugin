@@ -37,6 +37,9 @@ import java.io.IOException;
  * @version 2.0
  */
 public abstract class PullRequestActionFilter extends AbstractDescribableImpl<PullRequestActionFilter> {
+
     public abstract boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload);
+
     public abstract BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException;
+
 }
