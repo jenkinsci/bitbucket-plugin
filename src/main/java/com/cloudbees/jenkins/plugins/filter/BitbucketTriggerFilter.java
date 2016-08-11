@@ -57,4 +57,5 @@ public abstract class BitbucketTriggerFilter extends AbstractDescribableImpl<Bit
      * @return the {@link AbstractDescribableImpl}
      */
     public abstract AbstractDescribableImpl getActionFilter();
+
 }

@@ -42,4 +42,5 @@ public class RepositoryTriggerMatcher implements BitbucketEventTriggerMatcher {
         }
         return false;
     }
+
 }

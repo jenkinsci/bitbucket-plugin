@@ -57,4 +57,5 @@ public class PullRequestCreatedActionFilter extends PullRequestActionFilter {
     public static class ActionFilterDescriptorImpl extends PullRequestActionDescriptor {
         public String getDisplayName() { return "Created"; }
     }
+
 }

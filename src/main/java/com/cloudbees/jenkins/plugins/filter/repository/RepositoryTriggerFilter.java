@@ -73,4 +73,5 @@ public class RepositoryTriggerFilter extends BitbucketTriggerFilter {
             return Jenkins.getInstance().getDescriptorList(RepositoryActionFilter.class);
         }
     }
+
 }

@@ -46,4 +46,5 @@ public abstract class BitbucketPayloadProcessor {
      * Payload processor
      */
     public abstract void processPayload(JSONObject payload);
+
 }

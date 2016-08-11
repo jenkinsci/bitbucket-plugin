@@ -82,6 +82,7 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
         triggers.add(pullRequestTriggerFilter);
         return new BitBucketTrigger(triggers);
     }
+
 }
 
 

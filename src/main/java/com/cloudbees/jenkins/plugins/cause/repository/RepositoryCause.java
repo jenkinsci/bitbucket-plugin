@@ -45,4 +45,5 @@ public class RepositoryCause extends BitbucketTriggerCause {
         String pusher = bitbucketPayload.getUser() != null ? bitbucketPayload.getUser() : "";
         return "Started by Bitbucket repository event by " + pusher;
     }
+
 }

@@ -32,7 +32,6 @@ import java.io.IOException;
 
 /**
  * The base {@link BitbucketTriggerCause} for {@link SCMTrigger.SCMTriggerCause}
- * @since August 1, 2016
  * @version 1.1.6
  */
 public abstract class BitbucketTriggerCause extends SCMTrigger.SCMTriggerCause {
@@ -42,4 +41,5 @@ public abstract class BitbucketTriggerCause extends SCMTrigger.SCMTriggerCause {
         super(pollingLog);
         this.bitbucketPayload = bitbucketPayload;
     }
+
 }

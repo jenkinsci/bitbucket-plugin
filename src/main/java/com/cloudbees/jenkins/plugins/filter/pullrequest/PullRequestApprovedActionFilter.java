@@ -100,4 +100,5 @@ public class PullRequestApprovedActionFilter extends PullRequestActionFilter {
     }
 
     private static final Logger LOGGER = Logger.getLogger(PullRequestApprovedActionFilter.class.getName());
+
 }

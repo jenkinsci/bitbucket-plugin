@@ -42,12 +42,9 @@ public class OldPostPayloadProcessor extends BitbucketPayloadProcessor {
 
     @Override
     public void processPayload(JSONObject payload) {
-//        LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
-
         BitbucketPayload bitbucketPayload = new OldPostBitbucketPayload(payload);
 
         jobProbe.triggetMatchingJobs(bitbucketEvent, bitbucketPayload);
     }
-
 
 }

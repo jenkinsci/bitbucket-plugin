@@ -46,4 +46,5 @@ public class PullRequestCause extends BitbucketTriggerCause {
         String pusher = bitbucketPayload.getUser() != null ? bitbucketPayload.getUser() : "";
         return "Started by Bitbucket pull request event by " + pusher;
     }
+
 }

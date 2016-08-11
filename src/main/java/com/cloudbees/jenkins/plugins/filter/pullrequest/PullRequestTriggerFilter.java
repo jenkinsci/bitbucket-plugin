@@ -73,4 +73,5 @@ public class PullRequestTriggerFilter extends BitbucketTriggerFilter {
     public PullRequestActionFilter getActionFilter() {
         return actionFilter;
     }
+
 }

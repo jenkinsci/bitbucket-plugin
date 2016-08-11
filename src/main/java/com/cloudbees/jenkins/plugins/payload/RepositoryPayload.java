@@ -34,7 +34,9 @@ import javax.annotation.Nonnull;
  * @version 2.0
  */
 public class RepositoryPayload extends BitbucketPayload {
+
     public RepositoryPayload(@Nonnull JSONObject payload) {
         super(payload);
     }
+
 }

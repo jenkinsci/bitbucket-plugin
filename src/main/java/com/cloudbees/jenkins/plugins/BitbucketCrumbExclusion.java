@@ -47,4 +47,5 @@ public class BitbucketCrumbExclusion extends CrumbExclusion {
         }
         return false;
     }
+
 }

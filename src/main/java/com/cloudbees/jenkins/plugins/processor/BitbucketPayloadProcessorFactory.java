@@ -66,4 +66,5 @@ public class BitbucketPayloadProcessorFactory {
     public BitbucketPayloadProcessor createOldProcessor(BitbucketEvent bitbucketEvent) {
         return new OldPostPayloadProcessor(new BitbucketJobProbe(), bitbucketEvent);
     }
+
 }
