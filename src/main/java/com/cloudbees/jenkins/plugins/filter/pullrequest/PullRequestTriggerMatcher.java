@@ -36,13 +36,9 @@ import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
     @Override
     public boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter) {
-        if(triggerFilter.getActionFilter() instanceof PullRequestAnyActionFilter) {
+        if(BitbucketEvent.PULL_REQUEST_ACTIONS.APPROVED.equals(bitbucketEvent.getAction()) &&
+                triggerFilter.getActionFilter() instanceof PullRequestApprovedActionFilter) {
             return true;
-        } else {
-            if(BitbucketEvent.PULL_REQUEST_ACTIONS.APPROVED.equals(bitbucketEvent.getAction()) &&
-                    triggerFilter.getActionFilter() instanceof PullRequestApprovedActionFilter) {
-                return true;
-            }
         }
         return false;
     }
