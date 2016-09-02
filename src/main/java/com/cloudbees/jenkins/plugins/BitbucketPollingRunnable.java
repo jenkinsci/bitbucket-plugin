@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * @since August 1, 2016
  * @version 2.0
  */
-public class BitbucketPollingRunnable implements Runnable{
+public class BitbucketPollingRunnable implements Runnable {
     Job job;
     File logFile;
 
@@ -59,17 +59,12 @@ public class BitbucketPollingRunnable implements Runnable{
     public void run() {
         try {
             StreamTaskListener streamListener = new StreamTaskListener(logFile);
-
             try {
                 PrintStream logger = streamListener.getLogger();
-
                 long start = System.currentTimeMillis();
                 logger.println("Started on " + DateFormat.getDateTimeInstance().format(new Date()));
-
                 PollingResult pollingResult = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job).poll(streamListener);
-
                 logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-
                 bitbucketPollResultListener.onPollSuccess(pollingResult);
             } catch (Error e) {
                 e.printStackTrace(streamListener.error("Failed to record SCM polling"));
