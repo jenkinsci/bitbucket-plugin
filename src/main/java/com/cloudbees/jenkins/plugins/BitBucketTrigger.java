@@ -100,7 +100,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                                 try {
                                     cause = filter.getCause(getLogFile(), bitbucketPayload);
 
-                                    if (filter.shouldScheduleJob(bitbucketPayload)) {
+                                    if (filter.shouldScheduleJob(bitbucketPayload) && pollingResult.hasChanges()) {
                                         scheduleJob(cause, bitbucketPayload);
                                         return;
                                     }
