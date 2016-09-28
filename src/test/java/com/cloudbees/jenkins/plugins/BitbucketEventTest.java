@@ -97,7 +97,7 @@ public class BitbucketEventTest {
     @Test
     public void testPullRequestEventMergedAction() {
         String event = "pullrequest";
-        String action = "merged";
+        String action = "fulfilled";
 
         BitbucketEvent bitbucketEvent = createEvent(event, action);
 

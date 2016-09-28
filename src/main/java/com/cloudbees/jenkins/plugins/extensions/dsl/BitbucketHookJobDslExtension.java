@@ -28,6 +28,8 @@ import com.cloudbees.jenkins.plugins.BitBucketTrigger;
 import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestApprovedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestCreatedActionFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestUpdatedActionFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestMergedActionFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
 import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
@@ -67,7 +69,9 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
     public Object bitbucketPullRequestApprovedAction(boolean onlyIfReviewersApproved) {
         List<BitbucketTriggerFilter> triggers;
         PullRequestApprovedActionFilter pullRequestApprovedActionFilter = new PullRequestApprovedActionFilter(onlyIfReviewersApproved);
-        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestApprovedActionFilter);
+        // dmiller TODO: Determine how to properly deal with the pullRequestTargetBranch
+        String pullRequestTargetBranch = "";
+        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestApprovedActionFilter, pullRequestTargetBranch);
         triggers = new ArrayList<BitbucketTriggerFilter>();
         triggers.add(pullRequestTriggerFilter);
         return new BitBucketTrigger(triggers);
@@ -77,7 +81,33 @@ public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
     public Object bitbucketPullRequestCreatedAction() {
         List<BitbucketTriggerFilter> triggers;
         PullRequestCreatedActionFilter pullRequestCreatedActionFilter = new PullRequestCreatedActionFilter();
-        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestCreatedActionFilter);
+        // dmiller TODO: Determine how to properly deal with the pullRequestTargetBranch
+        String pullRequestTargetBranch = "";
+        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestCreatedActionFilter, pullRequestTargetBranch);
+        triggers = new ArrayList<BitbucketTriggerFilter>();
+        triggers.add(pullRequestTriggerFilter);
+        return new BitBucketTrigger(triggers);
+    }
+
+    @DslExtensionMethod(context = TriggerContext.class)
+    public Object bitbucketPullRequestUpdatedAction() {
+        List<BitbucketTriggerFilter> triggers;
+        PullRequestUpdatedActionFilter pullRequestUpdatedActionFilter = new PullRequestUpdatedActionFilter();
+        // dmiller TODO: Determine how to properly deal with the pullRequestTargetBranch
+        String pullRequestTargetBranch = "";
+        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestUpdatedActionFilter, pullRequestTargetBranch);
+        triggers = new ArrayList<BitbucketTriggerFilter>();
+        triggers.add(pullRequestTriggerFilter);
+        return new BitBucketTrigger(triggers);
+    }
+
+    @DslExtensionMethod(context = TriggerContext.class)
+    public Object bitbucketPullRequestMergedAction() {
+        List<BitbucketTriggerFilter> triggers;
+        PullRequestMergedActionFilter pullRequestMergedActionFilter = new PullRequestMergedActionFilter();
+        // dmiller TODO: Determine how to properly deal with the pullRequestTargetBranch
+        String pullRequestTargetBranch = "";
+        PullRequestTriggerFilter pullRequestTriggerFilter = new PullRequestTriggerFilter(pullRequestMergedActionFilter, pullRequestTargetBranch);
         triggers = new ArrayList<BitbucketTriggerFilter>();
         triggers.add(pullRequestTriggerFilter);
         return new BitBucketTrigger(triggers);

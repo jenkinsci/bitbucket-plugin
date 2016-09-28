@@ -43,7 +43,7 @@ public class BitbucketEvent {
         String CREATED = "created";
         String UPDATED = "updated";
         String APPROVED = "approved";
-        String MERGED = "merged";
+        String MERGED = "fulfilled";
     }
 
     private String name;
