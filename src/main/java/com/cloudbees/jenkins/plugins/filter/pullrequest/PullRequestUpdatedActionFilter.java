@@ -24,29 +24,40 @@
 
 package com.cloudbees.jenkins.plugins.filter.pullrequest;
 
-import com.cloudbees.jenkins.plugins.BitbucketEvent;
-import com.cloudbees.jenkins.plugins.filter.BitbucketEventTriggerMatcher;
-import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
+import java.io.File;
+import java.io.IOException;
+
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
+
+import hudson.Extension;
 
 /**
- * {link @code PullRequestTriggerMatcher} for {link @BitbucketEventTriggerMatcher}
- * @since August 1, 2016
+ * The filter for PullRequestUpdatedActionFilter
+ * @since October 18, 2016
  * @version 2.0
  */
-public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
+public class PullRequestUpdatedActionFilter extends PullRequestActionFilter {
+
+    @DataBoundConstructor
+    public PullRequestUpdatedActionFilter() {
+    }
+
     @Override
-    public boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter) {
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.APPROVED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestApprovedActionFilter) {
-            return true;
-        } else if (BitbucketEvent.PULL_REQUEST_ACTIONS.CREATED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof  PullRequestCreatedActionFilter) {
-            return true;
-        } else if (BitbucketEvent.PULL_REQUEST_ACTIONS.UPDATED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof  PullRequestUpdatedActionFilter) {
-            return true;
-        }
+    public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
         return false;
+    }
+
+    @Override
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
+        return null;
+    }
+
+    @Extension
+    public static class ActionFilterDescriptorImpl extends PullRequestActionDescriptor {
+        public String getDisplayName() { return "Updated"; }
     }
 
 }

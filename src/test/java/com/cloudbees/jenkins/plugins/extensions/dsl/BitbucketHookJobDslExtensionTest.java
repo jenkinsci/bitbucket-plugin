@@ -24,29 +24,32 @@
 
 package com.cloudbees.jenkins.plugins.extensions.dsl;
 
-import com.cloudbees.jenkins.plugins.BitBucketTrigger;
-import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestApprovedActionFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestCreatedActionFilter;
-import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
-import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
-import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
-import hudson.model.Cause;
-import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
-import hudson.model.TopLevelItem;
-import hudson.triggers.Trigger;
-import hudson.triggers.TriggerDescriptor;
-import org.junit.Rule;
-import org.junit.Test;
-import org.jvnet.hudson.test.JenkinsRule;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Rule;
+import org.junit.Test;
+import org.jvnet.hudson.test.JenkinsRule;
+
+import com.cloudbees.jenkins.plugins.BitBucketTrigger;
+import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestApprovedActionFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestCreatedActionFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
+import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestUpdatedActionFilter;
+import com.cloudbees.jenkins.plugins.filter.repository.RepositoryPushActionFilter;
+import com.cloudbees.jenkins.plugins.filter.repository.RepositoryTriggerFilter;
+
+import hudson.model.Cause;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.TopLevelItem;
+import hudson.triggers.Trigger;
+import hudson.triggers.TriggerDescriptor;
 
 public class BitbucketHookJobDslExtensionTest {
 
@@ -182,6 +185,37 @@ public class BitbucketHookJobDslExtensionTest {
                         if (bitbucketTriggerFilter instanceof PullRequestTriggerFilter) {
                             PullRequestTriggerFilter pullRequestTriggerFilter = (PullRequestTriggerFilter) bitbucketTriggerFilter;
                             assertEquals(pullRequestTriggerFilter.getActionFilter() instanceof PullRequestCreatedActionFilter, true);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testBitbucketPullRequestUpdatedAction() throws Exception {
+        TopLevelItem topLevelItem = jenkinsRule.getInstance().createProjectFromXML("whatever",
+                new ByteArrayInputStream((getJobDSLTrigger("freeStyleJob('test-job') { triggers{ bitbucketPullRequestUpdatedAction(false) } }\n")).getBytes()));
+        if (topLevelItem instanceof FreeStyleProject) {
+            FreeStyleProject freeStyleProject = (FreeStyleProject) topLevelItem;
+            Future<FreeStyleBuild> build = freeStyleProject.scheduleBuild2(0, new Cause.UserCause());
+            build.get(); //// let mock build finish
+        }
+        TopLevelItem whateverTopLevelItem =jenkinsRule.getInstance().getItem("test-job");
+        if (whateverTopLevelItem instanceof FreeStyleProject) {
+            FreeStyleProject whateverFreeStyleProject = (FreeStyleProject) whateverTopLevelItem;
+            Map<TriggerDescriptor, Trigger<?>> triggers = whateverFreeStyleProject.getTriggers();
+            assertEquals(triggers.size(), 1);
+            for (Map.Entry<TriggerDescriptor, Trigger<?>> entry : triggers.entrySet()) {
+                if(entry.getValue() instanceof BitBucketTrigger) {
+                    BitBucketTrigger bitBucketTrigger = (BitBucketTrigger) entry.getValue();
+                    List<BitbucketTriggerFilter> bitbucketTriggerFilters = bitBucketTrigger.getTriggers();
+                    assertEquals(bitbucketTriggerFilters.size(), 1);
+                    for (BitbucketTriggerFilter bitbucketTriggerFilter : bitbucketTriggerFilters) {
+                        assertEquals(bitbucketTriggerFilter instanceof PullRequestTriggerFilter, true);
+                        if (bitbucketTriggerFilter instanceof PullRequestTriggerFilter) {
+                            PullRequestTriggerFilter pullRequestTriggerFilter = (PullRequestTriggerFilter) bitbucketTriggerFilter;
+                            assertEquals(pullRequestTriggerFilter.getActionFilter() instanceof PullRequestUpdatedActionFilter, true);
                         }
                     }
                 }

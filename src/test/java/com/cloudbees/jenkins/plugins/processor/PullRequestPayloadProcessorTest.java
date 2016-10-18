@@ -24,9 +24,12 @@
 
 package com.cloudbees.jenkins.plugins.processor;
 
-import com.cloudbees.jenkins.plugins.*;
-import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
-import net.sf.json.JSONObject;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -34,11 +37,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import javax.servlet.http.HttpServletRequest;
+import com.cloudbees.jenkins.plugins.BitbucketEvent;
+import com.cloudbees.jenkins.plugins.BitbucketJobProbe;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import net.sf.json.JSONObject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PullRequestPayloadProcessorTest {
@@ -106,6 +109,38 @@ public class PullRequestPayloadProcessorTest {
 
         assertEquals(bitbucketEvent, eventCaptor.getValue());
         assertEquals(hgLoad, payloadCaptor.getValue().getPayload());
+    }
+
+    @Test
+    public void testProcessPullRequestUpdatedWebhookGit() {
+        // Set headers so that payload processor will parse as new Webhook payload
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("pullrequest:updated");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/test_user/test_repo";
+
+        BitbucketEvent bitbucketEvent = new BitbucketEvent(request.getHeader("x-event-key"));
+
+        pullRequestPayloadProcessor = new PullRequestPayloadProcessor(probe, bitbucketEvent);
+
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("username", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("html", new JSONObject()
+                                        .element("href", url))));
+
+        pullRequestPayloadProcessor.processPayload(payload);
+
+        verify(probe).triggetMatchingJobs(eventCaptor.capture(), payloadCaptor.capture());
+
+        assertEquals(bitbucketEvent, eventCaptor.getValue());
+        assertEquals(payload, payloadCaptor.getValue().getPayload());
+        assertEquals(user, payloadCaptor.getValue().getUser());
+        assertEquals(url, payloadCaptor.getValue().getScmUrl());
+        assertEquals("git", payloadCaptor.getValue().getScm());
     }
 
 }

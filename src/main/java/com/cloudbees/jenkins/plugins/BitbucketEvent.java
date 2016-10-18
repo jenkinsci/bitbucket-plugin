@@ -42,6 +42,7 @@ public class BitbucketEvent {
     public interface PULL_REQUEST_ACTIONS {
         String CREATED = "created";
         String APPROVED = "approved";
+        String UPDATED = "updated";
     }
 
     private String name;
@@ -79,6 +80,8 @@ public class BitbucketEvent {
             if(PULL_REQUEST_ACTIONS.APPROVED.equals(action)) {
                 return true;
             } else if(PULL_REQUEST_ACTIONS.CREATED.equals(action)) {
+                return true;
+            } else if(PULL_REQUEST_ACTIONS.UPDATED.equals(action)) {
                 return true;
             }
         }
