@@ -30,6 +30,7 @@ import java.io.IOException;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
+import com.cloudbees.jenkins.plugins.cause.pullrequest.PullRequestCause;
 import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 
 import hudson.Extension;
@@ -47,12 +48,12 @@ public class PullRequestUpdatedActionFilter extends PullRequestActionFilter {
 
     @Override
     public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
-        return false;
+        return true;
     }
 
     @Override
     public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
-        return null;
+        return new PullRequestCause(pollingLog, pullRequestPayload);
     }
 
     @Extension
