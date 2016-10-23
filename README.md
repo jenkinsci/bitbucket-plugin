@@ -15,3 +15,18 @@ freeStyleJob('test-job') {
   }
 }
 ```
+
+# --skip-ci
+The plugin supports the --skip-ci flag in the commit message to avoid triggering a job build. The supported flags are "--skip-ci", "[ci skip]" and "[skip ci]" .
+
+It will only check for valid flags in the message of the first commit.
+
+For example, the following commit messages will NOT trigger a job build:
+
+```
+"Merged by Jenkins CI --skip-ci"
+
+"Merged by Jenkins CI [ci skip]"
+
+"Merged by Jenkins CI [skip ci]"
+```
