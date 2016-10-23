@@ -37,7 +37,7 @@ public class BitbucketPayloadProcessor {
         }
     }
 
-    private void processWebhookPayload(JSONObject payload) {   	
+    private void processWebhookPayload(JSONObject payload) {
         if (payload.has("repository")) {
             JSONObject repo = payload.getJSONObject("repository");
             LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);

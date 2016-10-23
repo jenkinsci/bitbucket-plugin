@@ -90,7 +90,7 @@ public class BitbucketPayloadProcessorTest {
     public void testProcessPostServicePayload() {
         // Ensure header isn't set so that payload processor will parse as old POST service payload
         when(request.getHeader("user-agent")).thenReturn(null);
-        
+
         JSONObject payload = new JSONObject()
             .element("canon_url", "https://staging.bitbucket.org")
             .element("user", "old_user")
