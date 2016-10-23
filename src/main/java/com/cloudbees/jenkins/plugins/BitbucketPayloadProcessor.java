@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class BitbucketPayloadProcessor {
@@ -20,6 +21,11 @@ public class BitbucketPayloadProcessor {
     }
 
     public void processPayload(JSONObject payload, HttpServletRequest request) {
+		if (mustSkipCI(payload)) {
+			LOGGER.log(Level.INFO, "Skipping CI for {0}", payload.toString());
+			return;
+		}
+		
         if ("Bitbucket-Webhooks/2.0".equals(request.getHeader("user-agent"))) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
@@ -31,7 +37,7 @@ public class BitbucketPayloadProcessor {
         }
     }
 
-    private void processWebhookPayload(JSONObject payload) {
+    private void processWebhookPayload(JSONObject payload) {   	
         if (payload.has("repository")) {
             JSONObject repo = payload.getJSONObject("repository");
             LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
@@ -102,6 +108,24 @@ public class BitbucketPayloadProcessor {
         probe.triggerMatchingJobs(user, url, scm, payload.toString());
     }
 
+    private boolean mustSkipCI(JSONObject payload) {
+    	if (payload.has("commits")) {
+    		JSONArray commits = payload.getJSONArray("commits");
+    		if (commits.size() >= 1) {
+        		// Only check message of first commit
+    			JSONObject firstCommit = commits.getJSONObject(0);
+    			if (firstCommit.has("message")) {
+	    			String message = commits.getJSONObject(0).getString("message");
+	    			return message.indexOf("[ci skip]") != -1 ||
+	    	    			message.indexOf("[skip ci]") != -1 ||
+	    	    			message.indexOf("--skip-ci") != -1;
+    			}
+    		}
+    	}
+    	
+    	return false;
+    }
+    
     private static final Logger LOGGER = Logger.getLogger(BitbucketPayloadProcessor.class.getName());
 
 }
