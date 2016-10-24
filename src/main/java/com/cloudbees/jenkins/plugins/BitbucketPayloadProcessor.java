@@ -22,7 +22,6 @@ public class BitbucketPayloadProcessor {
 
     public void processPayload(JSONObject payload, HttpServletRequest request) {
         if (mustSkipCI(payload)) {
-            LOGGER.log(Level.INFO, "Skipping CI for {0}", payload.toString());
             return;
         }
 		
@@ -60,30 +59,36 @@ public class BitbucketPayloadProcessor {
 
 /*
 {
-    "canon_url": "https://bitbucket.org",
-    "commits": [
-        {
-            "author": "marcus",
-            "branch": "master",
-            "files": [
+    "push": {
+        "changes": [
+            {
+            "commits": [
                 {
-                    "file": "somefile.py",
-                    "type": "modified"
+                    "author": "marcus",
+                    "branch": "master",
+                    "files": [
+                        {
+                            "file": "somefile.py",
+                            "type": "modified"
+                        }
+                    ],
+                    "message": "Added some more things to somefile.py\n",
+                    "node": "620ade18607a",
+                    "parents": [
+                        "702c70160afc"
+                    ],
+                    "raw_author": "Marcus Bertrand <marcus@somedomain.com>",
+                    "raw_node": "620ade18607ac42d872b568bb92acaa9a28620e9",
+                    "revision": null,
+                    "size": -1,
+                    "timestamp": "2012-05-30 05:58:56",
+                    "utctimestamp": "2012-05-30 03:58:56+00:00"
                 }
-            ],
-            "message": "Added some more things to somefile.py\n",
-            "node": "620ade18607a",
-            "parents": [
-                "702c70160afc"
-            ],
-            "raw_author": "Marcus Bertrand <marcus@somedomain.com>",
-            "raw_node": "620ade18607ac42d872b568bb92acaa9a28620e9",
-            "revision": null,
-            "size": -1,
-            "timestamp": "2012-05-30 05:58:56",
-            "utctimestamp": "2012-05-30 03:58:56+00:00"
-        }
-    ],
+            ],                
+            }
+        ]
+    },
+    "canon_url": "https://bitbucket.org",
     "repository": {
         "absolute_url": "/marcus/project-x/",
         "fork": false,
@@ -128,9 +133,14 @@ public class BitbucketPayloadProcessor {
                             if (firstCommit.has("message")) {
                                 String message = commits.getJSONObject(0).getString("message");
 
-                                return message.indexOf("[ci skip]") != -1 ||
-                                        message.indexOf("[skip ci]") != -1 ||
-                                        message.indexOf("--skip-ci") != -1;
+                                boolean result = message.indexOf("[ci skip]") != -1 ||
+                                    message.indexOf("[skip ci]") != -1 ||
+                                    message.indexOf("--skip-ci") != -1;
+
+                                if (result)
+                                    LOGGER.log(Level.INFO, "Skipping CI for {0}", message);
+
+                                return result;
                             }
                         }
                     }
