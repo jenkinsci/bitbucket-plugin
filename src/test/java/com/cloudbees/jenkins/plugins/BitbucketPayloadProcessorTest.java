@@ -55,14 +55,19 @@ public class BitbucketPayloadProcessorTest {
 
         JSONArray commits = new JSONArray();
         commits.add(new JSONObject()
-                .element("author", "jenkins ci")
-                .element("branch", "master")
+                .element("date", "2016-10-23T21:59:22+00:00")
+                .element("type", "commit")
                 .element("message", message));
 
+        JSONArray changes = new JSONArray();
+        changes.add(new JSONObject()
+                .element("commits", commits));
+        
         JSONObject payload = new JSONObject()
             .element("actor", new JSONObject()
                 .element("username", user))
-            .element("commits", commits)
+            .element("push", new JSONObject()
+                .element("changes", changes))
             .element("repository", new JSONObject()
                 .element("links", new JSONObject()
                     .element("html", new JSONObject()
@@ -72,7 +77,8 @@ public class BitbucketPayloadProcessorTest {
             .element("scm", "hg")
             .element("owner", new JSONObject()
                 .element("username", user))
-            .element("commits", commits)
+            .element("push", new JSONObject()
+                    .element("changes", changes))
             .element("links", new JSONObject()
                 .element("html", new JSONObject()
                     .element("href", url)));

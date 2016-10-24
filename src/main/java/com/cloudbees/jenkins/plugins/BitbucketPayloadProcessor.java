@@ -109,16 +109,31 @@ public class BitbucketPayloadProcessor {
     }
 
     private boolean mustSkipCI(JSONObject payload) {
-        if (payload.has("commits")) {
-            JSONArray commits = payload.getJSONArray("commits");
-            if (commits.size() >= 1) {
-                // Only check message of first commit
-                JSONObject firstCommit = commits.getJSONObject(0);
-                if (firstCommit.has("message")) {
-                    String message = commits.getJSONObject(0).getString("message");
-                    return message.indexOf("[ci skip]") != -1 ||
-                            message.indexOf("[skip ci]") != -1 ||
-                            message.indexOf("--skip-ci") != -1;
+        if (payload.has("push")) {
+            JSONObject push = payload.getJSONObject("push");
+
+            if (push.has("changes")) {
+                JSONArray changes = push.getJSONArray("changes");
+
+                if (changes.size() >= 1) {
+                    JSONObject firstChange = changes.getJSONObject(0);
+
+                    if (firstChange.has("commits")) {
+                        JSONArray commits = firstChange.getJSONArray("commits");
+
+                        if (commits.size() >= 1) {
+                            // Only check message of first commit
+                            JSONObject firstCommit = commits.getJSONObject(0);
+
+                            if (firstCommit.has("message")) {
+                                String message = commits.getJSONObject(0).getString("message");
+
+                                return message.indexOf("[ci skip]") != -1 ||
+                                        message.indexOf("[skip ci]") != -1 ||
+                                        message.indexOf("--skip-ci") != -1;
+                            }
+                        }
+                    }
                 }
             }
         }
