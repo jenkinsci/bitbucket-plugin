@@ -1,7 +1,7 @@
 package com.cloudbees.jenkins.plugins;
 
 import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebRequestSettings;
+import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class CrumbExclusionTest {
     @Test
     public void shouldNotRequireACrumbForTheBitbucketHookUrl() throws IOException, SAXException {
         JenkinsRule.WebClient webClient = jenkins.createWebClient();
-        WebRequestSettings wrs = new WebRequestSettings(new URL(webClient.getContextPath() + "bitbucket-hook"),
+        WebRequest wrs = new WebRequest(new URL(webClient.getContextPath() + "bitbucket-hook"),
                 HttpMethod.POST);
         WebResponse resp = webClient.getPage(wrs).getWebResponse();
 
