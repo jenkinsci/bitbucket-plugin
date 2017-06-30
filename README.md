@@ -9,17 +9,6 @@ bitbucket-plugin
 
 See details on [wiki](https://wiki.jenkins-ci.org/display/JENKINS/BitBucket+Plugin)
 
-# Job DSL
-The plugin supports the following dsl extension to enable bitbucket pushes to trigger a build:
-
-```
-freeStyleJob('test-job') {
-  triggers{
-    bitbucketPush()
-  }
-}
-```
-
 # Pipeline script
 Pipeline code for building on pull-request create event. It merge from source to target in the PR.
 
