@@ -29,6 +29,8 @@ import hudson.model.AbstractBuild;
 import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents the payload of the pull request
@@ -40,18 +42,38 @@ public class PullRequestPayload extends BitbucketPayload {
         super(payload);
     }
 
+    private JSONObject getPullRequest(){
+        return payload.getJSONObject("pullrequest");
+    }
+
+    public String getSourceBranch(){
+        JSONObject source = getPullRequest().getJSONObject("source");
+        return source.getJSONObject("branch").getString("name");
+    }
+
+    public String getTargetBranch(){
+        JSONObject source = getPullRequest().getJSONObject("destination");
+        return source.getJSONObject("branch").getString("name");
+    }
+
+    public String getPullRequestUrl() {
+        return getPullRequest().getJSONObject("links").getJSONObject("html").getString("href");
+    }
+
     @Override
     public void buildEnvVars(AbstractBuild<?, ?> abstractBuild, EnvVars envVars) {
         super.buildEnvVars(abstractBuild, envVars);
 
-        JSONObject pullRequest = payload.getJSONObject("pullrequest");
-        JSONObject source = pullRequest.getJSONObject("source");
-
-        String branch = source.getJSONObject("branch").getString("name");
+        String branch = getSourceBranch();
         envVars.put("BITBUCKET_BRANCH", branch);
+        LOGGER.log(Level.FINEST, "Injecting BITBUCKET_BRANCH: {0}", branch);
 
-        String pullRequestUrl = pullRequest.getJSONObject("links").getJSONObject("html").getString("href");
+        String pullRequestUrl = getPullRequestUrl();
         envVars.put("PULL_REQUEST_LINK", pullRequestUrl);
+        LOGGER.log(Level.FINEST, "Injecting PULL_REQUEST_LINK: {0}", pullRequestUrl);
     }
+
+
+    private static final Logger LOGGER = Logger.getLogger(BitbucketPayload.class.getName());
 
 }

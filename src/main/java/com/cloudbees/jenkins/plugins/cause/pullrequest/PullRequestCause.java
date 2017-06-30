@@ -26,6 +26,7 @@ package com.cloudbees.jenkins.plugins.cause.pullrequest;
 
 import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
+import com.cloudbees.jenkins.plugins.payload.PullRequestPayload;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,10 @@ public class PullRequestCause extends BitbucketTriggerCause {
 
     public PullRequestCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
         super(pollingLog, bitbucketPayload);
+    }
+
+    public PullRequestPayload getPullRequestPayLoad() {
+        return (PullRequestPayload) super.getPayLoad();
     }
 
     @Override

@@ -24,6 +24,7 @@
 
 package com.cloudbees.jenkins.plugins.filter;
 
+import com.cloudbees.jenkins.plugins.BitBucketTrigger;
 import com.cloudbees.jenkins.plugins.BitbucketEvent;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerFilter;
 import com.cloudbees.jenkins.plugins.filter.pullrequest.PullRequestTriggerMatcher;
@@ -31,6 +32,8 @@ import com.cloudbees.jenkins.plugins.filter.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Filter matcher
@@ -50,7 +53,6 @@ public class FilterMatcher {
 
         if(triggerFilterList != null) {
             filteredList = new ArrayList<BitbucketTriggerFilter>();
-
             for(BitbucketTriggerFilter triggerFilter : triggerFilterList) {
                 if(matchesEventAndAction(bitbucketEvent, triggerFilter)) {
                     filteredList.add(triggerFilter);
@@ -68,6 +70,7 @@ public class FilterMatcher {
      */
     private boolean matchesEventAndAction(BitbucketEvent bitbucketEvent,
                                                                 BitbucketTriggerFilter triggerFilter) {
+        LOGGER.log(Level.FINEST, "Bitbucket event name {0} and trigger filter instance of {1}", new Object[]{bitbucketEvent.getName(), triggerFilter.getClass()});
         if(BitbucketEvent.EVENT.PULL_REQUEST.equals(bitbucketEvent.getName()) &&
                 triggerFilter instanceof PullRequestTriggerFilter) {
             return new PullRequestTriggerMatcher().matchesAction(bitbucketEvent, triggerFilter);
@@ -78,5 +81,7 @@ public class FilterMatcher {
 
         return false;
     }
+
+    private static final Logger LOGGER = Logger.getLogger(BitBucketTrigger.class.getName());
 
 }

@@ -24,18 +24,17 @@
 
 package com.cloudbees.jenkins.plugins.cause.pullrequest;
 
-import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
 import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
 
 import java.io.File;
 import java.io.IOException;
 
 /**
- * The {@link PullRequestApprovedCause} which represents a type of {@link BitbucketTriggerCause}
+ * The {@link PullRequestApprovedCause} which represents a type of {@link PullRequestCause}
  * @since August 1, 2016
  * @version 2.0
  */
-public class PullRequestApprovedCause extends BitbucketTriggerCause {
+public class PullRequestApprovedCause extends PullRequestCause {
     public PullRequestApprovedCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
         super(pollingLog, bitbucketPayload);
     }

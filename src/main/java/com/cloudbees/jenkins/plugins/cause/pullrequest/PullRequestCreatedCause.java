@@ -22,28 +22,26 @@
  * THE SOFTWARE.
  */
 
-package com.cloudbees.jenkins.plugins.cause;
+package com.cloudbees.jenkins.plugins.cause.pullrequest;
 
 import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
-import hudson.triggers.SCMTrigger;
 
 import java.io.File;
 import java.io.IOException;
 
 /**
- * The base {@link BitbucketTriggerCause} for {@link SCMTrigger.SCMTriggerCause}
- * @version 1.1.6
+ * The {@link PullRequestCreatedCause} which represents a type of {@link PullRequestCause}
+ * @since August 1, 2016
+ * @version 2.0
  */
-public abstract class BitbucketTriggerCause extends SCMTrigger.SCMTriggerCause {
-    protected BitbucketPayload bitbucketPayload;
-
-    public BitbucketTriggerCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
-        super(pollingLog);
-        this.bitbucketPayload = bitbucketPayload;
+public class PullRequestCreatedCause extends PullRequestCause {
+    public PullRequestCreatedCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
+        super(pollingLog, bitbucketPayload);
     }
 
-    public BitbucketPayload getPayLoad(){
-        return this.bitbucketPayload;
+    @Override
+    public String getShortDescription() {
+        return "Started by Bitbucket new pull request created";
     }
 
 }

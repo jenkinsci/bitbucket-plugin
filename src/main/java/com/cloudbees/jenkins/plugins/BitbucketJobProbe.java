@@ -107,6 +107,7 @@ public class BitbucketJobProbe {
     private boolean hasBeenTriggered(List<SCM> scmTriggered, SCM scmTrigger) {
         for (SCM scm : scmTriggered) {
             if (scm.equals(scmTrigger)) {
+                LOGGER.log(Level.FINEST, "Has been triggered {0}", scmTrigger.getType());
                 return true;
             }
         }
@@ -117,7 +118,9 @@ public class BitbucketJobProbe {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
+                    LOGGER.log(Level.FINEST, "Comparing {0} and {1} looselyMatches", new Object[]{urIish.toString(), url.toString()});
                     if (GitStatus.looselyMatches(urIish, url)) {
+                        LOGGER.log(Level.FINEST, "{0} and {1} looselyMatched successfully", new Object[]{urIish.toString(), url.toString()});
                         return true;
                     }
                 }
