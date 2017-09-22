@@ -107,5 +107,4 @@ public class PullRequestPayloadProcessorTest {
         assertEquals(bitbucketEvent, eventCaptor.getValue());
         assertEquals(hgLoad, payloadCaptor.getValue().getPayload());
     }
-
 }

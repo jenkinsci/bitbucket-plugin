@@ -62,9 +62,9 @@ public class BitbucketEventTest {
     }
 
     @Test
-    public void testPullRequestEvent() {
+    public void testPullRequestEventCreated() {
         String event = "pullrequest";
-        String action = "approved";
+        String action = "created";
 
         BitbucketEvent bitbucketEvent = createEvent(event, action);
 
@@ -73,9 +73,9 @@ public class BitbucketEventTest {
     }
 
     @Test
-    public void testPullRequestEventApprovedCreated() {
+    public void testPullRequestEventUpdated() {
         String event = "pullrequest";
-        String action = "created";
+        String action = "updated";
 
         BitbucketEvent bitbucketEvent = createEvent(event, action);
 
