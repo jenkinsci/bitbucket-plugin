@@ -24,30 +24,39 @@
 
 package com.cloudbees.jenkins.plugins.filter.pullrequest;
 
-import com.cloudbees.jenkins.plugins.BitbucketEvent;
-import com.cloudbees.jenkins.plugins.filter.BitbucketEventTriggerMatcher;
-import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
+import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
+import com.cloudbees.jenkins.plugins.cause.pullrequest.PullRequestUpdatedCause;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
+import hudson.Extension;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
- * {link @code PullRequestTriggerMatcher} for {link @BitbucketEventTriggerMatcher}
- * @since August 1, 2016
+ * The filter for PullRequestUpdatedActionFilter
+ *
  * @version 2.0
+ * @since September 21, 2017
  */
-public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
+public class PullRequestUpdatedActionFilter extends PullRequestActionFilter {
+
+    @DataBoundConstructor
+    public PullRequestUpdatedActionFilter() {
+    }
+
     @Override
-    public boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter) {
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.APPROVED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestApprovedActionFilter) {
-            return true;
-        }
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.UPDATED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestUpdatedActionFilter) {
-            return true;
-        }
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.CREATED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestCreatedActionFilter) {
-            return true;
-        }
-        return false;
+    public boolean shouldTriggerBuild(BitbucketPayload bitbucketPayload) {
+        return true;
+    }
+
+    @Override
+    public BitbucketTriggerCause getCause(File pollingLog, BitbucketPayload pullRequestPayload) throws IOException {
+        return new PullRequestUpdatedCause(pollingLog, pullRequestPayload);
+    }
+
+    @Extension
+    public static class ActionFilterDescriptorImpl extends PullRequestActionDescriptor {
+        public String getDisplayName() { return "Updated"; }
     }
 }

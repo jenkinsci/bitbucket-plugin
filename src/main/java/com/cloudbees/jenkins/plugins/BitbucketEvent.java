@@ -26,8 +26,9 @@ package com.cloudbees.jenkins.plugins;
 
 /**
  * Bitbucket events
- * @since August 1, 2016
+ *
  * @version 2.0
+ * @since August 1, 2016
  */
 public class BitbucketEvent {
     public interface EVENT {
@@ -42,6 +43,7 @@ public class BitbucketEvent {
     public interface PULL_REQUEST_ACTIONS {
         String CREATED = "created";
         String APPROVED = "approved";
+        String UPDATED = "updated";
     }
 
     private String name;
@@ -52,14 +54,14 @@ public class BitbucketEvent {
         String name = keyValuepair[0];
         String action = keyValuepair[1];
 
-        if(!checkValidEvent(name)) {
+        if (!checkValidEvent(name)) {
             throw new UnsupportedOperationException(name + " event is not valid or unsupported");
         } else {
             this.name = name;
         }
 
-        if(!checkAction(action)) {
-            throw new UnsupportedOperationException(action + " action for " + name + " event " );
+        if (!checkAction(action)) {
+            throw new UnsupportedOperationException(action + " action for " + name + " event ");
         } else {
             this.action = action;
         }
@@ -71,14 +73,16 @@ public class BitbucketEvent {
      * @return {@code true} if the action is defined
      */
     private boolean checkAction(String action) {
-        if(EVENT.REPOSITORY.equals(name)) {
+        if (EVENT.REPOSITORY.equals(name)) {
             if (REPOSITORY_ACTIONS.PUSH.equals(action)) {
                 return true;
             }
-        } else if(EVENT.PULL_REQUEST.equals(name)) {
-            if(PULL_REQUEST_ACTIONS.APPROVED.equals(action)) {
+        } else if (EVENT.PULL_REQUEST.equals(name)) {
+            if (PULL_REQUEST_ACTIONS.APPROVED.equals(action)) {
                 return true;
-            } else if(PULL_REQUEST_ACTIONS.CREATED.equals(action)) {
+            } else if (PULL_REQUEST_ACTIONS.CREATED.equals(action)) {
+                return true;
+            } else if (PULL_REQUEST_ACTIONS.UPDATED.equals(action)) {
                 return true;
             }
         }
@@ -100,8 +104,8 @@ public class BitbucketEvent {
      * @return {@code true} if the event is defined
      */
     private boolean checkValidEvent(String name) {
-        if(EVENT.REPOSITORY.equals(name)
-            || EVENT.PULL_REQUEST.equals(name)) {
+        if (EVENT.REPOSITORY.equals(name)
+                || EVENT.PULL_REQUEST.equals(name)) {
             return true;
         }
 
