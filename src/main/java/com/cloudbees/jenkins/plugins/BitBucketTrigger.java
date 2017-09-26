@@ -61,6 +61,7 @@ import java.util.logging.Logger;
 
 /**
  * Processes the HTTP POST requests received by {@link BitbucketHookReceiver}
+ *
  * @version 1.0
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
@@ -70,7 +71,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     public BitBucketTrigger(List<BitbucketTriggerFilter> triggers) {
         this.triggers = triggers;
     }
-    
+
     @Override
     public Object readResolve() throws ObjectStreamException {
         super.readResolve();
@@ -80,56 +81,57 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
             triggers = new ArrayList<BitbucketTriggerFilter>();
             triggers.add(repositoryTriggerFilter);
         }
+
         return this;
     }
+
     /**
      * Called when a POST is made.
      */
     public void onPost(final BitbucketEvent bitbucketEvent, final BitbucketPayload bitbucketPayload) {
         FilterMatcher filterMatcher = new FilterMatcher();
-
         final List<BitbucketTriggerFilter> matchingFilters = filterMatcher.getMatchingFilters(bitbucketEvent, triggers);
 
-        if(matchingFilters != null) {
-            if(matchingFilters.size() > 0) {
+        if (matchingFilters != null) {
+            if (matchingFilters.size() > 0) {
                 BitbucketPollingRunnable bitbucketPollingRunnable = new BitbucketPollingRunnable(job,
-                    getLogFile(),
-                    new BitbucketPollingRunnable.BitbucketPollResultListener() {
-                        @Override
-                        public void onPollSuccess(PollingResult pollingResult) {
-                            LOGGER.log(Level.FINEST, "Called onPollSuccess");
-                            for (BitbucketTriggerFilter filter : matchingFilters) {
-                                BitbucketTriggerCause cause;
-                                try {
-                                    cause = filter.getCause(getLogFile(), bitbucketPayload);
+                        getLogFile(),
+                        new BitbucketPollingRunnable.BitbucketPollResultListener() {
+                            @Override
+                            public void onPollSuccess(PollingResult pollingResult) {
+                                LOGGER.log(Level.FINEST, "Called onPollSuccess");
+                                for (BitbucketTriggerFilter filter : matchingFilters) {
+                                    BitbucketTriggerCause cause;
+                                    try {
+                                        cause = filter.getCause(getLogFile(), bitbucketPayload);
 
 
-                                    if (shouldScheduleJob(filter, pollingResult, bitbucketPayload)) {
-                                        scheduleJob(cause, bitbucketPayload);
-                                        return;
+                                        if (shouldScheduleJob(filter, pollingResult, bitbucketPayload)) {
+                                            scheduleJob(cause, bitbucketPayload);
+                                            return;
+                                        }
+
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
                                     }
-
-                                } catch (IOException e) {
-                                    e.printStackTrace();
                                 }
                             }
-                        }
 
-                        @Override
-                        public void onPollError(Throwable throwable) {
-                            LOGGER.log(Level.FINEST, "Called onPollError");
-                        }
-                    });
+                            @Override
+                            public void onPollError(Throwable throwable) {
+                                LOGGER.log(Level.FINEST, "Called onPollError");
+                            }
+                        });
                 getDescriptor().queue.execute(bitbucketPollingRunnable);
-            }else{
+            } else {
                 LOGGER.log(Level.FINEST, "Size is < zero");
             }
-        }else{
+        } else {
             LOGGER.log(Level.FINEST, "No matching filters");
         }
     }
 
-    private boolean shouldScheduleJob(BitbucketTriggerFilter filter, PollingResult pollingResult, BitbucketPayload bitbucketPayload){
+    private boolean shouldScheduleJob(BitbucketTriggerFilter filter, PollingResult pollingResult, BitbucketPayload bitbucketPayload) {
         boolean shouldScheduleJob = filter.shouldScheduleJob(bitbucketPayload);
         boolean hasChanges = pollingResult.hasChanges();
         boolean isPullRequestFilter = filter instanceof PullRequestTriggerFilter;
