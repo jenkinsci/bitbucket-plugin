@@ -67,31 +67,40 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
      * @throws IOException
      */
     public void doIndex(StaplerRequest req) throws IOException {
-        String body = IOUtils.toString(req.getInputStream());
-        if (!body.isEmpty() && req.getRequestURI().contains("/" + BITBUCKET_HOOK_URL + "/")) {
-            String contentType = req.getContentType();
-            if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
-                body = URLDecoder.decode(body);
-            }
-            if (body.startsWith("payload=")) body = body.substring(8);
-
-            LOGGER.log(Level.FINE, "Received commit hook notification : {0}", body);
-            JSONObject payload = JSONObject.fromObject(body);
-
-            if ("Bitbucket-Webhooks/2.0".equals(req.getHeader("user-agent"))) {
-                BitbucketEvent bitbucketEvent = new BitbucketEvent(req.getHeader("x-event-key"));
-                BitbucketPayloadProcessor bitbucketPayloadProcessor = payloadProcessorFactory.create(bitbucketEvent);
-                bitbucketPayloadProcessor.processPayload(payload);
-            } else {
-                LOGGER.log(Level.INFO, "Processing old POST service payload");
-                BitbucketPayloadProcessor bitbucketPayloadProcessor =
-                        payloadProcessorFactory.createOldProcessor(new BitbucketEvent("repo:push"));
-                bitbucketPayloadProcessor.processPayload(payload);
-            }
-        } else {
-            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. You might no have configured correctly the WebHook on BitBucket with the last slash `http://<JENKINS-URL>/bitbucket-hook/`");
+        String uri = req.getRequestURI();
+        if (!req.getRequestURI().contains("/" + BITBUCKET_HOOK_URL + "/")) {
+            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. "
+                + "BitBucket hook URI does not contain `/" + BITBUCKET_HOOK_URL + "/`: "
+                + "`" + uri + "`");
+            return;
         }
 
+        String body = IOUtils.toString(req.getInputStream());
+        if (body.isEmpty()) {
+            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. "
+                + "Received empty request from BitBucket");
+            return;
+        }
+
+        String contentType = req.getContentType();
+        if (contentType != null && contentType.startsWith("application/x-www-form-urlencoded")) {
+            body = URLDecoder.decode(body);
+        }
+        if (body.startsWith("payload=")) body = body.substring(8);
+
+        LOGGER.log(Level.FINE, "Received commit hook notification : {0}", body);
+        JSONObject payload = JSONObject.fromObject(body);
+
+        if ("Bitbucket-Webhooks/2.0".equals(req.getHeader("user-agent"))) {
+            BitbucketEvent bitbucketEvent = new BitbucketEvent(req.getHeader("x-event-key"));
+            BitbucketPayloadProcessor bitbucketPayloadProcessor = payloadProcessorFactory.create(bitbucketEvent);
+            bitbucketPayloadProcessor.processPayload(payload);
+        } else {
+            LOGGER.log(Level.INFO, "Processing old POST service payload");
+            BitbucketPayloadProcessor bitbucketPayloadProcessor =
+                    payloadProcessorFactory.createOldProcessor(new BitbucketEvent("repo:push"));
+            bitbucketPayloadProcessor.processPayload(payload);
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketHookReceiver.class.getName());
