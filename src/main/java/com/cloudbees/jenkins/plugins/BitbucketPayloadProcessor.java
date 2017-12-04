@@ -25,6 +25,11 @@ public class BitbucketPayloadProcessor {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayload(payload);
             }
+        } else if (payload.has("actor") && payload.has("repository")) {
+            if ("repo:push".equals(request.getHeader("x-event-key"))) {
+                LOGGER.log(Level.INFO, "Processing new Webhooks payload");
+                processWebhookPayloadBitBucketServer(payload);
+            }
         } else {
             LOGGER.log(Level.INFO, "Processing old POST service payload");
             processPostServicePayload(payload);
@@ -50,6 +55,17 @@ public class BitbucketPayloadProcessor {
             probe.triggerMatchingJobs(user, url, scm, payload.toString());
         }
 
+    }
+
+    private void processWebhookPayloadBitBucketServer(JSONObject payload) {
+        JSONObject repo = payload.getJSONObject("repository");
+        String user = payload.getJSONObject("actor").getString("username");
+        if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
+            String url = repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href");
+            url = url.replaceFirst(new String("projects.*"), new String("scm/" + repo.getString("fullName").toLowerCase()));
+            String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
+            probe.triggerMatchingJobs(user, url, scm, payload.toString());
+        }
     }
 
 /*
