@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.junit.Before;
@@ -58,6 +59,32 @@ public class BitbucketPayloadProcessorTest {
         payloadProcessor.processPayload(hgLoad, request);
 
         verify(probe).triggerMatchingJobs(user, url, "hg", hgLoad.toString());
+    }
+
+    @Test
+    public void processWebhookPayloadBitBucketServer() {
+        // Set headers so that payload processor will parse as new Webhook payload
+        when(request.getHeader("user-agent")).thenReturn("Apache-HttpClient/4.5.1 (Java/1.8.0_102)");
+        when(request.getHeader("x-event-key")).thenReturn("repo:push");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/scm/ce/test_repo";
+
+        JSONObject href = new JSONObject();
+        href.element("href", "https://bitbucket.org/projects/CE/repos/test_repo/browse");
+
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("username", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("self", new JSONArray()
+                                    .element(href)))
+                        .element("fullName",  "CE/test_repo"));
+
+        payloadProcessor.processPayload(payload, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
     }
 
     @Test
