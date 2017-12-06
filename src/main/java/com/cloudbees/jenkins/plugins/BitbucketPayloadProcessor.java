@@ -1,5 +1,7 @@
 package com.cloudbees.jenkins.plugins;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,14 +59,30 @@ public class BitbucketPayloadProcessor {
 
     }
 
+    /**
+     * Payload processor for BitBucket server. The plugin Post Webhooks for Bitbucket
+     * https://marketplace.atlassian.com/plugins/nl.topicus.bitbucket.bitbucket-webhooks/server/overview
+     * should be installed and configured
+     *
+     * @param payload
+     */
     private void processWebhookPayloadBitBucketServer(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
         String user = payload.getJSONObject("actor").getString("username");
+        String url = "";
         if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
-            String url = repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href");
-            url = url.replaceFirst(new String("projects.*"), new String("scm/" + repo.getString("fullName").toLowerCase()));
-            String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
-            probe.triggerMatchingJobs(user, url, scm, payload.toString());
+            try {
+                URL pushHref = new URL(repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href"));
+                if (pushHref.getProtocol().equals("https")) {
+                    url = pushHref.toString().replaceFirst(new String("projects.*"), new String("scm/" + repo.getString("fullName").toLowerCase()));
+                } else {
+                    url = pushHref.toString().replaceFirst(new String("projects.*"), new String(repo.getString("fullName").toLowerCase()));
+                }
+                String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
+                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+            } catch (MalformedURLException e) {
+                LOGGER.log(Level.WARNING, String.format("URL %s is malformed", url), e);
+            }
         }
     }
 
