@@ -84,14 +84,22 @@ public class BitbucketJobProbe {
         return false;
     }
 
+    URIish sanitizePath(final URIish urIish){
+        if(urIish.getScheme().startsWith("http")) {
+            // needed cause the ssh and https URI differs in Bitbucket Server.
+            final String path = urIish.getPath();
+            return urIish.setPath(path.replaceFirst("\\/scm", ""));
+        }else {
+            //ssh don't munge
+            return urIish;
+        }
+    }
+
     private boolean match(SCM scm, URIish url) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
-                    // needed cause the ssh and https URI differs in Bitbucket Server.
-                    if(urIish.getPath().startsWith("/scm")){
-                        urIish = urIish.setPath(urIish.getPath().substring(4));
-                    }
+                    urIish = sanitizePath(urIish);
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
