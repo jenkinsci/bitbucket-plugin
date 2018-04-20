@@ -121,6 +121,32 @@ public class BitbucketPayloadProcessor {
     "user": "marcus"
 }
 */
+    /*
+    I am getting following issue As I have created PR opened trigger on webhook
+    Caused by: net.sf.json.JSONException: JSONObject["user"] not found.
+    my request body has following type of json so this buitbucket plugin is not able to parse it
+    
+    author:{
+     user:
+        }
+       }
+        "author":{  
+      "user":{  
+        "name":"admin",
+        "emailAddress":"admin@example.com",
+        "id":1,
+        "displayName":"Administrator",
+        "active":true,
+        "slug":"admin",
+        "type":"NORMAL"
+      },
+      "role":"AUTHOR",
+      "approved":false,
+      "status":"UNAPPROVED"
+    },
+    Refer
+    https://confluence.atlassian.com/bitbucketserver056/event-payload-943528836.html?utm_campaign=in-app-help&utm_medium=in-app-help&utm_source=stash#Eventpayload-repositoryevents
+    */
     private void processPostServicePayload(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
         LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
