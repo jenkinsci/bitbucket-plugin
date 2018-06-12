@@ -21,6 +21,7 @@ import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
@@ -92,6 +93,12 @@ public class BitbucketJobProbe {
                     if(urIish.getPath().startsWith("/scm")){
                         urIish = urIish.setPath(urIish.getPath().substring(4));
                     }
+                    
+                    // needed because bitbucket self hosted does not transfer any host information
+                    if (StringUtils.isEmpty(url.getHost())) {
+                    	urIish.setHost(url.getHost());
+                    }
+                    
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;

@@ -27,18 +27,53 @@ public class BitbucketPayloadProcessor {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayload(payload);
             }
-        } else if (payload.has("actor") && payload.has("repository")) {
+        } else if (payload.has("actor") && payload.has("repository") && payload.getJSONObject("repository").has("links")) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayloadBitBucketServer(payload);
             }
+        } else if (payload.has("actor")) {
+        	// we assume that the passed hook was from bitbucket server https://confluence.atlassian.com/bitbucketserver/managing-webhooks-in-bitbucket-server-938025878.html
+        	LOGGER.log(Level.INFO, "Processing webhook for self-hosted bitbucket instance");
+        	processWebhookPayloadBitBucketSelfHosted(payload);
         } else {
             LOGGER.log(Level.INFO, "Processing old POST service payload");
             processPostServicePayload(payload);
         }
     }
 
-    private void processWebhookPayload(JSONObject payload) {
+    /**
+     * parses the payload from self hosted bitbucket instance which uses the default webhooks implementation.
+     * 
+     * https://confluence.atlassian.com/bitbucketserver0510/managing-webhooks-in-bitbucket-server-951390737.html
+     * https://confluence.atlassian.com/bitbucketserver0510/event-payload-951390742.html
+     * 
+     * @param payload The payload matching the definition in https://confluence.atlassian.com/bitbucketserver0510/event-payload-951390742.html
+     */
+    private void processWebhookPayloadBitBucketSelfHosted(JSONObject payload) {
+    	JSONObject repo;
+    	
+    	// find the repository hidden in different objects
+    	if (payload.has("repository")) { // for push to repository
+    		repo = payload.getJSONObject("repository");
+    	} else if (payload.has("pullRequest")) { // for all PR events
+    		repo = payload.getJSONObject("pullRequest").getJSONObject("toRef").getJSONObject("repository");
+    	} else {
+    		LOGGER.log(Level.WARNING, "Not possible to trigger job for event '{0}'. Only PR events and pushes are supported for now.", payload.get("eventKey"));
+    		LOGGER.log(Level.FINE, payload.toString());
+    		return;
+    	}
+    	
+        String user = payload.getJSONObject("actor").getString("name");
+        String url = repo.getJSONObject("project").getString("key").toLowerCase() + "/" + repo.getString("name");
+
+        // always use git no other repo type supported on self hosted solution
+        String scm = "git";
+        probe.triggerMatchingJobs(user, url, scm, payload.toString());
+		
+	}
+
+	private void processWebhookPayload(JSONObject payload) {
         if (payload.has("repository")) {
             JSONObject repo = payload.getJSONObject("repository");
             LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
