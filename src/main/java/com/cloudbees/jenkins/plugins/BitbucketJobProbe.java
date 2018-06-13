@@ -96,7 +96,7 @@ public class BitbucketJobProbe {
                     
                     // needed because bitbucket self hosted does not transfer any host information
                     if (StringUtils.isEmpty(url.getHost())) {
-                    	urIish.setHost(url.getHost());
+                    	urIish = urIish.setHost(url.getHost());
                     }
                     
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
