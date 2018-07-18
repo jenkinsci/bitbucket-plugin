@@ -65,7 +65,7 @@ public class BitbucketPayloadProcessor {
     	}
     	
         String user = payload.getJSONObject("actor").getString("name");
-        String url = repo.getJSONObject("project").getString("key").toLowerCase() + "/" + repo.getString("name");
+        String url = repo.getJSONObject("project").getString("key").toLowerCase() + "/" + repo.getString("slug");
 
         // always use git no other repo type supported on self hosted solution
         String scm = "git";
