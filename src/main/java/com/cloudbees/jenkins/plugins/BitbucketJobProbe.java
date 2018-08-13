@@ -89,18 +89,7 @@ public class BitbucketJobProbe {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
-                    // needed cause the ssh and https URI differs in Bitbucket Server.
-                    if(urIish.getPath().startsWith("/scm")){
-                        urIish = urIish.setPath(urIish.getPath().substring(4));
-                    }
-                    
-                    // needed because bitbucket self hosted does not transfer any host information
-                    if (StringUtils.isEmpty(url.getHost())) {
-                    	urIish = urIish.setHost(url.getHost());
-                    }
-                    
-                    LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
-                    if (GitStatus.looselyMatches(urIish, url)) {
+                    if (looselyMatch(url, urIish)) {
                         return true;
                     }
                 }
@@ -117,6 +106,29 @@ public class BitbucketJobProbe {
             }
         }
         return false;
+    }
+
+    public boolean looselyMatch(URIish url, URIish urIish) {
+        LOGGER.log(Level.FINE, "repo scheme: {0}", urIish.getScheme());
+        // needed cause the SSH and HTTPS URI differs in Bitbucket Server.
+        if ("ssh".equalsIgnoreCase(urIish.getScheme().toLowerCase())) {
+            // SSH repositories structure: ssh://git@domain:port/<project>/<repo>
+            // so strip everything in the url before /<project>/<repo
+            int indexOfLastSlash = url.getPath().lastIndexOf('/');
+            int indexOfLastButOneSlash = url.getPath().lastIndexOf('/', indexOfLastSlash - 1);
+            String projectRepoPath = url.getPath().substring(indexOfLastButOneSlash);
+            url = url.setPath(projectRepoPath);
+        } else /* assume HTTP(S) */ {
+            // HTTP clone repository contains '/scm/' somewhere after the context path.
+            urIish = urIish.setPath(urIish.getPath().replaceFirst("/scm/", "/"));
+
+            // needed because bitbucket self hosted does not transfer any host information
+            if (StringUtils.isEmpty(url.getHost())) {
+                urIish = urIish.setHost(url.getHost());
+            }
+        }
+        LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
+        return GitStatus.looselyMatches(urIish, url);
     }
 
     private boolean looselyMatches(URI notifyUri, String repository) {
