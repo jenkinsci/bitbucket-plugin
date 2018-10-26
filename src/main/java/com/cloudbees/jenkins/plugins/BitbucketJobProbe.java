@@ -1,29 +1,29 @@
 package com.cloudbees.jenkins.plugins;
 
+import com.google.common.base.Objects;
+
+import org.acegisecurity.context.SecurityContext;
+import org.acegisecurity.context.SecurityContextHolder;
+import org.eclipse.jgit.transport.RemoteConfig;
+import org.eclipse.jgit.transport.URIish;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.mercurial.MercurialSCM;
 import hudson.scm.SCM;
 import hudson.security.ACL;
-
-import java.net.URISyntaxException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import hudson.triggers.Trigger;
 import jenkins.model.Jenkins;
-
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
-import org.eclipse.jgit.transport.RemoteConfig;
-import org.eclipse.jgit.transport.URIish;
-import com.google.common.base.Objects;
 
 public class BitbucketJobProbe {
 
@@ -84,13 +84,13 @@ public class BitbucketJobProbe {
         return false;
     }
 
-    private boolean match(SCM scm, URIish url) {
+    protected boolean match(SCM scm, URIish url) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
                     // needed cause the ssh and https URI differs in Bitbucket Server.
-                    if(urIish.getPath().startsWith("/scm")){
-                        urIish = urIish.setPath(urIish.getPath().substring(4));
+                    if(urIish.getPath().contains("/scm/")){
+                        urIish = urIish.setPath(urIish.getPath().replaceFirst("/scm/","/"));
                     }
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
