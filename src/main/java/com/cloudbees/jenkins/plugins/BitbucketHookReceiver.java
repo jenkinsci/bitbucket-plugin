@@ -53,7 +53,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
 
             payloadProcessor.processPayload(payload, req);
         } else {
-            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. You might no have configured correctly the WebHook on BitBucket with the last slash `http://<JENKINS-URL>/bitbucket-hook/`");
+            LOGGER.log(Level.WARNING, "The Jenkins job cannot be triggered. You might not have configured correctly the WebHook on BitBucket with the last slash `http://<JENKINS-URL>/bitbucket-hook/` or a 'Test connection' invocation of the hook was triggered.");
         }
 
     }
