@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 public class BitbucketPayloadProcessor {
@@ -22,15 +23,20 @@ public class BitbucketPayloadProcessor {
     }
 
     public void processPayload(JSONObject payload, HttpServletRequest request) {
+        String eventKey = request.getHeader("x-event-key");
         if ("Bitbucket-Webhooks/2.0".equals(request.getHeader("user-agent"))) {
-            if ("repo:push".equals(request.getHeader("x-event-key"))) {
+            if ("repo:push".equals(eventKey)) {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayload(payload);
+            } else {
+                LOGGER.log(Level.FINE, "Ignored webhook with event key {0}", eventKey);
             }
         } else if (payload.has("actor") && payload.has("repository")) {
-            if ("repo:push".equals(request.getHeader("x-event-key"))) {
+            if ("repo:push".equals(eventKey) || "repo:refs_changed".equals(eventKey)) {
                 LOGGER.log(Level.INFO, "Processing new Webhooks payload");
                 processWebhookPayloadBitBucketServer(payload);
+            } else {
+                LOGGER.log(Level.FINE, "Ignored webhook with event key {0}", eventKey);
             }
         } else {
             LOGGER.log(Level.INFO, "Processing old POST service payload");
@@ -68,11 +74,26 @@ public class BitbucketPayloadProcessor {
      */
     private void processWebhookPayloadBitBucketServer(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getJSONObject("actor").getString("username");
+        JSONObject actor = payload.getJSONObject("actor");
+        String user = null;
+        if (actor.has("username")) {
+            user = actor.getString("username");
+        } else if (actor.has("slug")) {
+            user = actor.getString("slug");
+        }
         String url = "";
-        if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
+        JSONObject links = repo.getJSONObject("links");
+        if (links.has("clone")) {
+            JSONArray clones = links.getJSONArray("clone");
+            for (int i = 0; i < clones.size(); i++) {
+                String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
+                url = clones.getJSONObject(i).getString("href");
+                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+            }
+
+        } else if (links.getJSONArray("self").size() != 0) {
             try {
-                URL pushHref = new URL(repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href"));
+                URL pushHref = new URL(links.getJSONArray("self").getJSONObject(0).getString("href"));
                 url = pushHref.toString().replaceFirst(new String("projects.*"), new String(repo.getString("fullName").toLowerCase()));
                 String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
                 probe.triggerMatchingJobs(user, url, scm, payload.toString());

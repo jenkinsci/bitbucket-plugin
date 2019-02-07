@@ -88,6 +88,36 @@ public class BitbucketPayloadProcessorTest {
     }
 
     @Test
+    public void processWebhookPayloadBitBucketServerWithRefsChanged() {
+        when(request.getHeader("user-agent")).thenReturn("Apache-HttpClient/4.5.1 (Java/1.8.0_102)");
+        when(request.getHeader("x-event-key")).thenReturn("repo:refs_changed");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/ce/test_repo";
+        String urlSsh = "ssh://bitbucket.org:7999/ce/test_repo";
+
+        JSONObject href = new JSONObject();
+        href.element("href", url);
+        JSONObject href2 = new JSONObject();
+        href2.element("href", urlSsh);
+
+        // Set actor and repository so that payload processor will parse as Bitbucket Server Post Webhook payload
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("username", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("clone", new JSONArray()
+                                    .element(href)
+                                    .element(href2))));
+
+        payloadProcessor.processPayload(payload, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+        verify(probe).triggerMatchingJobs(user, urlSsh, "git", payload.toString());
+    }
+
+    @Test
     public void testProcessPostServicePayload() {
         // Ensure header isn't set so that payload processor will parse as old POST service payload
         when(request.getHeader("user-agent")).thenReturn(null);
