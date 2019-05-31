@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 public class BitbucketPayloadProcessor {
@@ -43,20 +44,34 @@ public class BitbucketPayloadProcessor {
             JSONObject repo = payload.getJSONObject("repository");
             LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
 
-            String user = payload.getJSONObject("actor").getString("nickname");
+            String user = getUser(payload, "actor");
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
             probe.triggerMatchingJobs(user, url, scm, payload.toString());
         } else if (payload.has("scm")) {
             LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
-            String user = payload.getJSONObject("owner").getString("nickname");
+            String user = getUser(payload, "owner");
             String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = payload.has("scm") ? payload.getString("scm") : "hg";
 
             probe.triggerMatchingJobs(user, url, scm, payload.toString());
         }
 
+    }
+
+    private String getUser(JSONObject payload, String jsonObject) {
+        String user;
+        try {
+            user = payload.getJSONObject(jsonObject).getString("username");
+        } catch (JSONException e1) {
+            try {
+                user = payload.getJSONObject(jsonObject).getString("nickname");
+            } catch (JSONException e2) {
+                user = payload.getJSONObject(jsonObject).getString("display_name");
+            }
+        }
+        return user;
     }
 
     /**
@@ -68,7 +83,7 @@ public class BitbucketPayloadProcessor {
      */
     private void processWebhookPayloadBitBucketServer(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getJSONObject("actor").getString("nickname");
+        String user = getUser(payload, "actor");
         String url = "";
         if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
             try {
