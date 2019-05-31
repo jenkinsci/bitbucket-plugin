@@ -43,14 +43,14 @@ public class BitbucketPayloadProcessor {
             JSONObject repo = payload.getJSONObject("repository");
             LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
 
-            String user = payload.getJSONObject("actor").getString("username");
+            String user = payload.getJSONObject("actor").getString("nickname");
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
             probe.triggerMatchingJobs(user, url, scm, payload.toString());
         } else if (payload.has("scm")) {
             LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
-            String user = payload.getJSONObject("owner").getString("username");
+            String user = payload.getJSONObject("owner").getString("nickname");
             String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = payload.has("scm") ? payload.getString("scm") : "hg";
 
@@ -68,7 +68,7 @@ public class BitbucketPayloadProcessor {
      */
     private void processWebhookPayloadBitBucketServer(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
-        String user = payload.getJSONObject("actor").getString("username");
+        String user = payload.getJSONObject("actor").getString("nickname");
         String url = "";
         if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
             try {
