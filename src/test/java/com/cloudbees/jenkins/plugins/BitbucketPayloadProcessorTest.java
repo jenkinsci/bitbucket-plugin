@@ -38,7 +38,7 @@ public class BitbucketPayloadProcessorTest {
 
         JSONObject payload = new JSONObject()
             .element("actor", new JSONObject()
-                .element("username", user))
+                .element("nickname", user))
             .element("repository", new JSONObject()
                 .element("links", new JSONObject()
                     .element("html", new JSONObject()
@@ -75,7 +75,7 @@ public class BitbucketPayloadProcessorTest {
         // Set actor and repository so that payload processor will parse as Bitbucket Server Post Webhook payload
         JSONObject payload = new JSONObject()
                 .element("actor", new JSONObject()
-                        .element("username", user))
+                        .element("nickname", user))
                 .element("repository", new JSONObject()
                         .element("links", new JSONObject()
                                 .element("self", new JSONArray()
@@ -104,4 +104,38 @@ public class BitbucketPayloadProcessorTest {
         verify(probe).triggerMatchingJobs("old_user", "https://staging.bitbucket.org/old_user/old_repo", "git", payload.toString());
     }
 
+
+    @Test
+    public void testProcessWebhookPayload_inCaseOwnerUsernameFieldIsReplacedByNickName() {
+        // Set headers so that payload processor will parse as new Webhook payload
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("repo:push");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/test_user/test_repo";
+
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("nickname", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("html", new JSONObject()
+                                        .element("href", url))));
+
+        JSONObject hgLoad = new JSONObject()
+                .element("scm", "hg")
+                .element("owner", new JSONObject()
+                        .element("nickname", user))
+                .element("links", new JSONObject()
+                        .element("html", new JSONObject()
+                                .element("href", url)));
+
+        payloadProcessor.processPayload(payload, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+
+        payloadProcessor.processPayload(hgLoad, request);
+
+        verify(probe).triggerMatchingJobs(user, url, "hg", hgLoad.toString());
+    }
 }
