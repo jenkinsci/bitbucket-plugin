@@ -34,6 +34,12 @@ public class BitbucketPayloadProcessor {
                 processWebhookPayloadBitBucketServer(payload);
             }
         } else {
+            if ("diagnostics:ping".equals(request.getHeader("x-event-key"))) {
+                if (payload.has("test") && payload.getBoolean("test") == true) {
+                    LOGGER.log(Level.INFO, "Bitbucket test connection payload");
+                    return;
+                }
+            }
             LOGGER.log(Level.INFO, "Processing old POST service payload");
             processPostServicePayload(payload);
         }
