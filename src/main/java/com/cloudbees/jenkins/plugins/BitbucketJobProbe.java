@@ -10,6 +10,7 @@ import hudson.security.ACL;
 import java.net.URISyntaxException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +44,7 @@ public class BitbucketJobProbe {
 
                     if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                         ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-                        for (Trigger trigger : pJob.getTriggers().values()) {
+                        for (Trigger<?> trigger : (Collection<Trigger>) pJob.getTriggers().values()) {
                             if (trigger instanceof BitBucketTrigger) {
                                 bTrigger = (BitBucketTrigger) trigger;
                                 break;

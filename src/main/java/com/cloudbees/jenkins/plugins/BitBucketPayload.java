@@ -4,6 +4,7 @@ import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.EnvironmentContributingAction;
 import hudson.model.InvisibleAction;
+import hudson.model.Run;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -26,11 +27,18 @@ public class BitBucketPayload extends InvisibleAction implements EnvironmentCont
         return payload;
     }
 
+    @Deprecated
     @Override
     public void buildEnvVars(AbstractBuild<?, ?> abstractBuild, EnvVars envVars) {
         final String payload = getPayload();
         LOGGER.log(Level.FINEST, "Injecting BITBUCKET_PAYLOAD: {0}", payload);
         envVars.put("BITBUCKET_PAYLOAD", payload);
+    }
+
+    @Override
+    public void buildEnvironment(@Nonnull Run<?, ?> run, @Nonnull EnvVars env) {
+        env.put("BITBUCKET_PAYLOAD",  payload.toString());
+        LOGGER.log(Level.FINEST, "Injecting BITBUCKET_PAYLOAD: {0}", payload);
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitBucketPayload.class.getName());
