@@ -129,13 +129,21 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
             }
         };
 
-        pJob.scheduleBuild2(5, new CauseAction(cause), bitbucketPayload);
+        pJob.scheduleBuild2(getQuietPeriod(), new CauseAction(cause), bitbucketPayload);
         if (pJob.scheduleBuild(cause)) {
             String name = " #" + job.getNextBuildNumber();
             LOGGER.info("SCM changes detected in " + job.getName() + ". Triggering " + name);
         } else {
             LOGGER.info("SCM changes detected in " + job.getName() + ". Job is already in the queue");
         }
+    }
+
+    private int getQuietPeriod() {
+        int quietPeriod = 5;
+        if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
+            quietPeriod = ((ParameterizedJobMixIn.ParameterizedJob) job).getQuietPeriod();
+        }
+        return quietPeriod > 5 ? quietPeriod : 5;
     }
 
     @Override
