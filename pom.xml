@@ -12,7 +12,7 @@
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/BitBucket+Plugin</url>
+    <url>https://github.com/jenkinsci/bitbucket-plugin</url>
 
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/bitbucket-plugin.git</connection>
@@ -65,6 +65,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.4</version>
                 <configuration>
                     <skip>true</skip>
                     <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
