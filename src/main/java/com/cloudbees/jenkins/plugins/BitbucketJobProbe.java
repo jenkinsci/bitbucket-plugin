@@ -102,6 +102,12 @@ public class BitbucketJobProbe {
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
+                    } else if ( urIish.getPath().endsWith(".git.git")){
+                        // Trying to match https://bitbucket.org/my_company/my_repo.git.git<-->https://bitbucket.org/my_company/my_repo.git
+                        LOGGER.log(Level.FINE, "Found .git.git, removing");
+                        urIish = urIish.setPath(urIish.getPath().substring(0,urIish.getPath().length()-4));
+                        LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
+                        return GitStatus.looselyMatches(urIish, url);
                     }
                 }
             }
