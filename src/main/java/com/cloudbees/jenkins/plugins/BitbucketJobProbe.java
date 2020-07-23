@@ -98,10 +98,15 @@ public class BitbucketJobProbe {
                     if (StringUtils.isEmpty(url.getHost())) {
                     	urIish = urIish.setHost(url.getHost());
                     }
-                    
+
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
+                    } else if ( urIish.getPath().endsWith(".git.git")){
+                        LOGGER.log(Level.FINE, "Repo ends with .git.git, removing last .git");
+                        urIish = urIish.setPath(urIish.getPath().substring(0,urIish.getPath().length()-4));
+                        LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
+                        return GitStatus.looselyMatches(urIish, url);
                     }
                 }
             }
