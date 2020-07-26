@@ -70,6 +70,12 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.13 (26. July 2020)
+
+-  See [PR-75](https://github.com/jenkinsci/bitbucket-plugin/pull/75), supporting repos that end with .git
+
+#### 1.1.12 (Not released)
+
 #### 1.1.11 (27. August 2019)
 
 -   Added possibility to process trigger from bitbucket server default webhooks [PR-63](https://github.com/jenkinsci/bitbucket-plugin/pull/63) 
