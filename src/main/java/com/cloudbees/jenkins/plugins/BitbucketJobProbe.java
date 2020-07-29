@@ -44,7 +44,7 @@ public class BitbucketJobProbe {
 
                     if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                         ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
-                        for (Trigger trigger : pJob.getTriggers().values()) {
+                        for (Object trigger : pJob.getTriggers().values()) {
                             if (trigger instanceof BitBucketTrigger) {
                                 bTrigger = (BitBucketTrigger) trigger;
                                 break;
