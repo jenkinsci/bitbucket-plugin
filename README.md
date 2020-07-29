@@ -70,6 +70,11 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.14 (29. July 2020)
+
+- Fixed CVE-2020-5529
+- Updated to jenkins version to 2.204.1 
+
 #### 1.1.13 (26. July 2020)
 
 -  See [PR-75](https://github.com/jenkinsci/bitbucket-plugin/pull/75), supporting repos that end with .git
