@@ -70,11 +70,15 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.16 (30. July 2020)
+
+- Fixed spotbugs errors
+
 #### 1.1.15  (29. July 2020)
 
 - Fixed javadoc error preventing from releasing 1.1.14
 
-#### 1.1.14 ((Not released)
+#### 1.1.14 (Not released)
 
 - Fixed CVE-2020-5529
 - Updated to jenkins version to 2.204.1 
