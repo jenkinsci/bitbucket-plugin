@@ -60,18 +60,19 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                         PrintStream logger = listener.getLogger();
                         long start = System.currentTimeMillis();
                         logger.println("Started on "+ DateFormat.getDateTimeInstance().format(new Date()));
-                        boolean result = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job).poll(listener).hasChanges();
-                        logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
-                        if(result)
-                            logger.println("Changes found");
-                        else
-                            logger.println("No changes");
-                        return result;
-                    } catch (Error e) {
-                        e.printStackTrace(listener.error("Failed to record SCM polling"));
-                        LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
-                        throw e;
-                    } catch (RuntimeException e) {
+                        SCMTriggerItem scmTriggerItem = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
+                        if ( scmTriggerItem == null){
+                            return false;
+                        } else {
+                            boolean result = scmTriggerItem.poll(listener).hasChanges();
+                            logger.println("Done. Took "+ Util.getTimeSpanString(System.currentTimeMillis()-start));
+                            if(result)
+                                logger.println("Changes found");
+                            else
+                                logger.println("No changes");
+                            return result;
+                        }
+                    } catch (Error | RuntimeException e) {
                         e.printStackTrace(listener.error("Failed to record SCM polling"));
                         LOGGER.log(Level.SEVERE,"Failed to record SCM polling",e);
                         throw e;
@@ -86,6 +87,10 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
             public void run() {
                 if (runPolling()) {
+                    if ( job == null){
+                        LOGGER.info("job is null");
+                        return;
+                    }
                     String name = " #"+job.getNextBuildNumber();
                     BitBucketPushCause cause;
                     try {
@@ -102,9 +107,13 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                     BitBucketPayload bitBucketPayload = new BitBucketPayload(payload);
                     pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
                     if (pJob.scheduleBuild(cause)) {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Triggering "+ name);
+                        if ( job != null) {
+                            LOGGER.info("SCM changes detected in " + job.getName() + ". Triggering " + name);
+                        }
                     } else {
-                        LOGGER.info("SCM changes detected in "+ job.getName()+". Job is already in the queue");
+                        if ( job != null) {
+                            LOGGER.info("SCM changes detected in " + job.getName() + ". Job is already in the queue");
+                        }
                     }
                 }
             }
@@ -121,15 +130,12 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
      * Returns the file that records the last/current polling activity.
      */
     public File getLogFile() {
-        return new File(job.getRootDir(),"bitbucket-polling.log");
-    }
+        if ( job == null){
+            throw new RuntimeException("job is null");
+        } else {
+            return new File(job.getRootDir(),"bitbucket-polling.log");
+        }
 
-    /**
-     * Check if "bitbucket-polling.log" already exists to initialize it
-     */
-    public boolean IsLogFileInitialized() {
-        File file = new File(job.getRootDir(),"bitbucket-polling.log");
-        return file.exists();
     }
 
     @Override
@@ -141,6 +147,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
      * Action object. Used to display the polling log.
      */
     public final class BitBucketWebHookPollingAction implements Action {
+        long start = 0;
         public Job<?,?> getOwner() {
             return job;
         }
@@ -165,7 +172,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
          * Writes the annotated log to the given output.
          */
         public void writeLogTo(XMLOutput out) throws IOException {
-            new AnnotatedLargeText<BitBucketWebHookPollingAction>(getLogFile(), Charset.defaultCharset(),true,this).writeHtmlTo(0,out.asWriter());
+            start = new AnnotatedLargeText<BitBucketWebHookPollingAction>(getLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(start, out.asWriter());
         }
     }
 

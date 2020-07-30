@@ -114,7 +114,7 @@ public class BitbucketPayloadProcessor {
      * https://marketplace.atlassian.com/plugins/nl.topicus.bitbucket.bitbucket-webhooks/server/overview
      * should be installed and configured
      *
-     * @param payload
+     * @param payload JSON object
      */
     private void processWebhookPayloadBitBucketServer(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
@@ -123,7 +123,7 @@ public class BitbucketPayloadProcessor {
         if (repo.getJSONObject("links").getJSONArray("self").size() != 0) {
             try {
                 URL pushHref = new URL(repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href"));
-                url = pushHref.toString().replaceFirst(new String("projects.*"), new String(repo.getString("fullName").toLowerCase()));
+                url = pushHref.toString().replaceFirst("projects.*", repo.getString("fullName").toLowerCase());
                 String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
                 probe.triggerMatchingJobs(user, url, scm, payload.toString());
             } catch (MalformedURLException e) {

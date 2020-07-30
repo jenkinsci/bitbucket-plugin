@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import hudson.triggers.Trigger;
+
 import jenkins.model.Jenkins;
 
 import jenkins.model.ParameterizedJobMixIn;
@@ -54,13 +54,18 @@ public class BitbucketJobProbe {
                     if (bTrigger != null) {
                         LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
-                        List<SCM> scmTriggered = new ArrayList<SCM>();
-                        for (SCM scmTrigger : item.getSCMs()) {
-                            if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-                                LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
-                                scmTriggered.add(scmTrigger);
-                                bTrigger.onPost(user, payload);
-                            } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
+                        if ( item == null){
+                            LOGGER.log(Level.INFO, "item is null");
+                        } else {
+                            List<SCM> scmTriggered = new ArrayList<>();
+                            for (SCM scmTrigger : item.getSCMs()) {
+                                if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
+                                    LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
+                                    scmTriggered.add(scmTrigger);
+                                    bTrigger.onPost(user, payload);
+                                } else
+                                    LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
+                            }
                         }
                     } else
                         LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());

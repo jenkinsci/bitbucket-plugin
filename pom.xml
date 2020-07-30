@@ -23,7 +23,7 @@
     </scm>
 
     <properties>
-        <spotbugs.skip>true</spotbugs.skip>
+<!--        <spotbugs.skip>true</spotbugs.skip>-->
         <jenkins.version>2.204.1</jenkins.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
