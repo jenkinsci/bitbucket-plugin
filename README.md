@@ -70,6 +70,10 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.17 (04. August 2020)
+
+- Changed repos to use HTTPS as suggested by JLLeitschuh in PR #70
+
 #### 1.1.16 (30. July 2020)
 
 - Fixed spotbugs errors
