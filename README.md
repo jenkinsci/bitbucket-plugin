@@ -70,6 +70,11 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.18 (04. August 2020)
+
+- See [PR-61](https://github.com/jenkinsci/bitbucket-plugin/pull/61), Fixing a typo, adding message re 'Test connection' 
+
+
 #### 1.1.17 (04. August 2020)
 
 - Changed repos to use HTTPS as suggested by JLLeitschuh in PR #70
