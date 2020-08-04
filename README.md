@@ -29,7 +29,7 @@ The older-style HTTP POSTs from Bitbucket are also supported but deprecated.
 
 On each push, the plugin:
 
-1.  Scans Jenkins for all jobs with "Build when a change is pushed to Bitbucket" option enabled. For MultiBranch pipelines `Scan Multibranch Pipeline Triggers` in order to be able to process the WebHook.
+1.  Scans Jenkins for all jobs with "Build when a change is pushed to Bitbucket" option enabled. For MultiBranch pipelines `Scan Multibranch Pipeline Triggers` should be configured in order to be able to process the WebHook.
 2.  For each job matched:
     1.  If the job's SCM (git) URL "loosely matches" that of the git repository listed inside the Bitbucket-provided payload, AND
     2.  If the job's SCM (git) detects that the remote repository has changes, THEN
