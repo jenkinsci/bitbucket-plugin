@@ -77,6 +77,10 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.19 (08. August 2020)
+
+- Added ability to override Repository URL which used for matching
+
 #### 1.1.18 (04. August 2020)
 
 - See [PR-61](https://github.com/jenkinsci/bitbucket-plugin/pull/61), Fixing a typo, adding message re 'Test connection' 
