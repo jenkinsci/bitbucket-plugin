@@ -38,8 +38,8 @@ public class BitbucketTriggerTest {
     @SuppressWarnings("rawtypes")
     @Test public void configRoundTripBitbucketTrigger() throws Exception {
         PipelineTriggersJobProperty triggersProperty = new PipelineTriggersJobProperty(null);
-        triggersProperty.addTrigger(new BitBucketTrigger());
+        triggersProperty.addTrigger(new BitBucketTrigger(""));
         List<JobProperty> properties = Collections.<JobProperty>singletonList(triggersProperty);
-        new SnippetizerTester(j).assertRoundTrip(new JobPropertyStep(properties), "properties([pipelineTriggers([bitbucketPush()])])");
+        new SnippetizerTester(j).assertRoundTrip(new JobPropertyStep(properties), "properties([pipelineTriggers([bitbucketPush('')])])");
     }
 }

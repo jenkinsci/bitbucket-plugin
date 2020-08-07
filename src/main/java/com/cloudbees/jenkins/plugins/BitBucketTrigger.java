@@ -3,13 +3,10 @@ package com.cloudbees.jenkins.plugins;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
-import hudson.model.Action;
-import hudson.model.CauseAction;
-import hudson.model.Hudson;
-import hudson.model.Item;
-import hudson.model.Job;
+import hudson.model.*;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
+import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
@@ -17,7 +14,9 @@ import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
 
+import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -35,8 +34,16 @@ import java.util.logging.Logger;
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
+    private final String overrideUrl;
+
     @DataBoundConstructor
-    public BitBucketTrigger() {
+    public BitBucketTrigger(String overrideUrl) {
+        this.overrideUrl = overrideUrl;
+    }
+
+    // notice that the name of the getter must exactly like the parameter
+    public String getOverrideUrl() {
+        return overrideUrl;
     }
 
     /**
@@ -179,6 +186,11 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     @Extension @Symbol("bitbucketPush")
     public static class DescriptorImpl extends TriggerDescriptor {
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Hudson.MasterComputer.threadPoolForRemoting);
+
+        // Must be inside the DescriptorImpl
+        public FormValidation doCheckOverrideUrl(@QueryParameter String value) throws IOException, ServletException {
+            return FormValidation.ok();
+        }
 
         @Override
         public boolean isApplicable(Item item) {

@@ -58,8 +58,11 @@ public class BitbucketJobProbe {
                             LOGGER.log(Level.INFO, "item is null");
                         } else {
                             List<SCM> scmTriggered = new ArrayList<>();
+                            if (item.getSCMs().isEmpty()){
+                                LOGGER.log(Level.WARNING, "No SCM configuration was found!");
+                            }
                             for (SCM scmTrigger : item.getSCMs()) {
-                                if (match(scmTrigger, remote) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
+                                if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
                                     LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
                                     scmTriggered.add(scmTrigger);
                                     bTrigger.onPost(user, payload);
@@ -90,7 +93,7 @@ public class BitbucketJobProbe {
         return false;
     }
 
-    private boolean match(SCM scm, URIish url) {
+    private boolean match(SCM scm, URIish url, String overrideUrl) {
         if (scm instanceof GitSCM) {
             for (RemoteConfig remoteConfig : ((GitSCM) scm).getRepositories()) {
                 for (URIish urIish : remoteConfig.getURIs()) {
@@ -98,7 +101,7 @@ public class BitbucketJobProbe {
                     if(urIish.getPath().startsWith("/scm")){
                         urIish = urIish.setPath(urIish.getPath().substring(4));
                     }
-                    
+
                     // needed because bitbucket self hosted does not transfer any host information
                     if (StringUtils.isEmpty(url.getHost())) {
                     	urIish = urIish.setHost(url.getHost());
@@ -107,11 +110,9 @@ public class BitbucketJobProbe {
                     LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
-                    } else if ( urIish.getPath().endsWith(".git.git")){
-                        LOGGER.log(Level.FINE, "Repo ends with .git.git, removing last .git");
-                        urIish = urIish.setPath(urIish.getPath().substring(0,urIish.getPath().length()-4));
-                        LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
-                        return GitStatus.looselyMatches(urIish, url);
+                    } else if ( overrideUrl != null && !overrideUrl.isEmpty()){
+                        LOGGER.log(Level.FINE, "Trying to match using override Repository URL {0} ", overrideUrl + "<-->" + url.toString());
+                        return overrideUrl.contentEquals(url.toString());
                     }
                 }
             }

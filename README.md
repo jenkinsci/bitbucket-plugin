@@ -52,9 +52,16 @@ Since the version 1.1.7 of the Bitbucket plugin works against Bitbucket server. 
 
 ![](docs/images/Screen_Shot_2017-12-05_at_15.15.17.png)
 
-  
-
 After this, you are all set-up
+
+## Override Repository URL
+
+![](docs/images/override_repo_url.png)
+
+In case the matching mechanism does not work, you can manually override the URL used for matching.  
+For example:  
+The URL https://bitbucket.org/tzachs/my_repo.git.git would be tried to matched with https://bitbucket.org/tzachs/my_repo.git. This of course would fail.  
+To overcome this, setting the "Override Repository URL" field to https://bitbucket.org/tzachs/my_repo.git would match the URL and will trigger the JOB when a commit is pushed to my_repo.git.git
 
 ## Job DSL
 
