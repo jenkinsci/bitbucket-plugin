@@ -4,13 +4,16 @@ import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
 import hudson.plugins.mercurial.MercurialSCM;
+import hudson.plugins.mercurial.MercurialSCMSource;
 import hudson.scm.SCM;
 import hudson.security.ACL;
 
 import java.net.URISyntaxException;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +21,10 @@ import java.util.logging.Logger;
 import jenkins.model.Jenkins;
 
 import jenkins.model.ParameterizedJobMixIn;
+import jenkins.plugins.git.GitSCMSource;
+import jenkins.scm.api.SCMHead;
+import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.SCMSourceOwner;
 import jenkins.triggers.SCMTriggerItem;
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
@@ -73,6 +80,18 @@ public class BitbucketJobProbe {
                     } else
                         LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());
                 }
+                LOGGER.log(Level.FINE, "Now checking SCMSourceOwners/multiBranchProjects");
+                for (SCMSourceOwner scmSourceOwner : Jenkins.getInstance().getAllItems(SCMSourceOwner.class)) {
+                    LOGGER.log(Level.FINE, "Considering candidate scmSourceOwner {0}", scmSourceOwner);
+                    List<SCMSource> scmSources = scmSourceOwner.getSCMSources();
+                    for (SCMSource scmSource : scmSources) {
+                        LOGGER.log(Level.FINER, "Considering candidate scmSource {0}", scmSource);
+                        if (match(scmSource, remote)) {
+                            LOGGER.log(Level.INFO, "Triggering BitBucket scmSourceOwner {0}", scmSourceOwner);
+                            scmSourceOwner.onSCMSourceUpdated(scmSource);
+                        } else LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{scmSourceOwner.getName(), remote});
+                	}
+                }
             } catch (URISyntaxException e) {
                 LOGGER.log(Level.WARNING, "Invalid repository URL {0}", url);
             } finally {
@@ -119,6 +138,44 @@ public class BitbucketJobProbe {
         } else if (scm instanceof MercurialSCM) {
             try {
                 URI hgUri = new URI(((MercurialSCM) scm).getSource());
+                String remote = url.toString();
+                if (looselyMatches(hgUri, remote)) {
+                    return true;
+                }
+            } catch (URISyntaxException ex) {
+                LOGGER.log(Level.SEVERE, "Could not parse jobSource uri: {0} ", ex);
+            }
+        }
+        return false;
+    }
+
+    private boolean match(SCMSource scm, URIish url) {
+        if (scm instanceof GitSCMSource) {
+        	String gitRemote = ((GitSCMSource) scm).getRemote();
+        	URIish urIish;
+			try {
+				urIish = new URIish(gitRemote);
+			} catch (URISyntaxException e) {
+                LOGGER.log(Level.SEVERE, "Could not parse gitRemote: "+gitRemote, e);
+                return false;
+			}
+            // needed cause the ssh and https URI differs in Bitbucket Server.
+            if(urIish.getPath().startsWith("/scm")){
+                urIish = urIish.setPath(urIish.getPath().substring(4));
+            }
+
+            // needed because bitbucket self hosted does not transfer any host information
+            if (StringUtils.isEmpty(url.getHost())) {
+            	urIish = urIish.setHost(url.getHost());
+            }
+
+            LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
+            if (GitStatus.looselyMatches(urIish, url)) {
+                return true;
+            }
+        } else if (scm instanceof MercurialSCMSource) {
+            try {
+                URI hgUri = new URI(((MercurialSCMSource) scm).getSource());
                 String remote = url.toString();
                 if (looselyMatches(hgUri, remote)) {
                     return true;
