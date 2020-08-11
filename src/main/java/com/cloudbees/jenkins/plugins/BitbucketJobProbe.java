@@ -9,11 +9,9 @@ import hudson.scm.SCM;
 import hudson.security.ACL;
 
 import java.net.URISyntaxException;
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +20,6 @@ import jenkins.model.Jenkins;
 
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.plugins.git.GitSCMSource;
-import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
 import jenkins.triggers.SCMTriggerItem;
