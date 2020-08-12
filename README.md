@@ -77,6 +77,10 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.20 (12. August 2020)
+
+- Show what project is triggered, not just the branch name. #69
+
 #### 1.1.19 (08. August 2020)
 
 - Added ability to override Repository URL which used for matching
