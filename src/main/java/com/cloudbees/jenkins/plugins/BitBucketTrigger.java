@@ -14,6 +14,7 @@ import jenkins.triggers.SCMTriggerItem;
 import org.apache.commons.jelly.XMLOutput;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
@@ -34,16 +35,19 @@ import java.util.logging.Logger;
  */
 public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
-    private final String overrideUrl;
+    private String overrideUrl;
 
     @DataBoundConstructor
-    public BitBucketTrigger(String overrideUrl) {
-        this.overrideUrl = overrideUrl;
-    }
+    public BitBucketTrigger() { }
 
     // notice that the name of the getter must exactly like the parameter
     public String getOverrideUrl() {
         return overrideUrl;
+    }
+
+    @DataBoundSetter
+    public void setOverrideUrl(String overrideUrl){
+        this.overrideUrl = overrideUrl;
     }
 
     /**

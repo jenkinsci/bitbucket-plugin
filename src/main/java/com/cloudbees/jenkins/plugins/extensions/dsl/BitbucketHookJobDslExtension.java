@@ -10,7 +10,7 @@ import javaposse.jobdsl.plugin.DslExtensionMethod;
 public class BitbucketHookJobDslExtension extends ContextExtensionPoint {
     @DslExtensionMethod(context = TriggerContext.class)
     public Object bitbucketPush(Runnable closure) {
-        return new BitBucketTrigger("");
+        return new BitBucketTrigger();
     }
 }
 

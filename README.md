@@ -77,6 +77,10 @@ freeStyleJob('test-job') {
 
 **Changelog**
 
+#### 1.1.21 (28. August 2020)
+
+- Fixed [JENKINS-63374 - Bitbucket plugin changed API for the bitbucketPush trigger in an incompatible way](https://issues.jenkins-ci.org/browse/JENKINS-63374)
+
 #### 1.1.20 (12. August 2020)
 
 - Show what project is triggered, not just the branch name. #69
