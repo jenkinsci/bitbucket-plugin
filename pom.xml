@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>bitbucket</artifactId>
-    <version>1.1.22</version>
+    <version>1.1.23-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
@@ -19,11 +19,11 @@
         <connection>scm:git:git://github.com/jenkinsci/bitbucket-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/bitbucket-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/bitbucket-plugin</url>
-        <tag>bitbucket-1.1.22</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
-<!--        <spotbugs.skip>true</spotbugs.skip>-->
+        <!--        <spotbugs.skip>true</spotbugs.skip>-->
         <jenkins.version>2.204.1</jenkins.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -95,7 +95,7 @@
         <dependency> <!-- minimun required version to work with Workflow 1.4 GitSCM step-->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-<!--            <version>4.3.0</version>-->
+            <!--            <version>4.3.0</version>-->
         </dependency>
         <dependency> <!-- minimun required version to work with Workflow 1.4 GitSCM step-->
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -105,7 +105,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-<!--            <version>2.0.22-beta</version>-->
+            <!--            <version>2.0.22-beta</version>-->
             <scope>test</scope>
         </dependency>
         <dependency>
