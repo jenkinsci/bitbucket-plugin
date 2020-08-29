@@ -76,7 +76,7 @@ freeStyleJob('test-job') {
 ```
 
 **Changelog**
-#### 1.1.22 (29. August 2020)
+#### 1.1.23 (29. August 2020)
 
 - [PR-65 - Ignore payload processing for diagnostics:ping](https://github.com/jenkinsci/bitbucket-plugin/pull/65)  
 
