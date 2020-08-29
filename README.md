@@ -76,14 +76,17 @@ freeStyleJob('test-job') {
 ```
 
 **Changelog**
+#### 1.1.22 (29. August 2020)
+
+- [PR-65 - Ignore payload processing for diagnostics:ping](https://github.com/jenkinsci/bitbucket-plugin/pull/65)  
 
 #### 1.1.21 (28. August 2020)
 
-- Fixed [JENKINS-63374 - Bitbucket plugin changed API for the bitbucketPush trigger in an incompatible way](https://issues.jenkins-ci.org/browse/JENKINS-63374)
+- [JENKINS-63374 - Bitbucket plugin changed API for the bitbucketPush trigger in an incompatible way](https://issues.jenkins-ci.org/browse/JENKINS-63374)
 
 #### 1.1.20 (12. August 2020)
 
-- Show what project is triggered, not just the branch name. #69
+- [PR-69 - Show what project is triggered not just branch](https://github.com/jenkinsci/bitbucket-plugin/pull/69)
 
 #### 1.1.19 (08. August 2020)
 
@@ -91,7 +94,7 @@ freeStyleJob('test-job') {
 
 #### 1.1.18 (04. August 2020)
 
-- See [PR-61](https://github.com/jenkinsci/bitbucket-plugin/pull/61), Fixing a typo, adding message re 'Test connection' 
+- [PR-61 - Fixing a typo, adding message re 'Test connection'](https://github.com/jenkinsci/bitbucket-plugin/pull/61) 
 
 
 #### 1.1.17 (04. August 2020)
