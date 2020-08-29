@@ -38,6 +38,13 @@ public class BitbucketPayloadProcessor {
         	LOGGER.log(Level.INFO, "Processing webhook for self-hosted bitbucket instance");
         	processWebhookPayloadBitBucketSelfHosted(payload);
         } else {
+            // https://github.com/jenkinsci/bitbucket-plugin/pull/65
+            if ("diagnostics:ping".equals(request.getHeader("x-event-key"))) {
+                if (payload.has("test") && payload.getBoolean("test")) {
+                    LOGGER.log(Level.INFO, "Bitbucket test connection payload");
+                    return;
+                }
+            }
             LOGGER.log(Level.INFO, "Processing old POST service payload");
             processPostServicePayload(payload);
         }
