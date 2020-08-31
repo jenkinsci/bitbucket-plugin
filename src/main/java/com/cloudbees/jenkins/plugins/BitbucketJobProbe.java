@@ -67,7 +67,7 @@ public class BitbucketJobProbe {
                             }
                             for (SCM scmTrigger : item.getSCMs()) {
                                 if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-                                    LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getName());
+                                    LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getFullDisplayName());
                                     scmTriggered.add(scmTrigger);
                                     bTrigger.onPost(user, payload);
                                 } else
