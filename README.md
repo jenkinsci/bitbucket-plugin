@@ -76,6 +76,10 @@ freeStyleJob('test-job') {
 ```
 
 **Changelog**
+#### 1.1.24 (31. August 2020)
+
+- [PR-68 - New Branch: Scan multibranch pipeline log](https://github.com/jenkinsci/bitbucket-plugin/pull/68)
+
 #### 1.1.23 (29. August 2020)
 
 - [PR-65 - Ignore payload processing for diagnostics:ping](https://github.com/jenkinsci/bitbucket-plugin/pull/65)  
