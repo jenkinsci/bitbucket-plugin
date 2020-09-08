@@ -30,8 +30,15 @@ public class BitbucketPayloadProcessor {
             }
         } else if (payload.has("actor") && payload.has("repository") && payload.getJSONObject("repository").has("links")) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
-                LOGGER.log(Level.INFO, "Processing new Webhooks payload");
+                // found web hook according to https://support.atlassian.com/bitbucket-cloud/docs/event-payloads/
+                LOGGER.log(Level.INFO, "Processing new Cloud Webhooks payload");
                 processWebhookPayloadBitBucketServer(payload);
+            } else if ("repo:refs_changed".equals(request.getHeader("x-event-key"))) {
+                // found web hook according to https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
+                LOGGER.log(Level.INFO, "Processing new Self Hosted Server Webhooks payload");
+                processWebhookPayloadBitBucketSelfHosted(payload);
+            } else {
+                LOGGER.log(Level.INFO, "Unsupported [x-event-key] value, [x-event-key] is [" + request.getHeader("x-event-key") + "]");
             }
         } else if (payload.has("actor")) {
         	// we assume that the passed hook was from bitbucket server https://confluence.atlassian.com/bitbucketserver/managing-webhooks-in-bitbucket-server-938025878.html
