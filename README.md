@@ -76,6 +76,10 @@ freeStyleJob('test-job') {
 ```
 
 **Changelog**
+#### 1.1.26 (10. October 2020)
+
+- Added logging for JENKINS-63848
+
 #### 1.1.25 (8. September 2020)
 
 - [JENKINS-63468 - Bitbucket plugin unable to parse push/test connection bitbucket webhook json payload](https://issues.jenkins-ci.org/browse/JENKINS-63468)
