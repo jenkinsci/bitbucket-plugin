@@ -76,6 +76,10 @@ freeStyleJob('test-job') {
 ```
 
 **Changelog**
+#### 1.1.27 (11. October 2020)
+
+- Fixed logging printing
+
 #### 1.1.26 (10. October 2020)
 
 - Added logging for JENKINS-63848
