@@ -88,7 +88,7 @@ public class BitbucketJobProbe {
                             LOGGER.log(Level.INFO, "Triggering BitBucket scmSourceOwner {0}", scmSourceOwner);
                             scmSourceOwner.onSCMSourceUpdated(scmSource);
                         } else {
-                            LOGGER.log(Level.FINE, "{0} SCM doesn't match remote repo {1}", new Object[]{scmSourceOwner.getFullDisplayName(), remote});
+                            LOGGER.log(Level.FINE, String.format("SCM [%s] doesn't match remote repo [%s]", scmSourceOwner.getFullDisplayName(), remote));
                         }
                     }
                 }
