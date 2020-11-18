@@ -78,9 +78,7 @@ freeStyleJob('test-job') {
 ### Job DSL example for overrideUrl
 ```
 triggers{
-  bitbucketPush{
-    overrideUrl('https://bitbucket.org/blabla/hello-world-server')
-  }
+  bitbucketPush overrideUrl: 'https://bitbucket.org/blabla/hello-world-server'
 }
 ```
 
