@@ -71,7 +71,7 @@ public class BitbucketJobProbe {
                                     scmTriggered.add(scmTrigger);
                                     bTrigger.onPost(user, payload);
                                 } else {
-                                    LOGGER.log(Level.FINEST, "{0} SCM doesn't match remote repo {1}", new Object[]{job.getName(), remote});
+                                    LOGGER.log(Level.FINEST, String.format("[%s] SCM doesn't match remote repo [%s]", job.getName(), remote));
                                 }
                             }
                         }
