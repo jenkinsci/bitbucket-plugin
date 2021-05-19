@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.Extension;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;

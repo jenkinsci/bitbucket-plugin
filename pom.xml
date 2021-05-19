@@ -134,6 +134,12 @@
             <artifactId>scm-api</artifactId>
             <version>2.6.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-multibranch</artifactId>
+            <version>2.16</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 

@@ -23,12 +23,14 @@ import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
 import jenkins.triggers.SCMTriggerItem;
+
 import org.acegisecurity.context.SecurityContext;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
+import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 public class BitbucketJobProbe {
 
@@ -44,18 +46,25 @@ public class BitbucketJobProbe {
                 URIish remote = new URIish(url);
                 for (Job<?, ?> job : Jenkins.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
-                    LOGGER.log(Level.FINE, "Considering candidate job {0}", job.getName());
+                    LOGGER.log(Level.FINE, "Considering candidate job [{0}]", job.getName());
 
                     if (job instanceof ParameterizedJobMixIn.ParameterizedJob) {
                         ParameterizedJobMixIn.ParameterizedJob pJob = (ParameterizedJobMixIn.ParameterizedJob) job;
                         for (Object trigger : pJob.getTriggers().values()) {
                             if (trigger instanceof BitBucketTrigger) {
                                 bTrigger = (BitBucketTrigger) trigger;
+                                LOGGER.log(Level.FINE, "Job [{0}] has BitBucketTrigger", job.getName());
                                 break;
+                            } else if ( trigger instanceof BitBucketMultibranchTrigger){
+                                LOGGER.fine("Trigger is BitBucketMultibranchTrigger");
                             }
                         }
+                    } else {
+                        LOGGER.finest("job [" + job.getName() + "] is not ParameterizedJobMixIn.ParameterizedJob. [" + job.getClass().getSimpleName() + "]");
                     }
-                    if (bTrigger != null) {
+                    if (bTrigger == null) {
+                        LOGGER.log(Level.FINE, "[{0}] hasn't BitBucketTrigger set", job.getName());
+                    } else {
                         LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
                         if (item == null) {
@@ -75,8 +84,7 @@ public class BitbucketJobProbe {
                                 }
                             }
                         }
-                    } else
-                        LOGGER.log(Level.FINE, "{0} hasn't BitBucketTrigger set", job.getName());
+                    }
                 }
                 LOGGER.log(Level.FINE, "Now checking SCMSourceOwners/multiBranchProjects");
                 for (SCMSourceOwner scmSourceOwner : Jenkins.getInstance().getAllItems(SCMSourceOwner.class)) {
@@ -85,9 +93,35 @@ public class BitbucketJobProbe {
                     for (SCMSource scmSource : scmSources) {
                         LOGGER.log(Level.FINER, "Considering candidate scmSource {0}", scmSource);
                         if (match(scmSource, remote)) {
-                            LOGGER.log(Level.INFO, "Triggering BitBucket scmSourceOwner {0}", scmSourceOwner);
+                            LOGGER.log(Level.INFO, "Triggering BitBucket scmSourceOwner [{0}]", scmSourceOwner);
                             scmSourceOwner.onSCMSourceUpdated(scmSource);
+                        } else if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
+                            LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
+                            WorkflowMultiBranchProject workflowMultiBranchProject = (WorkflowMultiBranchProject) scmSourceOwner;
+                            if ( workflowMultiBranchProject.getTriggers().isEmpty()){
+                                LOGGER.finest("No triggers found");
+                            } else {
+                                workflowMultiBranchProject.getTriggers().forEach(((triggerDescriptor, trigger) -> {
+                                    if ( trigger instanceof BitBucketMultibranchTrigger){
+                                        LOGGER.finest("Found BitBucketMultibranchTrigger type");
+                                        BitBucketMultibranchTrigger bitBucketMultibranchTrigger = (BitBucketMultibranchTrigger) trigger;
+                                        if ( bitBucketMultibranchTrigger.getOverrideUrl() == null || bitBucketMultibranchTrigger.getOverrideUrl().isEmpty()){
+                                            LOGGER.finest("Ignoring empty overrideUrl");
+                                        } else {
+                                            LOGGER.fine("Found override URL [" + bitBucketMultibranchTrigger.getOverrideUrl() + "]");
+                                            LOGGER.log(Level.FINE, "Trying to match {0} ", remote + "<-->" + bitBucketMultibranchTrigger.getOverrideUrl());
+                                            if ( bitBucketMultibranchTrigger.getOverrideUrl().equalsIgnoreCase(remote.toString())) {
+                                                LOGGER.info(String.format("Triggering BitBucket scmSourceOwner [%s] by overrideUrl [%s]",scmSourceOwner.getName(), bitBucketMultibranchTrigger.getOverrideUrl()));
+                                                scmSourceOwner.onSCMSourceUpdated(scmSource);
+                                            }
+                                        }
+                                    } else {
+                                        LOGGER.finest("Found BitBucketMultibranchTrigger type");
+                                    }
+                                }));
+                            }
                         } else {
+
                             LOGGER.log(Level.FINE, String.format("SCM [%s] doesn't match remote repo [%s]", scmSourceOwner.getFullDisplayName(), remote));
                         }
                     }
@@ -127,11 +161,11 @@ public class BitbucketJobProbe {
                         urIish = urIish.setHost(url.getHost());
                     }
 
-                    LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
+                    LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url);
                     if (GitStatus.looselyMatches(urIish, url)) {
                         return true;
                     } else if (overrideUrl != null && !overrideUrl.isEmpty()) {
-                        LOGGER.log(Level.FINE, "Trying to match using override Repository URL {0} ", overrideUrl + "<-->" + url.toString());
+                        LOGGER.log(Level.FINE, "Trying to match using override Repository URL {0} ", overrideUrl + "<-->" + url);
                         return overrideUrl.contentEquals(url.toString());
                     }
                 }
@@ -175,10 +209,8 @@ public class BitbucketJobProbe {
                 urIish = urIish.setHost(url.getHost());
             }
 
-            LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url.toString());
-            if (GitStatus.looselyMatches(urIish, url)) {
-                return true;
-            }
+            LOGGER.log(Level.FINE, "Trying to match {0} ", urIish.toString() + "<-->" + url);
+            return GitStatus.looselyMatches(urIish, url);
         } else if (scm instanceof MercurialSCMSource) {
             LOGGER.log(Level.FINEST, "SCMSource is MercurialSCMSource");
             try {
