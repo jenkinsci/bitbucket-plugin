@@ -83,6 +83,10 @@ triggers{
 ```
 
 **Changelog**
+#### 1.1.28 (19. May 2021)
+
+- JENKINS-65651 - Added option to override URL in multi branch jobs
+
 #### 1.1.27 (11. October 2020)
 
 - Fixed logging printing
