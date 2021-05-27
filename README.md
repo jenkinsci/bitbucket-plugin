@@ -83,6 +83,10 @@ triggers{
 ```
 
 **Changelog**
+#### 1.1.29 (27. May 2021)
+
+- Changed help of multibranch according to https://issues.jenkins.io/browse/JENKINS-65651?focusedCommentId=409435&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-409435
+
 #### 1.1.28 (19. May 2021)
 
 - JENKINS-65651 - Added option to override URL in multi branch jobs
