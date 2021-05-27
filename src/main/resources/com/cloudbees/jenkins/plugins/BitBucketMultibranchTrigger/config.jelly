@@ -11,7 +11,7 @@
       Creates a text field that shows the value of the "name" property.
       When submitted, it will be passed to the corresponding constructor parameter.
     -->
-    <f:entry title="Override Repository URL" field="overrideUrl">
+    <f:entry title="Override Repository URL or Path" field="overrideUrl">
             <f:textbox />
         </f:entry>
 </j:jelly>
