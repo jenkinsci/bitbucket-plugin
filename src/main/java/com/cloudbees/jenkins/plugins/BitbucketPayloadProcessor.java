@@ -7,7 +7,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
+import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 
 public class BitbucketPayloadProcessor {
@@ -58,7 +60,7 @@ public class BitbucketPayloadProcessor {
     }
 
     /**
-     * parses the payload from self hosted bitbucket instance which uses the default webhooks implementation.
+     * parses the payload from self-hosted bitbucket instance which uses the default webhooks implementation.
      * 
      * https://confluence.atlassian.com/bitbucketserver0510/managing-webhooks-in-bitbucket-server-951390737.html
      * https://confluence.atlassian.com/bitbucketserver0510/event-payload-951390742.html
@@ -82,31 +84,82 @@ public class BitbucketPayloadProcessor {
         String user = payload.getJSONObject("actor").getString("name");
         String url = repo.getJSONObject("project").getString("key").toLowerCase() + "/" + repo.getString("slug");
 
-        // always use git no other repo type supported on self hosted solution
+        // always use git no other repo type supported on self-hosted solution
         String scm = "git";
         probe.triggerMatchingJobs(user, url, scm, payload.toString());
 		
 	}
 
 	private void processWebhookPayload(JSONObject payload) {
-        if (payload.has("repository")) {
+        if (isPayloadOldMemberNull(payload)){
+            String branchName = getBranchName(payload);
             JSONObject repo = payload.getJSONObject("repository");
-            LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
-
+            LOGGER.log(Level.INFO, "Branch [" +branchName + "] was created");
             String user = getUser(payload, "actor");
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
-            probe.triggerMatchingJobs(user, url, scm, payload.toString());
-        } else if (payload.has("scm")) {
-            LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
-            String user = getUser(payload, "owner");
-            String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
-            String scm = payload.has("scm") ? payload.getString("scm") : "hg";
+            probe.triggerMatchingJobs(user, url, scm, payload.toString(), branchName);
+        } else {
+            if (payload.has("repository")) {
+                JSONObject repo = payload.getJSONObject("repository");
+                LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
 
-            probe.triggerMatchingJobs(user, url, scm, payload.toString());
+                String user = getUser(payload, "actor");
+                String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
+                String scm = repo.has("scm") ? repo.getString("scm") : "git";
+
+                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+            } else if (payload.has("scm")) {
+                LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
+                String user = getUser(payload, "owner");
+                String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
+                String scm = payload.has("scm") ? payload.getString("scm") : "hg";
+
+                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+            }
+       }
+
+    }
+
+    private String getBranchName(JSONObject payload) {
+        if (payload.has("push")) {
+            LOGGER.log(Level.INFO, "found [push] in payload");
+            JSONObject jsonObjectPush = payload.getJSONObject("push");
+            if (jsonObjectPush.has("changes")) {
+                LOGGER.log(Level.INFO, "found [push/changes] in payload");
+                JSONArray jsonArrayChanges = jsonObjectPush.getJSONArray("changes");
+
+                for (Object jsonArrayChange : jsonArrayChanges) {
+                    JSONObject jsonObject = (JSONObject) jsonArrayChange;
+                    if (jsonObject.has("new")) {
+                        JSONObject jsonObjectNew = jsonObject.getJSONObject("new");
+                        if (jsonObjectNew.has("name")) {
+                            return jsonObjectNew.getString("name");
+                        }
+
+                    }
+                }
+            }
         }
+        return "";
+    }
 
+    private boolean isPayloadOldMemberNull(JSONObject payload) {
+        if ( payload.has("push")){
+            LOGGER.log(Level.INFO, "found [push] in payload");
+            JSONObject jsonObjectPush = payload.getJSONObject("push");
+            if (jsonObjectPush.has("changes")){
+                LOGGER.log(Level.INFO, "found [push/changes] in payload");
+                JSONArray jsonArrayChanges = jsonObjectPush.getJSONArray("changes");
+
+                for (Object jsonArrayChange : jsonArrayChanges) {
+                    JSONObject jsonObject = (JSONObject) jsonArrayChange;
+                    return jsonObject.get("old") instanceof JSONNull;
+                }
+            }
+        }
+        return false;
     }
 
     private String getUser(JSONObject payload, String jsonObject) {

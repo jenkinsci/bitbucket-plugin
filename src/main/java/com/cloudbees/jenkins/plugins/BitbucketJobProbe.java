@@ -34,12 +34,11 @@ import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 
 public class BitbucketJobProbe {
 
-    @Deprecated
-    public void triggerMatchingJobs(String user, String url, String scm) {
-        triggerMatchingJobs(user, url, scm, "");
+    public void triggerMatchingJobs(String user, String url, String scm, String payload) {
+        triggerMatchingJobs(user, url, scm, payload, null);
     }
 
-    public void triggerMatchingJobs(String user, String url, String scm, String payload) {
+    public void triggerMatchingJobs(String user, String url, String scm, String payload, String branchName) {
         if ("git".equals(scm) || "hg".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
             try {
@@ -78,7 +77,7 @@ public class BitbucketJobProbe {
                                 if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
                                     LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getFullDisplayName());
                                     scmTriggered.add(scmTrigger);
-                                    bTrigger.onPost(user, payload);
+                                    bTrigger.onPost(user, payload, branchName);
                                 } else {
                                     LOGGER.log(Level.FINEST, String.format("[%s] SCM doesn't match remote repo [%s]", job.getName(), remote));
                                 }
