@@ -83,7 +83,8 @@ triggers{
 ```
 
 **Changelog**
-#### 1.1.30 (27. May 2021)
+#### 1.1.30 (20. Nov 2021)
+
 - JENKINS-49414 - Added ability to trigger the job upon receiving a branch was created event
 
 #### 1.1.29 (27. May 2021)
