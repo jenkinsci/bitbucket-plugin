@@ -83,6 +83,9 @@ triggers{
 ```
 
 **Changelog**
+#### 1.1.30 (27. May 2021)
+- JENKINS-49414 - Added ability to trigger the job upon receiving a branch was created event
+
 #### 1.1.29 (27. May 2021)
 
 - Changed help of multibranch according to https://issues.jenkins.io/browse/JENKINS-65651?focusedCommentId=409435&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-409435
