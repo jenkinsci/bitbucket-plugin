@@ -27,34 +27,34 @@ public class BitbucketPayloadProcessor {
     public void processPayload(JSONObject payload, HttpServletRequest request) {
         if ("Bitbucket-Webhooks/2.0".equals(request.getHeader("user-agent"))) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
-                LOGGER.log(Level.INFO, "Processing new Webhooks payload");
+                LOGGER.log(Level.FINER, "Processing new Webhooks payload");
                 processWebhookPayload(payload);
             }
         } else if (payload.has("actor") && payload.has("repository") && payload.getJSONObject("repository").has("links")) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
                 // found web hook according to https://support.atlassian.com/bitbucket-cloud/docs/event-payloads/
-                LOGGER.log(Level.INFO, "Processing new Cloud Webhooks payload");
+                LOGGER.log(Level.FINER, "Processing new Cloud Webhooks payload");
                 processWebhookPayloadBitBucketServer(payload);
             } else if ("repo:refs_changed".equals(request.getHeader("x-event-key"))) {
                 // found web hook according to https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
-                LOGGER.log(Level.INFO, "Processing new Self Hosted Server Webhooks payload");
+                LOGGER.log(Level.FINER, "Processing new Self Hosted Server Webhooks payload");
                 processWebhookPayloadBitBucketSelfHosted(payload);
             } else {
-                LOGGER.log(Level.INFO, "Unsupported [x-event-key] value, [x-event-key] is [" + request.getHeader("x-event-key") + "]");
+                LOGGER.log(Level.FINER, "Unsupported [x-event-key] value, [x-event-key] is [" + request.getHeader("x-event-key") + "]");
             }
         } else if (payload.has("actor")) {
         	// we assume that the passed hook was from bitbucket server https://confluence.atlassian.com/bitbucketserver/managing-webhooks-in-bitbucket-server-938025878.html
-        	LOGGER.log(Level.INFO, "Processing webhook for self-hosted bitbucket instance");
+        	LOGGER.log(Level.FINER, "Processing webhook for self-hosted bitbucket instance");
         	processWebhookPayloadBitBucketSelfHosted(payload);
         } else {
             // https://github.com/jenkinsci/bitbucket-plugin/pull/65
             if ("diagnostics:ping".equals(request.getHeader("x-event-key"))) {
                 if (payload.has("test") && payload.getBoolean("test")) {
-                    LOGGER.log(Level.INFO, "Bitbucket test connection payload");
+                    LOGGER.log(Level.FINER, "Bitbucket test connection payload");
                     return;
                 }
             }
-            LOGGER.log(Level.INFO, "Processing old POST service payload");
+            LOGGER.log(Level.FINER, "Processing old POST service payload");
             processPostServicePayload(payload);
         }
     }
@@ -94,7 +94,7 @@ public class BitbucketPayloadProcessor {
         if (isPayloadOldMemberNull(payload)){
             String branchName = getBranchName(payload);
             JSONObject repo = payload.getJSONObject("repository");
-            LOGGER.log(Level.INFO, "Branch [" +branchName + "] was created");
+            LOGGER.log(Level.FINER, "Branch [" +branchName + "] was created");
             String user = getUser(payload, "actor");
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
@@ -103,7 +103,7 @@ public class BitbucketPayloadProcessor {
         } else {
             if (payload.has("repository")) {
                 JSONObject repo = payload.getJSONObject("repository");
-                LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
+                LOGGER.log(Level.FINER, "Received commit hook notification for {0}", repo);
 
                 String user = getUser(payload, "actor");
                 String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
@@ -111,7 +111,7 @@ public class BitbucketPayloadProcessor {
 
                 probe.triggerMatchingJobs(user, url, scm, payload.toString());
             } else if (payload.has("scm")) {
-                LOGGER.log(Level.INFO, "Received commit hook notification for hg: {0}", payload);
+                LOGGER.log(Level.FINER, "Received commit hook notification for hg: {0}", payload);
                 String user = getUser(payload, "owner");
                 String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
                 String scm = payload.has("scm") ? payload.getString("scm") : "hg";
@@ -124,10 +124,10 @@ public class BitbucketPayloadProcessor {
 
     private String getBranchName(JSONObject payload) {
         if (payload.has("push")) {
-            LOGGER.log(Level.INFO, "found [push] in payload");
+            LOGGER.log(Level.FINER, "found [push] in payload");
             JSONObject jsonObjectPush = payload.getJSONObject("push");
             if (jsonObjectPush.has("changes")) {
-                LOGGER.log(Level.INFO, "found [push/changes] in payload");
+                LOGGER.log(Level.FINER, "found [push/changes] in payload");
                 JSONArray jsonArrayChanges = jsonObjectPush.getJSONArray("changes");
 
                 for (Object jsonArrayChange : jsonArrayChanges) {
@@ -147,10 +147,10 @@ public class BitbucketPayloadProcessor {
 
     private boolean isPayloadOldMemberNull(JSONObject payload) {
         if ( payload.has("push")){
-            LOGGER.log(Level.INFO, "found [push] in payload");
+            LOGGER.log(Level.FINER, "found [push] in payload");
             JSONObject jsonObjectPush = payload.getJSONObject("push");
             if (jsonObjectPush.has("changes")){
-                LOGGER.log(Level.INFO, "found [push/changes] in payload");
+                LOGGER.log(Level.FINER, "found [push/changes] in payload");
                 JSONArray jsonArrayChanges = jsonObjectPush.getJSONArray("changes");
 
                 for (Object jsonArrayChange : jsonArrayChanges) {
@@ -201,7 +201,7 @@ public class BitbucketPayloadProcessor {
 
     private void processPostServicePayload(JSONObject payload) {
         JSONObject repo = payload.getJSONObject("repository");
-        LOGGER.log(Level.INFO, "Received commit hook notification for {0}", repo);
+        LOGGER.log(Level.FINER, "Received commit hook notification for {0}", repo);
 
         String user = payload.getString("user");
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
