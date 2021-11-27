@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>bitbucket</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${changelist}</version>
     <packaging>hpi</packaging>
     <name>Jenkins Bitbucket Plugin</name>
     <description>integrate Jenkins with BitBucket.</description>
@@ -23,8 +23,7 @@
     </scm>
 
     <properties>
-        <revision>1.1.31</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <changelist>999999-SNAPSHOT</changelist>
         <!--        <spotbugs.skip>true</spotbugs.skip>-->
         <jenkins.version>2.204.1</jenkins.version>
         <maven.compiler.source>1.8</maven.compiler.source>
