@@ -67,7 +67,7 @@ public class BitbucketJobProbe {
                         LOGGER.log(Level.FINE, "Considering to poke {0}", job.getFullDisplayName());
                         SCMTriggerItem item = SCMTriggerItem.SCMTriggerItems.asSCMTriggerItem(job);
                         if (item == null) {
-                            LOGGER.log(Level.INFO, "item is null");
+                            LOGGER.log(Level.FINER, "item is null");
                         } else {
                             List<SCM> scmTriggered = new ArrayList<>();
                             if (item.getSCMs().isEmpty()) {
@@ -75,7 +75,7 @@ public class BitbucketJobProbe {
                             }
                             for (SCM scmTrigger : item.getSCMs()) {
                                 if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-                                    LOGGER.log(Level.INFO, "Triggering BitBucket job {0}", job.getFullDisplayName());
+                                    LOGGER.log(Level.FINER, "Triggering BitBucket job {0}", job.getFullDisplayName());
                                     scmTriggered.add(scmTrigger);
                                     bTrigger.onPost(user, payload, branchName);
                                 } else {
@@ -92,7 +92,7 @@ public class BitbucketJobProbe {
                     for (SCMSource scmSource : scmSources) {
                         LOGGER.log(Level.FINER, "Considering candidate scmSource {0}", scmSource);
                         if (match(scmSource, remote)) {
-                            LOGGER.log(Level.INFO, "Triggering BitBucket scmSourceOwner [{0}]", scmSourceOwner);
+                            LOGGER.log(Level.FINER, "Triggering BitBucket scmSourceOwner [{0}]", scmSourceOwner);
                             scmSourceOwner.onSCMSourceUpdated(scmSource);
                         } else if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
                             LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
