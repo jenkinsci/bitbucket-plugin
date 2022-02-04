@@ -69,7 +69,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
                         LOGGER,
                         triggeredByUser,
                         branchName,
-                        buildOnCreatedBranch
+                        buildOnCreatedBranch != null && buildOnCreatedBranch // buildOnCreatedBranch == null ? false : buildOnCreatedBranch to prevent NPE
                 )
         );
     }
