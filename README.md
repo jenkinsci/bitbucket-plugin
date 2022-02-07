@@ -83,6 +83,9 @@ triggers{
 ```
 
 **Changelog**
+#### 215.vfe32d14d1f47 #### (04. Feb 2022)
+- Fixed NPE
+
 #### 1.1.30 (20. Nov 2021)
 
 - JENKINS-49414 - Added ability to trigger the job upon receiving a branch was created event
