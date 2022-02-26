@@ -1,9 +1,10 @@
 package com.cloudbees.jenkins.plugins;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
 import hudson.model.EnvironmentContributingAction;
 import hudson.model.InvisibleAction;
+import hudson.model.Run;
 
 import javax.annotation.Nonnull;
 import java.util.logging.Level;
@@ -27,10 +28,11 @@ public class BitBucketPayload extends InvisibleAction implements EnvironmentCont
     }
 
     @Override
-    public void buildEnvVars(AbstractBuild<?, ?> abstractBuild, EnvVars envVars) {
+    public void buildEnvironment(@NonNull Run<?, ?> run, @NonNull EnvVars env) {
+        EnvironmentContributingAction.super.buildEnvironment(run, env);
         final String payload = getPayload();
         LOGGER.log(Level.FINEST, "Injecting BITBUCKET_PAYLOAD: {0}", payload);
-        envVars.put("BITBUCKET_PAYLOAD", payload);
+        env.put("BITBUCKET_PAYLOAD", payload);
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitBucketPayload.class.getName());

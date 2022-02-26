@@ -25,7 +25,7 @@
     <properties>
         <changelist>999999-SNAPSHOT</changelist>
         <!--        <spotbugs.skip>true</spotbugs.skip>-->
-        <jenkins.version>2.204.1</jenkins.version>
+        <jenkins.version>2.303.1</jenkins.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <java.level>8</java.level>
