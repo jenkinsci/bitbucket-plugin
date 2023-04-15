@@ -101,7 +101,7 @@
         <dependency> <!-- minimun required version to work with Workflow 1.4 GitSCM step-->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>mercurial</artifactId>
-            <version>2.10</version>
+            <version>1260.vdfb_723cdcc81</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
