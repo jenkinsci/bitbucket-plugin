@@ -83,6 +83,10 @@ triggers{
 ```
 
 **Changelog**
+
+#### 237.vc424f493c5f6 (10. Dec 2023)
+- JENKINS-72448 - Updated jenkins.version from 2.375.3 to 2.414.1
+
 #### 223.vd12f2bca5430 (26. Feb 2022)
 - JENKINS-41635 - fixed. This required a change in Jenkins minimum version from 2.204.1 to 2.303.1
 
