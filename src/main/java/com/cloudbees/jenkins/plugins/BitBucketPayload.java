@@ -6,7 +6,6 @@ import hudson.model.EnvironmentContributingAction;
 import hudson.model.InvisibleAction;
 import hudson.model.Run;
 
-import javax.annotation.Nonnull;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,13 +15,13 @@ import java.util.logging.Logger;
  * @version 1.1.5
  */
 public class BitBucketPayload extends InvisibleAction implements EnvironmentContributingAction {
-    private final @Nonnull String payload;
+    private final @NonNull String payload;
 
-    public BitBucketPayload(@Nonnull String payload) {
+    public BitBucketPayload(@NonNull String payload) {
         this.payload = payload;
     }
 
-    @Nonnull
+    @NonNull
     public String getPayload() {
         return payload;
     }
