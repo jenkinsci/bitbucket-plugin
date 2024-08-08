@@ -84,6 +84,9 @@ triggers{
 
 **Changelog**
 
+#### TBD ####
+- JENKINS-69490 - fixed NPE when using pipeline-syntax properties: Set job properties
+
 #### 237.vc424f493c5f6 (10. Dec 2023)
 - JENKINS-72448 - Updated jenkins.version from 2.375.3 to 2.414.1
 
