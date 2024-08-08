@@ -8,3 +8,4 @@ work/*
 /target
 .DS_Store
 **/.DS_Store
+opentofu
