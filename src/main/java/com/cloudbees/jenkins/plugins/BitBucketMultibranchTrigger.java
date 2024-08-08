@@ -45,7 +45,9 @@ public class BitBucketMultibranchTrigger extends Trigger<WorkflowMultiBranchProj
 
         @Override
         public boolean isApplicable(Item item) {
-            LOGGER.finest(item.getClass().getSimpleName());
+            if ( item != null){
+                LOGGER.finest(item.getClass().getSimpleName());
+            }
             return item instanceof WorkflowMultiBranchProject;
         }
 
