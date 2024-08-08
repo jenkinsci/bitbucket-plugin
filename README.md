@@ -84,7 +84,7 @@ triggers{
 
 **Changelog**
 
-#### TBD ####
+#### 250.v8032f588d8a_c ####
 - JENKINS-69490 - fixed NPE when using pipeline-syntax properties: Set job properties
 
 #### 237.vc424f493c5f6 (10. Dec 2023)
