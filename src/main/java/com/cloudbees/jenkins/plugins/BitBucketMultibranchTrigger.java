@@ -20,6 +20,7 @@ public class BitBucketMultibranchTrigger extends Trigger<WorkflowMultiBranchProj
     private static final Logger LOGGER = Logger.getLogger(BitBucketMultibranchTrigger.class.getName());
 
     private String overrideUrl;
+    private String payload;
 
     @DataBoundConstructor
     public BitBucketMultibranchTrigger() { }
@@ -32,6 +33,14 @@ public class BitBucketMultibranchTrigger extends Trigger<WorkflowMultiBranchProj
     @DataBoundSetter
     public void setOverrideUrl(String overrideUrl){
         this.overrideUrl = overrideUrl;
+    }
+
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
+
+    public String getPayload() {
+        return payload;
     }
 
     @Extension

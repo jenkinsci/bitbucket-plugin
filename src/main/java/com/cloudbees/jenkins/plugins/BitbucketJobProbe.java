@@ -1,5 +1,6 @@
 package com.cloudbees.jenkins.plugins;
 
+import hudson.model.CauseAction;
 import hudson.model.Job;
 import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.GitStatus;
@@ -12,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -92,8 +94,34 @@ public class BitbucketJobProbe {
                     for (SCMSource scmSource : scmSources) {
                         LOGGER.log(Level.FINER, "Considering candidate scmSource {0}", scmSource);
                         if (match(scmSource, remote)) {
-                            LOGGER.log(Level.FINER, "Triggering BitBucket scmSourceOwner [{0}]", scmSourceOwner);
-                            scmSourceOwner.onSCMSourceUpdated(scmSource);
+                            if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
+                                LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
+                                WorkflowMultiBranchProject workflowMultiBranchProject  = (WorkflowMultiBranchProject) scmSourceOwner;
+                                AtomicReference<BitBucketMultibranchTrigger> bitBucketMultibranchTrigger = new AtomicReference<>(null);
+                                if ( workflowMultiBranchProject.getTriggers().isEmpty()) {
+                                    LOGGER.finest("No triggers found");
+                                } else {
+                                    workflowMultiBranchProject.getTriggers().forEach(((triggerDescriptor, trigger) -> {
+                                        if (trigger instanceof BitBucketMultibranchTrigger) {
+                                            LOGGER.finest("Found BitBucketMultibranchTrigger type");
+                                            bitBucketMultibranchTrigger.set((BitBucketMultibranchTrigger) trigger);
+                                        }
+                                    }));
+                                }
+                                if ( bitBucketMultibranchTrigger.get() == null){
+                                    scmSourceOwner.onSCMSourceUpdated(scmSource);
+                                } else {
+                                    if (workflowMultiBranchProject.isBuildable()){
+                                        bitBucketMultibranchTrigger.get().setPayload(payload);
+                                        BitBucketPushCause bitBucketPushCause = new BitBucketPushCause(user);
+                                        workflowMultiBranchProject.scheduleBuild2(0, new CauseAction(bitBucketPushCause));
+                                    } else {
+                                        LOGGER.finest("workflowMultiBranchProject is not builtable");
+                                    }
+                                }
+                            } else {
+                                scmSourceOwner.onSCMSourceUpdated(scmSource);
+                            }
                         } else if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
                             LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
                             WorkflowMultiBranchProject workflowMultiBranchProject = (WorkflowMultiBranchProject) scmSourceOwner;
