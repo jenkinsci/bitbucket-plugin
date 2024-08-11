@@ -84,6 +84,10 @@ triggers{
 
 **Changelog**
 
+#### 254.v9d8ec33a_7a_42 ####
+
+- JENKINS-65697 - feat - BITBUCKET_PIPELINE is now available in multibranch-pipelines
+
 #### 250.v8032f588d8a_c ####
 - JENKINS-69490 - fixed NPE when using pipeline-syntax properties: Set job properties
 
