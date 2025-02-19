@@ -71,7 +71,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>mercurial</artifactId>
-            <version>1260.vdfb_723cdcc81</version>
+            <version>1309.v6802b_f0efb_b_9</version>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
