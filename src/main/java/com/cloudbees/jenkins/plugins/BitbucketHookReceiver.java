@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.IOUtils;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 /**
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
@@ -39,7 +39,7 @@ public class BitbucketHookReceiver implements UnprotectedRootAction {
      * as form-urlencoded <pre>payload=JSON</pre>
      * @throws IOException
      */
-    public void doIndex(StaplerRequest req) throws IOException {
+    public void doIndex(StaplerRequest2 req) throws IOException {
         String body = IOUtils.toString(req.getInputStream());
         if (!body.isEmpty() && req.getRequestURI().contains("/" + BITBUCKET_HOOK_URL + "/")) {
             String contentType = req.getContentType();

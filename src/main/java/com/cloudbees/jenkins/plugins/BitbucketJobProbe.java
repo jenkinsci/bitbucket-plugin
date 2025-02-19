@@ -26,8 +26,8 @@ import jenkins.scm.api.SCMSource;
 import jenkins.scm.api.SCMSourceOwner;
 import jenkins.triggers.SCMTriggerItem;
 
-import org.acegisecurity.context.SecurityContext;
-import org.acegisecurity.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
@@ -42,7 +42,7 @@ public class BitbucketJobProbe {
 
     public void triggerMatchingJobs(String user, String url, String scm, String payload, String branchName) {
         if ("git".equals(scm) || "hg".equals(scm)) {
-            SecurityContext old = Jenkins.getInstance().getACL().impersonate(ACL.SYSTEM);
+            SecurityContext old = Jenkins.getInstance().getACL().impersonate2(ACL.SYSTEM2);
             try {
                 URIish remote = new URIish(url);
                 for (Job<?, ?> job : Jenkins.getInstance().getAllItems(Job.class)) {
