@@ -66,7 +66,7 @@ public class BitbucketJobProbe {
                                 bTrigger = (BitBucketTrigger) trigger;
                                 LOGGER.log(Level.FINE, "Job [{0}] has BitBucketTrigger", job.getName());
                                 break;
-                            } else if ( trigger instanceof BitBucketMultibranchTrigger){
+                            } else if (trigger instanceof BitBucketMultibranchTrigger) {
                                 LOGGER.fine("Trigger is BitBucketMultibranchTrigger");
                             }
                         }
@@ -108,7 +108,7 @@ public class BitbucketJobProbe {
                                 LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
                                 WorkflowMultiBranchProject workflowMultiBranchProject  = (WorkflowMultiBranchProject) scmSourceOwner;
                                 AtomicReference<BitBucketMultibranchTrigger> bitBucketMultibranchTrigger = new AtomicReference<>(null);
-                                if ( workflowMultiBranchProject.getTriggers().isEmpty()) {
+                                if (workflowMultiBranchProject.getTriggers().isEmpty()) {
                                     LOGGER.finest("No triggers found");
                                 } else {
                                     workflowMultiBranchProject.getTriggers().forEach(((triggerDescriptor, trigger) -> {
@@ -118,10 +118,10 @@ public class BitbucketJobProbe {
                                         }
                                     }));
                                 }
-                                if ( bitBucketMultibranchTrigger.get() == null){
+                                if (bitBucketMultibranchTrigger.get() == null) {
                                     scmSourceOwner.onSCMSourceUpdated(scmSource);
                                 } else {
-                                    if (workflowMultiBranchProject.isBuildable()){
+                                    if (workflowMultiBranchProject.isBuildable()) {
                                         bitBucketMultibranchTrigger.get().setPayload(payload);
                                         BitBucketPushCause bitBucketPushCause = new BitBucketPushCause(user);
                                         workflowMultiBranchProject.scheduleBuild2(0, new CauseAction(bitBucketPushCause));
@@ -135,19 +135,19 @@ public class BitbucketJobProbe {
                         } else if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
                             LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
                             WorkflowMultiBranchProject workflowMultiBranchProject = (WorkflowMultiBranchProject) scmSourceOwner;
-                            if ( workflowMultiBranchProject.getTriggers().isEmpty()){
+                            if (workflowMultiBranchProject.getTriggers().isEmpty()) {
                                 LOGGER.finest("No triggers found");
                             } else {
                                 workflowMultiBranchProject.getTriggers().forEach(((triggerDescriptor, trigger) -> {
-                                    if ( trigger instanceof BitBucketMultibranchTrigger){
+                                    if (trigger instanceof BitBucketMultibranchTrigger) {
                                         LOGGER.finest("Found BitBucketMultibranchTrigger type");
                                         BitBucketMultibranchTrigger bitBucketMultibranchTrigger = (BitBucketMultibranchTrigger) trigger;
-                                        if ( bitBucketMultibranchTrigger.getOverrideUrl() == null || bitBucketMultibranchTrigger.getOverrideUrl().isEmpty()){
+                                        if (bitBucketMultibranchTrigger.getOverrideUrl() == null || bitBucketMultibranchTrigger.getOverrideUrl().isEmpty()) {
                                             LOGGER.finest("Ignoring empty overrideUrl");
                                         } else {
                                             LOGGER.fine("Found override URL [" + bitBucketMultibranchTrigger.getOverrideUrl() + "]");
                                             LOGGER.log(Level.FINE, "Trying to match {0} ", remote + "<-->" + bitBucketMultibranchTrigger.getOverrideUrl());
-                                            if ( bitBucketMultibranchTrigger.getOverrideUrl().equalsIgnoreCase(remote.toString())) {
+                                            if (bitBucketMultibranchTrigger.getOverrideUrl().equalsIgnoreCase(remote.toString())) {
                                                 LOGGER.info(String.format("Triggering BitBucket scmSourceOwner [%s] by overrideUrl [%s]",scmSourceOwner.getName(), bitBucketMultibranchTrigger.getOverrideUrl()));
                                                 scmSourceOwner.onSCMSourceUpdated(scmSource);
                                             }
