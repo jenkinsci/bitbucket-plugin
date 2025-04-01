@@ -33,8 +33,18 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
+import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
 
 public class BitbucketJobProbe {
+
+    private boolean isBranchPluginAvailable = false;
+
+    public BitbucketJobProbe() {
+        if (Jenkins.get().getPlugin("cloudbees-bitbucket-branch-source") != null) {
+            LOGGER.log(Level.FINEST, "Bitbucket branch source available");
+            isBranchPluginAvailable = true;
+        }
+    }
 
     public void triggerMatchingJobs(String user, String url, String scm, String payload) {
         triggerMatchingJobs(user, url, scm, payload, null);
@@ -216,10 +226,21 @@ public class BitbucketJobProbe {
     }
 
     private boolean match(SCMSource scm, URIish url) {
-        if (scm instanceof GitSCMSource) {
-            LOGGER.log(Level.FINEST, "SCMSource is GitSCMSource");
-            String gitRemote = ((GitSCMSource) scm).getRemote();
+        if (scm instanceof GitSCMSource || (isBranchPluginAvailable && scm instanceof BitbucketSCMSource)) {
+            String gitRemote;
+            if (scm instanceof GitSCMSource) {
+                LOGGER.log(Level.FINEST, "SCMSource is GitSCMSource");
+                gitRemote = ((GitSCMSource) scm).getRemote();
+            } else if (isBranchPluginAvailable) {
+                LOGGER.log(Level.FINEST, "SCMSource is BitbucketSCMSource");
+                gitRemote = ((BitbucketSCMSource) scm).getServerUrl() + "/" +
+                            ((BitbucketSCMSource) scm).getRepoOwner() + "/" +
+                            ((BitbucketSCMSource) scm).getRepository();
+            } else {
+                return false;
+            }
             URIish urIish;
+            LOGGER.log(Level.FINEST, "SCMSource remote is " + gitRemote);
             try {
                 urIish = new URIish(gitRemote);
             } catch (URISyntaxException e) {
