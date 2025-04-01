@@ -99,6 +99,11 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-multibranch</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>cloudbees-bitbucket-branch-source</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
