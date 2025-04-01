@@ -17,7 +17,7 @@ import org.kohsuke.stapler.StaplerRequest2;
  * @author <a href="mailto:nicolas.deloof@gmail.com">Nicolas De Loof</a>
  */
 @Extension
-public class BitbucketHookReceiver implements UnprotectedRootAction {
+public class BitbucketHookReceiver extends BitbucketCrumbExclusion implements UnprotectedRootAction {
 
     private final BitbucketPayloadProcessor payloadProcessor = new BitbucketPayloadProcessor();
     public static final String BITBUCKET_HOOK_URL = "bitbucket-hook";
