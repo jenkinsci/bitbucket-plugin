@@ -8,34 +8,42 @@ import jenkins.branch.BranchSource;
 import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.plugins.git.GitSampleRepoRule;
+import jenkins.plugins.git.junit.jupiter.WithGitSampleRepo;
 import jenkins.plugins.git.traits.BranchDiscoveryTrait;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @SuppressWarnings({"rawtypes", "ResultOfMethodCallIgnored"})
-public class BitbucketMultibranchTest {
+@WithJenkins
+@WithGitSampleRepo
+class BitbucketMultibranchTest {
 
-    @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+    private JenkinsRule jenkinsRule;
 
-    @Rule
-    public GitSampleRepoRule sampleRepo = new GitSampleRepoRule();
+    private GitSampleRepoRule sampleRepo;
 
+    @BeforeEach
+    void setUp(JenkinsRule rule, GitSampleRepoRule repo) {
+        jenkinsRule = rule;
+        sampleRepo = repo;
+    }
 
     @Test
-    public void testWorkflowMultiBranchProject() throws Exception{
+    void testWorkflowMultiBranchProject() throws Exception{
         BitbucketEnvironmentContributor instance =
                 jenkinsRule.jenkins.getExtensionList(EnvironmentContributor.class).get(BitbucketEnvironmentContributor.class);
         assertNotNull(instance);
@@ -84,8 +92,7 @@ public class BitbucketMultibranchTest {
                 new CauseAction(new BitBucketPushCause("tzachs")), new Bla());
 
         Queue.Executable executable = Objects.requireNonNull(queueItem).getFuture().get();
-        if ( executable instanceof MultiBranchProject.BranchIndexing){
-            MultiBranchProject.BranchIndexing branchIndexing = (MultiBranchProject.BranchIndexing) executable;
+        if (executable instanceof MultiBranchProject.BranchIndexing branchIndexing) {
             String multiBranchLog = getLog(branchIndexing.getLogText());
             jenkinsRule.assertStringContains(multiBranchLog, "Starting branch indexing");
             jenkinsRule.assertStringContains(multiBranchLog, "Started by BitBucket push by tzachs");

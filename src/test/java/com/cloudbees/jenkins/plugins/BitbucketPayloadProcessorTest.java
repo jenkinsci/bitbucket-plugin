@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -14,28 +15,27 @@ import net.sf.json.JSONObject;
 
 
 import org.apache.commons.io.IOUtils;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BitbucketPayloadProcessorTest {
+@ExtendWith(MockitoExtension.class)
+class BitbucketPayloadProcessorTest {
 
     @Mock private HttpServletRequest request;
     @Mock private BitbucketJobProbe probe;
 
     private BitbucketPayloadProcessor payloadProcessor;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         payloadProcessor = new BitbucketPayloadProcessor(probe);
     }
 
     @Test
-    public void testProcessWebhookPayload() {
+    void testProcessWebhookPayload() {
         // Set headers so that payload processor will parse as new Webhook payload
         when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
         when(request.getHeader("x-event-key")).thenReturn("repo:push");
@@ -69,7 +69,7 @@ public class BitbucketPayloadProcessorTest {
     }
 
     @Test
-    public void processWebhookPayloadBitBucketServer() {
+    void processWebhookPayloadBitBucketServer() {
         when(request.getHeader("user-agent")).thenReturn("Apache-HttpClient/4.5.1 (Java/1.8.0_102)");
         when(request.getHeader("x-event-key")).thenReturn("repo:push");
 
@@ -95,7 +95,7 @@ public class BitbucketPayloadProcessorTest {
     }
 
     @Test
-    public void testProcessPostServicePayload() {
+    void testProcessPostServicePayload() {
         // Ensure header isn't set so that payload processor will parse as old POST service payload
         when(request.getHeader("user-agent")).thenReturn(null);
 
@@ -110,38 +110,38 @@ public class BitbucketPayloadProcessorTest {
 
         verify(probe).triggerMatchingJobs("old_user", "https://staging.bitbucket.org/old_user/old_repo", "git", payload.toString());
     }
-    
-    
+
+
     @Test
-    public void processWebhookPayloadBitBucketSelfHostedPush() throws IOException {
+    void processWebhookPayloadBitBucketSelfHostedPush() throws IOException {
         String user = "user";
         String url = "proj/repository";
 
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_pr_merge_payload.json")) {
-        	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input));
+        	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
             payloadProcessor.processPayload(payload, request);
-            
+
             verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
         }
-        
+
     }
-    
+
     @Test
-    public void processWebhookPayloadBitBucketSelfHostedPR() throws IOException {
+    void processWebhookPayloadBitBucketSelfHostedPR() throws IOException {
     	String user = "user";
         String url = "proj/repository";
 
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_pr_merge_payload.json")) {
-        	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input));
+        	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
             payloadProcessor.processPayload(payload, request);
-            
+
             verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
         }
     }
 
 
     @Test
-    public void testProcessWebhookPayload_inCaseOwnerUsernameFieldIsReplacedByNickName() {
+    void testProcessWebhookPayload_inCaseOwnerUsernameFieldIsReplacedByNickName() {
         // Set headers so that payload processor will parse as new Webhook payload
         when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
         when(request.getHeader("x-event-key")).thenReturn("repo:push");
