@@ -7,39 +7,41 @@ import org.jenkinsci.plugins.workflow.cps.SnippetizerTester;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty;
 import org.jenkinsci.plugins.workflow.multibranch.JobPropertyStep;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.List;
 
 /**
  * @author Allan Burdajewicz
  */
-public class BitbucketTriggerTest {
-
-    @Rule public JenkinsRule j = new JenkinsRule();
+@WithJenkins
+class BitbucketTriggerTest {
 
     @Test
     @Issue("JENKINS-44309")
-    public void symbolAnnotationBitbucketTrigger() throws Exception {
+    void symbolAnnotationBitbucketTrigger(JenkinsRule j) throws Exception {
         WorkflowJob p = j.jenkins.createProject(WorkflowJob.class, "p");
-        p.setDefinition(new CpsFlowDefinition("properties([pipelineTriggers([bitbucketPush()])])\n"));
+        p.setDefinition(new CpsFlowDefinition("properties([pipelineTriggers([bitbucketPush()])])\n", false));
         j.assertBuildStatusSuccess(p.scheduleBuild2(0));
-        Assert.assertFalse(p.getTriggers().isEmpty());
-        Trigger trigger = p.getTriggersJobProperty().getTriggers().get(0);
-        Assert.assertNotNull(trigger);
-        Assert.assertTrue(trigger instanceof BitBucketTrigger);
+        assertFalse(p.getTriggers().isEmpty());
+        Trigger<?> trigger = p.getTriggersJobProperty().getTriggers().get(0);
+        assertNotNull(trigger);
+        assertInstanceOf(BitBucketTrigger.class, trigger);
     }
 
     @SuppressWarnings("rawtypes")
-    @Test public void configRoundTripBitbucketTrigger() throws Exception {
+    @Test
+    void configRoundTripBitbucketTrigger(JenkinsRule j) throws Exception {
         PipelineTriggersJobProperty triggersProperty = new PipelineTriggersJobProperty(null);
         triggersProperty.addTrigger(new BitBucketTrigger());
-        List<JobProperty> properties = Collections.<JobProperty>singletonList(triggersProperty);
+        List<JobProperty> properties = Collections.singletonList(triggersProperty);
         new SnippetizerTester(j).assertRoundTrip(new JobPropertyStep(properties), "properties([pipelineTriggers([bitbucketPush()])])");
     }
 }
