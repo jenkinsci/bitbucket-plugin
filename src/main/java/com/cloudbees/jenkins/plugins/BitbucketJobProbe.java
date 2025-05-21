@@ -83,7 +83,7 @@ public class BitbucketJobProbe {
                         } else {
                             List<SCM> scmTriggered = new ArrayList<>();
                             if (item.getSCMs().isEmpty()) {
-                                LOGGER.log(Level.WARNING, "No SCM configuration was found!");
+                                LOGGER.log(Level.FINE, "No SCM configuration was found!");
                             }
                             for (SCM scmTrigger : item.getSCMs()) {
                                 if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
