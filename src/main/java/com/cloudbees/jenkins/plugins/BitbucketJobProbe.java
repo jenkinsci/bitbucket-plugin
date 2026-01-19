@@ -28,7 +28,7 @@ import jenkins.triggers.SCMTriggerItem;
 
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.apache.commons.lang.StringUtils;
+
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
@@ -194,7 +194,7 @@ public class BitbucketJobProbe {
                     }
 
                     // needed because bitbucket self hosted does not transfer any host information
-                    if (StringUtils.isEmpty(url.getHost())) {
+                    if (url.getHost() == null || url.getHost().isEmpty()) {
                         urIish = urIish.setHost(url.getHost());
                     }
 
@@ -253,7 +253,7 @@ public class BitbucketJobProbe {
             }
 
             // needed because bitbucket self hosted does not transfer any host information
-            if (StringUtils.isEmpty(url.getHost())) {
+            if (url.getHost() == null || url.getHost().isEmpty()) {
                 urIish = urIish.setHost(url.getHost());
             }
 
