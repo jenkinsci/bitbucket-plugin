@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,7 +58,7 @@ public class BitbucketJobProbe {
                 URIish remote = new URIish(url);
                 boolean matchingProtectedJobFound = false;
                 boolean signatureRejectedForMatchingJob = false;
-                boolean acceptedMatchingJobFound = false;
+                AtomicBoolean acceptedMatchingJobFound = new AtomicBoolean(false);
                 boolean matchingJobFound = false;
                 for (Job<?, ?> job : Jenkins.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
@@ -95,7 +96,7 @@ public class BitbucketJobProbe {
                                     if (shouldTriggerForSignature(job, bTrigger, signatureHeader, bodyBytes)) {
                                         LOGGER.log(Level.FINER, "Triggering BitBucket job {0}", job.getFullDisplayName());
                                         scmTriggered.add(scmTrigger);
-                                        acceptedMatchingJobFound = true;
+                                        acceptedMatchingJobFound.set(true);
                                         bTrigger.onPost(user, payload, branchName);
                                     } else {
                                         signatureRejectedForMatchingJob = true;
@@ -133,17 +134,23 @@ public class BitbucketJobProbe {
                                     }));
                                 }
                                 if (bitBucketMultibranchTrigger.get() == null) {
+                                    acceptedMatchingJobFound.set(true);
                                     scmSourceOwner.onSCMSourceUpdated(scmSource);
                                 } else {
                                     if (workflowMultiBranchProject.isBuildable()) {
-                                        bitBucketMultibranchTrigger.get().setPayload(payload);
                                         BitBucketPushCause bitBucketPushCause = new BitBucketPushCause(user);
-                                        workflowMultiBranchProject.scheduleBuild2(0, new CauseAction(bitBucketPushCause));
+                                        workflowMultiBranchProject.scheduleBuild2(
+                                                0,
+                                                new CauseAction(bitBucketPushCause),
+                                                new BitBucketPayload(payload)
+                                        );
+                                        acceptedMatchingJobFound.set(true);
                                     } else {
                                         LOGGER.finest("workflowMultiBranchProject is not builtable");
                                     }
                                 }
                             } else {
+                                acceptedMatchingJobFound.set(true);
                                 scmSourceOwner.onSCMSourceUpdated(scmSource);
                             }
                         } else if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
@@ -163,6 +170,7 @@ public class BitbucketJobProbe {
                                             LOGGER.log(Level.FINE, "Trying to match {0} ", remote + "<-->" + bitBucketMultibranchTrigger.getOverrideUrl());
                                             if (bitBucketMultibranchTrigger.getOverrideUrl().equalsIgnoreCase(remote.toString())) {
                                                 LOGGER.info(String.format("Triggering BitBucket scmSourceOwner [%s] by overrideUrl [%s]",scmSourceOwner.getName(), bitBucketMultibranchTrigger.getOverrideUrl()));
+                                                acceptedMatchingJobFound.set(true);
                                                 scmSourceOwner.onSCMSourceUpdated(scmSource);
                                             }
                                         }
@@ -177,7 +185,7 @@ public class BitbucketJobProbe {
                         }
                     }
                 }
-                if (acceptedMatchingJobFound) {
+                if (acceptedMatchingJobFound.get()) {
                     return BitbucketWebhookResult.TRIGGERED;
                 }
                 if (matchingProtectedJobFound || signatureRejectedForMatchingJob) {

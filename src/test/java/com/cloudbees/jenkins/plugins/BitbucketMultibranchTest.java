@@ -5,6 +5,7 @@ import hudson.EnvVars;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.*;
 import jenkins.branch.BranchSource;
+import jenkins.branch.BranchIndexingCause;
 import jenkins.branch.MultiBranchProject;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.plugins.git.GitSampleRepoRule;
@@ -15,6 +16,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.jvnet.hudson.test.Issue;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
@@ -25,6 +27,8 @@ import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @SuppressWarnings({"rawtypes", "ResultOfMethodCallIgnored"})
@@ -44,8 +48,8 @@ class BitbucketMultibranchTest {
 
     @Test
     void testWorkflowMultiBranchProject() throws Exception{
-        BitbucketEnvironmentContributor instance =
-                jenkinsRule.jenkins.getExtensionList(EnvironmentContributor.class).get(BitbucketEnvironmentContributor.class);
+        BitbucketMultibranchRunListener instance =
+                jenkinsRule.jenkins.getExtensionList(hudson.model.listeners.RunListener.class).get(BitbucketMultibranchRunListener.class);
         assertNotNull(instance);
 
 
@@ -74,6 +78,56 @@ class BitbucketMultibranchTest {
         assertEquals(1, build.getNumber());
         jenkinsRule.assertBuildStatusSuccess(build);
         jenkinsRule.assertLogContains("Branch indexing", build);
+        assertNull(build.getAction(BitBucketPayload.class));
+    }
+
+    @Test
+    @Issue("JENKINS-75752")
+    void webhookPayloadIsInjectedOnlyIntoWebhookTriggeredBranchBuilds() throws Exception {
+        sampleRepo.init();
+        sampleRepo.write("Jenkinsfile", "pipeline { agent any; stages { stage('Build') { steps { echo 'Building...' } } } }");
+        sampleRepo.git("add", "Jenkinsfile");
+        sampleRepo.git("commit", "--message=Initial commit");
+
+        WorkflowMultiBranchProject workflowMultiBranchProject =
+                jenkinsRule.jenkins.createProject(WorkflowMultiBranchProject.class, "payload-project");
+
+        GitSCMSource gitSource = new GitSCMSource(sampleRepo.toString());
+        gitSource.getTraits().add(new BranchDiscoveryTrait());
+        workflowMultiBranchProject.getSourcesList().add(new BranchSource(gitSource));
+
+        BitBucketMultibranchTrigger trigger = new BitBucketMultibranchTrigger();
+        workflowMultiBranchProject.addTrigger(trigger);
+        trigger.start(workflowMultiBranchProject, true);
+        workflowMultiBranchProject.save();
+
+        WorkflowJob job = scheduleAndFindBranchProject(workflowMultiBranchProject);
+        WorkflowRun initialBuild = job.getLastBuild();
+        assertNotNull(initialBuild);
+        assertNull(initialBuild.getAction(BitBucketPayload.class));
+
+        sampleRepo.write("change.txt", "new change");
+        sampleRepo.git("add", "change.txt");
+        sampleRepo.git("commit", "--message=Webhook commit");
+
+        String payload = "{\"from\":\"webhook\"}";
+        BitbucketWebhookResult result =
+                new BitbucketJobProbe().triggerMatchingJobs("tzachs", sampleRepo.toString(), "git", payload, null, null, null);
+
+        assertEquals(BitbucketWebhookResult.TRIGGERED, result);
+        jenkinsRule.waitUntilNoActivity();
+
+        WorkflowRun webhookBuild = job.getLastBuild();
+        assertNotNull(webhookBuild);
+        assertTrue(webhookBuild.getNumber() > initialBuild.getNumber());
+        assertNotNull(webhookBuild.getCause(BranchIndexingCause.class));
+        assertEquals(payload, webhookBuild.getEnvironment(TaskListener.NULL).get("BITBUCKET_PAYLOAD"));
+        assertEquals(payload, webhookBuild.getAction(BitBucketPayload.class).getPayload());
+
+        WorkflowRun manualBuild = jenkinsRule.buildAndAssertSuccess(job);
+        assertNull(manualBuild.getCause(BranchIndexingCause.class));
+        assertNull(manualBuild.getAction(BitBucketPayload.class));
+        assertNull(manualBuild.getEnvironment(TaskListener.NULL).get("BITBUCKET_PAYLOAD"));
     }
 
     private static class Bla extends CauseAction implements EnvironmentContributingAction {
