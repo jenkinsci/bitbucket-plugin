@@ -84,6 +84,10 @@ triggers{
 
 **Changelog**
 
+#### 293.v10c900939523 ####
+
+- JENKINS-73111 - feat - added support for HMAC secrets
+
 #### 254.v9d8ec33a_7a_42 ####
 
 - JENKINS-65697 - feat - BITBUCKET_PIPELINE is now available in multibranch-pipelines
