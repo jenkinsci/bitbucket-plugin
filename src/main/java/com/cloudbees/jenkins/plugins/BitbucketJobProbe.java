@@ -46,15 +46,19 @@ public class BitbucketJobProbe {
         }
     }
 
-    public void triggerMatchingJobs(String user, String url, String scm, String payload) {
-        triggerMatchingJobs(user, url, scm, payload, null);
+    public BitbucketWebhookResult triggerMatchingJobs(String user, String url, String scm, String payload) {
+        return triggerMatchingJobs(user, url, scm, payload, null, null, null);
     }
 
-    public void triggerMatchingJobs(String user, String url, String scm, String payload, String branchName) {
+    public BitbucketWebhookResult triggerMatchingJobs(String user, String url, String scm, String payload, String branchName, String signatureHeader, byte[] bodyBytes) {
         if ("git".equals(scm) || "hg".equals(scm)) {
             SecurityContext old = Jenkins.getInstance().getACL().impersonate2(ACL.SYSTEM2);
             try {
                 URIish remote = new URIish(url);
+                boolean matchingProtectedJobFound = false;
+                boolean signatureRejectedForMatchingJob = false;
+                boolean acceptedMatchingJobFound = false;
+                boolean matchingJobFound = false;
                 for (Job<?, ?> job : Jenkins.getInstance().getAllItems(Job.class)) {
                     BitBucketTrigger bTrigger = null;
                     LOGGER.log(Level.FINE, "Considering candidate job [{0}]", job.getName());
@@ -87,9 +91,18 @@ public class BitbucketJobProbe {
                             }
                             for (SCM scmTrigger : item.getSCMs()) {
                                 if (match(scmTrigger, remote, bTrigger.getOverrideUrl()) && !hasBeenTriggered(scmTriggered, scmTrigger)) {
-                                    LOGGER.log(Level.FINER, "Triggering BitBucket job {0}", job.getFullDisplayName());
-                                    scmTriggered.add(scmTrigger);
-                                    bTrigger.onPost(user, payload, branchName);
+                                    matchingJobFound = true;
+                                    if (shouldTriggerForSignature(job, bTrigger, signatureHeader, bodyBytes)) {
+                                        LOGGER.log(Level.FINER, "Triggering BitBucket job {0}", job.getFullDisplayName());
+                                        scmTriggered.add(scmTrigger);
+                                        acceptedMatchingJobFound = true;
+                                        bTrigger.onPost(user, payload, branchName);
+                                    } else {
+                                        signatureRejectedForMatchingJob = true;
+                                        if (hasWebhookSecret(bTrigger)) {
+                                            matchingProtectedJobFound = true;
+                                        }
+                                    }
                                 } else {
                                     LOGGER.log(Level.FINEST, String.format("[%s] SCM doesn't match remote repo [%s]", job.getName(), remote));
                                 }
@@ -104,6 +117,7 @@ public class BitbucketJobProbe {
                     for (SCMSource scmSource : scmSources) {
                         LOGGER.log(Level.FINER, "Considering candidate scmSource {0}", scmSource);
                         if (match(scmSource, remote)) {
+                            matchingJobFound = true;
                             if (scmSourceOwner instanceof WorkflowMultiBranchProject) {
                                 LOGGER.finest("scmSourceOwner [" + scmSourceOwner.getName() + "] is of type WorkflowMultiBranchProject");
                                 WorkflowMultiBranchProject workflowMultiBranchProject  = (WorkflowMultiBranchProject) scmSourceOwner;
@@ -163,6 +177,18 @@ public class BitbucketJobProbe {
                         }
                     }
                 }
+                if (acceptedMatchingJobFound) {
+                    return BitbucketWebhookResult.TRIGGERED;
+                }
+                if (matchingProtectedJobFound || signatureRejectedForMatchingJob) {
+                    return BitbucketWebhookResult.INVALID_SIGNATURE;
+                }
+                if (!matchingJobFound) {
+                    LOGGER.log(Level.WARNING, "No Jenkins job or multibranch project matched repository [{0}]", url);
+                    return BitbucketWebhookResult.NO_MATCH;
+                }
+                LOGGER.log(Level.WARNING, "Bitbucket webhook matched Jenkins items for repository [{0}] but did not trigger a build", url);
+                return BitbucketWebhookResult.NO_MATCH;
             } catch (URISyntaxException e) {
                 LOGGER.log(Level.WARNING, "Invalid repository URL {0}", url);
             } finally {
@@ -172,6 +198,35 @@ public class BitbucketJobProbe {
         } else {
             throw new UnsupportedOperationException("Unsupported SCM type " + scm);
         }
+        return BitbucketWebhookResult.IGNORED;
+    }
+
+    private boolean shouldTriggerForSignature(Job<?, ?> job, BitBucketTrigger trigger, String signatureHeader, byte[] bodyBytes) {
+        String secret = trigger.getWebhookSecretPlainText();
+        if (secret == null || secret.isBlank()) {
+            if (signatureHeader != null && !signatureHeader.isBlank()) {
+                LOGGER.log(Level.WARNING, "Job [{0}] has no webhook secret configured, but X-Hub-Signature header was provided", job.getName());
+                return false;
+            }
+            LOGGER.log(Level.FINE, "Job [{0}] has no webhook secret configured; accepting request without signature validation", job.getName());
+            return true;
+        }
+
+        if (signatureHeader == null || signatureHeader.isBlank()) {
+            LOGGER.log(Level.FINE, "Job [{0}] has a webhook secret configured, but X-Hub-Signature header is missing", job.getName());
+            return false;
+        }
+
+        boolean valid = BitbucketWebhookSignatureValidator.isValidSignature(signatureHeader, secret, bodyBytes);
+        if (!valid) {
+            LOGGER.log(Level.FINE, "Job [{0}] webhook signature did not validate", job.getName());
+        }
+        return valid;
+    }
+
+    private boolean hasWebhookSecret(BitBucketTrigger trigger) {
+        String secret = trigger.getWebhookSecretPlainText();
+        return secret != null && !secret.isBlank();
     }
 
     private boolean hasBeenTriggered(List<SCM> scmTriggered, SCM scmTrigger) {

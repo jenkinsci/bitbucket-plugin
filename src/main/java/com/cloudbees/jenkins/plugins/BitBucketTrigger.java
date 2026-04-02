@@ -10,6 +10,7 @@ import hudson.model.Job;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -35,6 +36,7 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
 
     private String overrideUrl;
     private Boolean buildOnCreatedBranch;
+    private Secret webhookSecret;
 
     @DataBoundConstructor
     public BitBucketTrigger() { }
@@ -56,6 +58,19 @@ public class BitBucketTrigger extends Trigger<Job<?, ?>> {
     @DataBoundSetter
     public void setBuildOnCreatedBranch(Boolean buildOnCreatedBranch) {
         this.buildOnCreatedBranch = buildOnCreatedBranch;
+    }
+
+    public Secret getWebhookSecret() {
+        return webhookSecret;
+    }
+
+    @DataBoundSetter
+    public void setWebhookSecret(Secret webhookSecret) {
+        this.webhookSecret = webhookSecret;
+    }
+
+    public String getWebhookSecretPlainText() {
+        return Secret.toString(webhookSecret);
     }
 
     /**
