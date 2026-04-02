@@ -1,5 +1,8 @@
 package com.cloudbees.jenkins.plugins;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +35,7 @@ class BitbucketPayloadProcessorTest {
     @BeforeEach
     void setUp() {
         payloadProcessor = new BitbucketPayloadProcessor(probe);
+        when(probe.triggerMatchingJobs(any(), any(), any(), any(), any(), any(), any())).thenReturn(BitbucketWebhookResult.TRIGGERED);
     }
 
     @Test
@@ -59,13 +63,13 @@ class BitbucketPayloadProcessorTest {
                 .element("html", new JSONObject()
                     .element("href", url)));
 
-        payloadProcessor.processPayload(payload, request);
+        payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+        verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
 
-        payloadProcessor.processPayload(hgLoad, request);
+        payloadProcessor.processPayload(hgLoad, request, hgLoad.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs(user, url, "hg", hgLoad.toString());
+        verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("hg"), eq(hgLoad.toString()), isNull(), isNull(), any(byte[].class));
     }
 
     @Test
@@ -89,9 +93,9 @@ class BitbucketPayloadProcessorTest {
                                     .element(href)))
                         .element("fullName",  "CE/test_repo"));
 
-        payloadProcessor.processPayload(payload, request);
+        payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+        verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
     }
 
     @Test
@@ -106,9 +110,9 @@ class BitbucketPayloadProcessorTest {
                 .element("scm", "git")
                 .element("absolute_url", "/old_user/old_repo"));
 
-        payloadProcessor.processPayload(payload, request);
+        payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs("old_user", "https://staging.bitbucket.org/old_user/old_repo", "git", payload.toString());
+        verify(probe).triggerMatchingJobs(eq("old_user"), eq("https://staging.bitbucket.org/old_user/old_repo"), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
     }
 
 
@@ -119,9 +123,9 @@ class BitbucketPayloadProcessorTest {
 
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_pr_merge_payload.json")) {
         	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
-            payloadProcessor.processPayload(payload, request);
+            payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-            verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+            verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
         }
 
     }
@@ -133,9 +137,9 @@ class BitbucketPayloadProcessorTest {
 
         try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_pr_merge_payload.json")) {
         	JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
-            payloadProcessor.processPayload(payload, request);
+            payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-            verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+            verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
         }
     }
 
@@ -165,12 +169,12 @@ class BitbucketPayloadProcessorTest {
                         .element("html", new JSONObject()
                                 .element("href", url)));
 
-        payloadProcessor.processPayload(payload, request);
+        payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs(user, url, "git", payload.toString());
+        verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("git"), eq(payload.toString()), isNull(), isNull(), any(byte[].class));
 
-        payloadProcessor.processPayload(hgLoad, request);
+        payloadProcessor.processPayload(hgLoad, request, hgLoad.toString().getBytes(StandardCharsets.UTF_8));
 
-        verify(probe).triggerMatchingJobs(user, url, "hg", hgLoad.toString());
+        verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("hg"), eq(hgLoad.toString()), isNull(), isNull(), any(byte[].class));
     }
 }

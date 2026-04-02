@@ -24,39 +24,40 @@ public class BitbucketPayloadProcessor {
         this(new BitbucketJobProbe());
     }
 
-    public void processPayload(JSONObject payload, HttpServletRequest request) {
+    public BitbucketWebhookResult processPayload(JSONObject payload, HttpServletRequest request, byte[] bodyBytes) {
         if ("Bitbucket-Webhooks/2.0".equals(request.getHeader("user-agent"))) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
                 LOGGER.log(Level.FINER, "Processing new Webhooks payload");
-                processWebhookPayload(payload);
+                return processWebhookPayload(payload, request, bodyBytes);
             }
         } else if (payload.has("actor") && payload.has("repository") && payload.getJSONObject("repository").has("links")) {
             if ("repo:push".equals(request.getHeader("x-event-key"))) {
                 // found web hook according to https://support.atlassian.com/bitbucket-cloud/docs/event-payloads/
                 LOGGER.log(Level.FINER, "Processing new Cloud Webhooks payload");
-                processWebhookPayloadBitBucketServer(payload);
+                return processWebhookPayloadBitBucketServer(payload, request, bodyBytes);
             } else if ("repo:refs_changed".equals(request.getHeader("x-event-key"))) {
                 // found web hook according to https://confluence.atlassian.com/bitbucketserver/event-payload-938025882.html
                 LOGGER.log(Level.FINER, "Processing new Self Hosted Server Webhooks payload");
-                processWebhookPayloadBitBucketSelfHosted(payload);
+                return processWebhookPayloadBitBucketSelfHosted(payload, request, bodyBytes);
             } else {
                 LOGGER.log(Level.FINER, "Unsupported [x-event-key] value, [x-event-key] is [" + request.getHeader("x-event-key") + "]");
             }
         } else if (payload.has("actor")) {
         	// we assume that the passed hook was from bitbucket server https://confluence.atlassian.com/bitbucketserver/managing-webhooks-in-bitbucket-server-938025878.html
         	LOGGER.log(Level.FINER, "Processing webhook for self-hosted bitbucket instance");
-        	processWebhookPayloadBitBucketSelfHosted(payload);
+        	return processWebhookPayloadBitBucketSelfHosted(payload, request, bodyBytes);
         } else {
             // https://github.com/jenkinsci/bitbucket-plugin/pull/65
             if ("diagnostics:ping".equals(request.getHeader("x-event-key"))) {
                 if (payload.has("test") && payload.getBoolean("test")) {
                     LOGGER.log(Level.FINER, "Bitbucket test connection payload");
-                    return;
+                    return BitbucketWebhookResult.IGNORED;
                 }
             }
             LOGGER.log(Level.FINER, "Processing old POST service payload");
-            processPostServicePayload(payload);
+            return processPostServicePayload(payload, request, bodyBytes);
         }
+        return BitbucketWebhookResult.IGNORED;
     }
 
     /**
@@ -67,7 +68,7 @@ public class BitbucketPayloadProcessor {
      * 
      * @param payload The payload matching the definition in https://confluence.atlassian.com/bitbucketserver0510/event-payload-951390742.html
      */
-    private void processWebhookPayloadBitBucketSelfHosted(JSONObject payload) {
+    private BitbucketWebhookResult processWebhookPayloadBitBucketSelfHosted(JSONObject payload, HttpServletRequest request, byte[] bodyBytes) {
     	JSONObject repo;
     	
     	// find the repository hidden in different objects
@@ -78,7 +79,7 @@ public class BitbucketPayloadProcessor {
     	} else {
     		LOGGER.log(Level.WARNING, "Not possible to trigger job for event '{0}'. Only PR events and pushes are supported for now.", payload.get("eventKey"));
     		LOGGER.log(Level.FINE, payload.toString());
-    		return;
+    		return BitbucketWebhookResult.IGNORED;
     	}
     	
         String user = payload.getJSONObject("actor").getString("name");
@@ -86,11 +87,11 @@ public class BitbucketPayloadProcessor {
 
         // always use git no other repo type supported on self-hosted solution
         String scm = "git";
-        probe.triggerMatchingJobs(user, url, scm, payload.toString());
+        return probe.triggerMatchingJobs(user, url, scm, payload.toString(), null, request.getHeader("X-Hub-Signature"), bodyBytes);
 		
 	}
 
-	private void processWebhookPayload(JSONObject payload) {
+	private BitbucketWebhookResult processWebhookPayload(JSONObject payload, HttpServletRequest request, byte[] bodyBytes) {
         if (isPayloadOldMemberNull(payload)){
             String branchName = getBranchName(payload);
             JSONObject repo = payload.getJSONObject("repository");
@@ -99,7 +100,7 @@ public class BitbucketPayloadProcessor {
             String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
             String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
-            probe.triggerMatchingJobs(user, url, scm, payload.toString(), branchName);
+            return probe.triggerMatchingJobs(user, url, scm, payload.toString(), branchName, request.getHeader("X-Hub-Signature"), bodyBytes);
         } else {
             if (payload.has("repository")) {
                 JSONObject repo = payload.getJSONObject("repository");
@@ -109,17 +110,17 @@ public class BitbucketPayloadProcessor {
                 String url = repo.getJSONObject("links").getJSONObject("html").getString("href");
                 String scm = repo.has("scm") ? repo.getString("scm") : "git";
 
-                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+                return probe.triggerMatchingJobs(user, url, scm, payload.toString(), null, request.getHeader("X-Hub-Signature"), bodyBytes);
             } else if (payload.has("scm")) {
                 LOGGER.log(Level.FINER, "Received commit hook notification for hg: {0}", payload);
                 String user = getUser(payload, "owner");
                 String url = payload.getJSONObject("links").getJSONObject("html").getString("href");
                 String scm = payload.has("scm") ? payload.getString("scm") : "hg";
 
-                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+                return probe.triggerMatchingJobs(user, url, scm, payload.toString(), null, request.getHeader("X-Hub-Signature"), bodyBytes);
             }
        }
-
+       return BitbucketWebhookResult.IGNORED;
     }
 
     private String getBranchName(JSONObject payload) {
@@ -183,7 +184,7 @@ public class BitbucketPayloadProcessor {
      *
      * @param payload JSON object
      */
-    private void processWebhookPayloadBitBucketServer(JSONObject payload) {
+    private BitbucketWebhookResult processWebhookPayloadBitBucketServer(JSONObject payload, HttpServletRequest request, byte[] bodyBytes) {
         JSONObject repo = payload.getJSONObject("repository");
         String user = getUser(payload, "actor");
         String url = "";
@@ -192,14 +193,15 @@ public class BitbucketPayloadProcessor {
                 URL pushHref = new URL(repo.getJSONObject("links").getJSONArray("self").getJSONObject(0).getString("href"));
                 url = pushHref.toString().replaceFirst("projects.*", repo.getString("fullName").toLowerCase());
                 String scm = repo.has("scmId") ? repo.getString("scmId") : "git";
-                probe.triggerMatchingJobs(user, url, scm, payload.toString());
+                return probe.triggerMatchingJobs(user, url, scm, payload.toString(), null, request.getHeader("X-Hub-Signature"), bodyBytes);
             } catch (MalformedURLException e) {
                 LOGGER.log(Level.WARNING, String.format("URL %s is malformed", url), e);
             }
         }
+        return BitbucketWebhookResult.IGNORED;
     }
 
-    private void processPostServicePayload(JSONObject payload) {
+    private BitbucketWebhookResult processPostServicePayload(JSONObject payload, HttpServletRequest request, byte[] bodyBytes) {
         JSONObject repo = payload.getJSONObject("repository");
         LOGGER.log(Level.FINER, "Received commit hook notification for {0}", repo);
 
@@ -207,7 +209,7 @@ public class BitbucketPayloadProcessor {
         String url = payload.getString("canon_url") + repo.getString("absolute_url");
         String scm = repo.getString("scm");
 
-        probe.triggerMatchingJobs(user, url, scm, payload.toString());
+        return probe.triggerMatchingJobs(user, url, scm, payload.toString(), null, request.getHeader("X-Hub-Signature"), bodyBytes);
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketPayloadProcessor.class.getName());
