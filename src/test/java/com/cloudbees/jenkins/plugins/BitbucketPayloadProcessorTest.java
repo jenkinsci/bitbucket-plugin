@@ -177,4 +177,46 @@ class BitbucketPayloadProcessorTest {
 
         verify(probe).triggerMatchingJobs(eq(user), eq(url), eq("hg"), eq(hgLoad.toString()), isNull(), isNull(), any(byte[].class));
     }
+
+    @Test
+    void processWebhookPayloadBranchCreatedOrphanBranchPassesBranchName() throws IOException {
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("repo:push");
+
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_branch_created_orphan_payload.json")) {
+            JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
+            payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
+
+            verify(probe).triggerMatchingJobs(
+                    eq("example-user"),
+                    eq("https://bitbucket.org/example-user/sample-repo"),
+                    eq("git"),
+                    eq(payload.toString()),
+                    eq("empty_branch1"),
+                    isNull(),
+                    any(byte[].class)
+            );
+        }
+    }
+
+    @Test
+    void processWebhookPayloadBranchCreatedWithCommitPassesBranchName() throws IOException {
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("repo:push");
+
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("bitbucket_branch_created_with_commit_payload.json")) {
+            JSONObject payload = JSONObject.fromObject(IOUtils.toString(input, StandardCharsets.UTF_8));
+            payloadProcessor.processPayload(payload, request, payload.toString().getBytes(StandardCharsets.UTF_8));
+
+            verify(probe).triggerMatchingJobs(
+                    eq("example-user"),
+                    eq("https://bitbucket.org/example-user/sample-repo"),
+                    eq("git"),
+                    eq(payload.toString()),
+                    eq("not_empty1"),
+                    isNull(),
+                    any(byte[].class)
+            );
+        }
+    }
 }

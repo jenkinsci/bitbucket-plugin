@@ -1,0 +1,37 @@
+{
+  "push": {
+    "changes": [
+      {
+        "old": null,
+        "new": {
+          "name": "empty_branch1",
+          "target": {
+            "type": "commit",
+            "hash": "893ef2b069d431658e3f12f6b4673d1138df2782",
+            "message": "Initial commit on orphan branch\n"
+          },
+          "type": "branch"
+        },
+        "created": true,
+        "commits": [
+          {
+            "type": "commit",
+            "hash": "893ef2b069d431658e3f12f6b4673d1138df2782",
+            "message": "Initial commit on orphan branch\n"
+          }
+        ]
+      }
+    ]
+  },
+  "repository": {
+    "links": {
+      "html": {
+        "href": "https://bitbucket.org/example-user/sample-repo"
+      }
+    },
+    "scm": "git"
+  },
+  "actor": {
+    "nickname": "example-user"
+  }
+}

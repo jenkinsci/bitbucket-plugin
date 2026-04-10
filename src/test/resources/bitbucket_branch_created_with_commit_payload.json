@@ -1,0 +1,37 @@
+{
+  "push": {
+    "changes": [
+      {
+        "old": null,
+        "new": {
+          "name": "not_empty1",
+          "target": {
+            "type": "commit",
+            "hash": "22d6318e7e464ddd1916fa75ff847377839c4b7d",
+            "message": "adding\n"
+          },
+          "type": "branch"
+        },
+        "created": true,
+        "commits": [
+          {
+            "type": "commit",
+            "hash": "22d6318e7e464ddd1916fa75ff847377839c4b7d",
+            "message": "adding\n"
+          }
+        ]
+      }
+    ]
+  },
+  "repository": {
+    "links": {
+      "html": {
+        "href": "https://bitbucket.org/example-user/sample-repo"
+      }
+    },
+    "scm": "git"
+  },
+  "actor": {
+    "nickname": "example-user"
+  }
+}
