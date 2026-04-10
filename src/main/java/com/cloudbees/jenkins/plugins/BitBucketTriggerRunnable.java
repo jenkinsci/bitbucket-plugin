@@ -32,6 +32,33 @@ public class BitBucketTriggerRunnable implements Runnable {
         this.buildOnCreatedBranch = buildOnCreatedBranch;
     }
 
+    boolean shouldTriggerBuild(boolean pollingFoundChanges, PrintStream logger) {
+        if (this.branchName == null || this.branchName.isEmpty()) {
+            if (pollingFoundChanges) {
+                logger.println("Changes found");
+            } else {
+                logger.println("No changes");
+            }
+            return pollingFoundChanges;
+        }
+
+        if (pollingFoundChanges) {
+            logger.println("Changes found");
+            logger.println("Branch [" + this.branchName + "] was created");
+            return true;
+        }
+
+        if (this.buildOnCreatedBranch) {
+            logger.println("No changes");
+            logger.println("Branch [" + this.branchName + "] was created");
+            return true;
+        }
+
+        logger.println("No changes");
+        logger.println("Branch [" + this.branchName + "] was created but \"Build on branch created\" is false, not triggering");
+        return false;
+    }
+
     private boolean runPolling() {
         try {
             StreamTaskListener listener = new StreamTaskListener(getLogFile());
@@ -45,26 +72,7 @@ public class BitBucketTriggerRunnable implements Runnable {
                 } else {
                     boolean result = scmTriggerItem.poll(listener).hasChanges();
                     logger.println("Done. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-
-                    if ( this.branchName == null || this.branchName.isEmpty()){
-                        if (result) {
-                            logger.println("Changes found");
-                        } else {
-                            logger.println("No changes");
-                        }
-                    } else {
-                        if ( this.buildOnCreatedBranch){
-                            logger.println("Branch [" + this.branchName + "] was created");
-                            return true;
-                        } else {
-                            logger.println("Branch [" + this.branchName + "] was created but \"Build on branch created\" is false, not triggering");
-                            return false;
-                        }
-
-
-                    }
-
-                    return result;
+                    return shouldTriggerBuild(result, logger);
                 }
             } catch (Error | RuntimeException e) {
                 e.printStackTrace(listener.error("Failed to record SCM polling"));
