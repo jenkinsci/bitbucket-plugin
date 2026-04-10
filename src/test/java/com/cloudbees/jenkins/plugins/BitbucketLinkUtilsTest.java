@@ -67,6 +67,15 @@ class BitbucketLinkUtilsTest {
     }
 
     @Test
+    void parsesBitbucketServerScpStyleSshRemoteForBitbucketHost() {
+        BitbucketLinkUtils.BitbucketRemote remote = linkUtils
+                .parseRemote("git@bitbucket.example.com:PRJ/repo.git")
+                .orElseThrow();
+
+        assertEquals("https://bitbucket.example.com/projects/PRJ/repos/repo", remote.toRepositoryUrl());
+    }
+
+    @Test
     void createsLinksFromBitbucketBranchSourceCoordinates() {
         BitbucketSCMSource source = new BitbucketSCMSource("PRJ", "repo");
         source.setServerUrl("https://stash.example.com/bitbucket");
@@ -87,5 +96,7 @@ class BitbucketLinkUtilsTest {
     void ignoresNonBitbucketRemote() {
         assertTrue(linkUtils.parseRemote("/tmp/local-repo").isEmpty());
         assertFalse(linkUtils.parseRemote("https://github.com/jenkinsci/bitbucket-plugin.git").isPresent());
+        assertFalse(linkUtils.parseRemote("git@github.com:jenkinsci/bitbucket-plugin.git").isPresent());
+        assertFalse(linkUtils.parseRemote("git@gitlab.com:group/repo.git").isPresent());
     }
 }

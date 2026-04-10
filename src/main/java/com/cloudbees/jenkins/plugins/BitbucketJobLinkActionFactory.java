@@ -11,6 +11,8 @@ import jenkins.model.TransientActionFactory;
 import jenkins.plugins.git.GitSCMSource;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.SCMSource;
+import jenkins.scm.api.mixin.ChangeRequestSCMHead;
+import jenkins.scm.api.mixin.TagSCMHead;
 import org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
@@ -85,7 +87,14 @@ public class BitbucketJobLinkActionFactory extends TransientActionFactory<Job> {
         if (source == null || head == null) {
             return Optional.empty();
         }
+        if (!supportsBranchLink(head)) {
+            return Optional.empty();
+        }
         return linkUtils.createBranchLink(source, head.getName());
+    }
+
+    static boolean supportsBranchLink(SCMHead head) {
+        return !(head instanceof ChangeRequestSCMHead) && !(head instanceof TagSCMHead);
     }
 
     @Override

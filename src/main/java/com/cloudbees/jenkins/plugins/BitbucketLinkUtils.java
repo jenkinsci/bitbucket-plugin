@@ -89,8 +89,9 @@ final class BitbucketLinkUtils {
                 return Optional.of(BitbucketRemote.cloud(httpsBaseUrl(host), segments[0], stripGitSuffix(segments[1])));
             }
 
-            boolean allowSimpleServerPath = uri.getScheme() == null || !"http".equalsIgnoreCase(uri.getScheme())
-                    && !"https".equalsIgnoreCase(uri.getScheme());
+            boolean allowSimpleServerPath = (uri.getScheme() == null || !"http".equalsIgnoreCase(uri.getScheme())
+                    && !"https".equalsIgnoreCase(uri.getScheme()))
+                    && looksLikeBitbucketServerHost(host);
             ParsedServerPath parsedServerPath = ParsedServerPath.from(path, allowSimpleServerPath);
             if (parsedServerPath == null) {
                 return Optional.empty();
@@ -130,6 +131,11 @@ final class BitbucketLinkUtils {
 
     private static boolean isBitbucketCloudHost(String host) {
         return "bitbucket.org".equalsIgnoreCase(host);
+    }
+
+    private static boolean looksLikeBitbucketServerHost(String host) {
+        String normalizedHost = host.toLowerCase(Locale.ENGLISH);
+        return normalizedHost.contains("bitbucket") || normalizedHost.contains("stash");
     }
 
     private static String httpsBaseUrl(String host) {
