@@ -98,7 +98,7 @@ final class BitbucketLinkUtils {
             }
             return Optional.of(BitbucketRemote.server(
                     httpsBaseUrl(host, parsedServerPath.contextPath()),
-                    parsedServerPath.projectKey(),
+                    parsedServerPath.parsedProjectKey(),
                     parsedServerPath.repositorySlug()
             ));
         } catch (Exception ignored) {
@@ -224,7 +224,7 @@ final class BitbucketLinkUtils {
         SERVER
     }
 
-    private record ParsedServerPath(String contextPath, String projectKey, String repositorySlug) {
+    private record ParsedServerPath(String contextPath, String parsedProjectKey, String repositorySlug) {
         static ParsedServerPath from(String rawPath, boolean allowSimplePath) {
             String[] segments = rawPath.split("/");
             if (segments.length >= 3) {
