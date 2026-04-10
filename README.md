@@ -84,6 +84,10 @@ triggers{
 
 **Changelog**
 
+#### 302.vda_f34f88e4ce ####
+
+- JENKINS-33989 - feat - Link to the bitbucket project on the sidebar + change links
+
 #### 293.v10c900939523 ####
 
 - JENKINS-73111 - feat - added support for HMAC secrets
