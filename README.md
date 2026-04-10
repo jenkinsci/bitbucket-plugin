@@ -84,6 +84,11 @@ triggers{
 
 **Changelog**
 
+
+#### 307.va_9f30d0b_8f0d ####
+
+- JENKINS-69670 - JENKINS-49414 regression - build is not triggered when new branch is pushed with new commit(s)
+
 #### 302.vda_f34f88e4ce ####
 
 - JENKINS-33989 - feat - Link to the bitbucket project on the sidebar + change links
