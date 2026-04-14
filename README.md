@@ -1,7 +1,7 @@
 Bitbucket Plugin for Jenkins
 ============================
 
-[![Build Status](https://ci.jenkins.io/job/Plugins/job/bitbucket-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/bitbucket-plugin/job/master/)
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins%2Fbitbucket-plugin%2Fmaster)](https://ci.jenkins.io/job/Plugins/job/bitbucket-plugin/job/master/)
 [![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/bitbucket.svg)](https://plugins.jenkins.io/bitbucket/)
 [![GitHub release](https://img.shields.io/github/v/release/jenkinsci/bitbucket-plugin?label=changelog)](https://github.com/jenkinsci/bitbucket-plugin/releases/latest/)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/bitbucket.svg?color=blue)](https://plugins.jenkins.io/bitbucket/)
