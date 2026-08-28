@@ -1,10 +1,14 @@
 package com.cloudbees.jenkins.plugins;
 
 import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BitbucketLinkUtilsTest {
@@ -98,5 +102,34 @@ class BitbucketLinkUtilsTest {
         assertFalse(linkUtils.parseRemote("https://github.com/jenkinsci/bitbucket-plugin.git").isPresent());
         assertFalse(linkUtils.parseRemote("git@github.com:jenkinsci/bitbucket-plugin.git").isPresent());
         assertFalse(linkUtils.parseRemote("git@gitlab.com:group/repo.git").isPresent());
+    }
+
+    @Test
+    void handlesUnknownOrNullSCMSourceSafely() {
+        assertFalse(linkUtils.createRepoLink((jenkins.scm.api.SCMSource) null).isPresent());
+        assertFalse(linkUtils.createBranchLink((jenkins.scm.api.SCMSource) null, "main").isPresent());
+
+        jenkins.scm.api.SCMSource customSource = org.mockito.Mockito.mock(jenkins.scm.api.SCMSource.class);
+
+        assertFalse(linkUtils.createRepoLink(customSource).isPresent());
+        assertFalse(linkUtils.createBranchLink(customSource, "main").isPresent());
+    }
+
+    @Test
+    void optionalBitbucketBranchSourceIsNotHardLinked() throws IOException {
+        assertDoesNotReferenceOptionalBitbucketClass(BitbucketLinkUtils.class);
+        assertDoesNotReferenceOptionalBitbucketClass(BitbucketJobProbe.class);
+    }
+
+    private static void assertDoesNotReferenceOptionalBitbucketClass(Class<?> type) throws IOException {
+        String resourceName = "/" + type.getName().replace('.', '/') + ".class";
+        try (InputStream bytecode = type.getResourceAsStream(resourceName)) {
+            assertNotNull(bytecode, "Missing bytecode resource for " + type.getName());
+            String constantPool = new String(bytecode.readAllBytes(), StandardCharsets.ISO_8859_1);
+            assertFalse(
+                    constantPool.contains("com/cloudbees/jenkins/plugins/bitbucket/BitbucketSCMSource"),
+                    type.getName() + " must not hard-link the optional Bitbucket Branch Source plugin"
+            );
+        }
     }
 }
