@@ -1,6 +1,7 @@
 package com.cloudbees.jenkins.plugins;
 
 import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
+import hudson.plugins.mercurial.MercurialSCMSource;
 import jenkins.branch.BranchSource;
 import jenkins.scm.api.SCMHead;
 import jenkins.scm.api.mixin.ChangeRequestSCMHead;
@@ -12,6 +13,7 @@ import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @WithJenkins
 class BitbucketLinkActionFactoryTest {
@@ -62,5 +64,16 @@ class BitbucketLinkActionFactoryTest {
         assertEquals(false, BitbucketJobLinkActionFactory.supportsBranchLink(new PullRequestHead("PR-1")));
         assertEquals(false, BitbucketJobLinkActionFactory.supportsBranchLink(new TagHead("v1.0.0")));
         assertEquals(true, BitbucketJobLinkActionFactory.supportsBranchLink(new SCMHead("main") {}));
+    }
+
+    @Test
+    void multibranchProjectsWithAnotherScmSourceDoNotFail(JenkinsRule j) throws Exception {
+        WorkflowMultiBranchProject project = j.jenkins.createProject(WorkflowMultiBranchProject.class, "mbp-mercurial");
+        project.getSourcesList().add(new BranchSource(
+                new MercurialSCMSource("https://example.invalid/repository")));
+
+        BitbucketExternalLink action = project.getAction(BitbucketExternalLink.class);
+
+        assertNull(action);
     }
 }

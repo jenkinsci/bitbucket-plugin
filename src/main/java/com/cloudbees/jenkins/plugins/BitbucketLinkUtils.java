@@ -1,6 +1,5 @@
 package com.cloudbees.jenkins.plugins;
 
-import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.plugins.git.GitSCM;
 import hudson.scm.SCM;
@@ -10,6 +9,7 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -20,6 +20,8 @@ final class BitbucketLinkUtils {
 
     static final String REPOSITORY_LINK_NAME = "Browse Repository";
     static final String BRANCH_LINK_NAME = "View Branch";
+    private static final String BITBUCKET_SCM_SOURCE_CLASS =
+            "com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource";
 
     Optional<BitbucketExternalLink> createRepoLink(SCMSource source) {
         return resolve(source)
@@ -43,15 +45,40 @@ final class BitbucketLinkUtils {
         if (source instanceof GitSCMSource) {
             return parseRemote(((GitSCMSource) source).getRemote());
         }
-        if (source instanceof BitbucketSCMSource) {
-            BitbucketSCMSource bitbucketSource = (BitbucketSCMSource) source;
-            return fromCoordinates(
-                    bitbucketSource.getServerUrl(),
-                    bitbucketSource.getRepoOwner(),
-                    bitbucketSource.getRepository()
-            );
+        Optional<BitbucketRemote> bitbucketSourceRemote = resolveBitbucketSCMSource(source);
+        if (bitbucketSourceRemote.isPresent()) {
+            return bitbucketSourceRemote;
         }
         return Optional.empty();
+    }
+
+    private Optional<BitbucketRemote> resolveBitbucketSCMSource(SCMSource source) {
+        if (source == null) {
+            return Optional.empty();
+        }
+        Class<?> clazz = source.getClass();
+        boolean isBitbucketSCMSource = false;
+        while (clazz != null && clazz != Object.class) {
+            if (BITBUCKET_SCM_SOURCE_CLASS.equals(clazz.getName())) {
+                isBitbucketSCMSource = true;
+                break;
+            }
+            clazz = clazz.getSuperclass();
+        }
+        if (!isBitbucketSCMSource) {
+            return Optional.empty();
+        }
+        try {
+            Method getServerUrl = source.getClass().getMethod("getServerUrl");
+            Method getRepoOwner = source.getClass().getMethod("getRepoOwner");
+            Method getRepository = source.getClass().getMethod("getRepository");
+            String serverUrl = (String) getServerUrl.invoke(source);
+            String repoOwner = (String) getRepoOwner.invoke(source);
+            String repository = (String) getRepository.invoke(source);
+            return fromCoordinates(serverUrl, repoOwner, repository);
+        } catch (ReflectiveOperationException | ClassCastException ignored) {
+            return Optional.empty();
+        }
     }
 
     Optional<BitbucketRemote> resolve(SCM scm) {

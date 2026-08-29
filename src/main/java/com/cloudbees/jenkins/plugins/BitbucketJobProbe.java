@@ -34,7 +34,6 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import com.google.common.base.Objects;
 import org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject;
-import com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource;
 
 public class BitbucketJobProbe {
 
@@ -289,16 +288,15 @@ public class BitbucketJobProbe {
     }
 
     private boolean match(SCMSource scm, URIish url) {
-        if (scm instanceof GitSCMSource || (isBranchPluginAvailable && scm instanceof BitbucketSCMSource)) {
+        String bitbucketRemote = getBitbucketSCMSourceRemote(scm);
+        if (scm instanceof GitSCMSource || bitbucketRemote != null) {
             String gitRemote;
             if (scm instanceof GitSCMSource) {
                 LOGGER.log(Level.FINEST, "SCMSource is GitSCMSource");
                 gitRemote = ((GitSCMSource) scm).getRemote();
-            } else if (isBranchPluginAvailable) {
+            } else if (bitbucketRemote != null) {
                 LOGGER.log(Level.FINEST, "SCMSource is BitbucketSCMSource");
-                gitRemote = ((BitbucketSCMSource) scm).getServerUrl() + "/" +
-                            ((BitbucketSCMSource) scm).getRepoOwner() + "/" +
-                            ((BitbucketSCMSource) scm).getRepository();
+                gitRemote = bitbucketRemote;
             } else {
                 return false;
             }
@@ -350,6 +348,33 @@ public class BitbucketJobProbe {
             LOGGER.log(Level.SEVERE, "Could not parse repository uri: {0}, {1}", new Object[]{repository, ex});
         }
         return result;
+    }
+
+    private String getBitbucketSCMSourceRemote(SCMSource scm) {
+        if (!isBranchPluginAvailable || scm == null) {
+            return null;
+        }
+        Class<?> clazz = scm.getClass();
+        boolean isBitbucketSCMSource = false;
+        while (clazz != null && clazz != Object.class) {
+            if ("com.cloudbees.jenkins.plugins.bitbucket.BitbucketSCMSource".equals(clazz.getName())) {
+                isBitbucketSCMSource = true;
+                break;
+            }
+            clazz = clazz.getSuperclass();
+        }
+        if (!isBitbucketSCMSource) {
+            return null;
+        }
+        try {
+            String serverUrl = (String) scm.getClass().getMethod("getServerUrl").invoke(scm);
+            String repoOwner = (String) scm.getClass().getMethod("getRepoOwner").invoke(scm);
+            String repository = (String) scm.getClass().getMethod("getRepository").invoke(scm);
+            return serverUrl + "/" + repoOwner + "/" + repository;
+        } catch (ReflectiveOperationException | ClassCastException e) {
+            LOGGER.log(Level.FINE, "Failed to read BitbucketSCMSource properties reflectively", e);
+            return null;
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketJobProbe.class.getName());
