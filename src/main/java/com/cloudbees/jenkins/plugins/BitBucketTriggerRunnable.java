@@ -115,7 +115,7 @@ public class BitBucketTriggerRunnable implements Runnable {
         }
 
         // -1 means inherit the quiet period value from the job settings
-        Queue.Item item = ParameterizedJobMixIn.scheduleBuild2(job, -1, new BitBucketPayload(cause, payload));
+        Queue.Item item = ParameterizedJobMixIn.scheduleBuild2(job, -1, new CauseAction(cause), new BitBucketPayload(payload));
         if (item == null) {
             logger.info("SCM changes detected in " + job.getName() + ", but Jenkins refused to trigger the build!");
         } else if (!(item instanceof Queue.BlockedItem)) {
