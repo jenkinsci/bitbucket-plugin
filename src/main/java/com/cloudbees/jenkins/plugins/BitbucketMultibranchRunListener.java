@@ -7,6 +7,7 @@ import hudson.model.listeners.RunListener;
 import jenkins.branch.BranchIndexingCause;
 import jenkins.branch.MultiBranchProject;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,7 +16,7 @@ public class BitbucketMultibranchRunListener extends RunListener<Run<?, ?>> {
 
     @Override
     public void onStarted(Run<?, ?> run, TaskListener listener) {
-        if (run.getAction(BitBucketPayload.class) != null) {
+        if (!run.getActions(BitBucketPayload.class).isEmpty()) {
             return;
         }
 
@@ -36,14 +37,16 @@ public class BitbucketMultibranchRunListener extends RunListener<Run<?, ?>> {
             return;
         }
 
-        BitBucketPayload payload = indexing.getAction(BitBucketPayload.class);
-        if (payload == null) {
-            LOGGER.log(Level.FINEST, "No Bitbucket payload action found on active indexing for multibranch project [{0}]", multiBranchProject.getFullName());
+        List<BitBucketPayload> payloads = indexing.getActions(BitBucketPayload.class);
+        if (payloads.isEmpty()) {
+            LOGGER.log(Level.FINEST, "No Bitbucket payload actions found on active indexing for multibranch project [{0}]", multiBranchProject.getFullName());
             return;
         }
 
-        LOGGER.log(Level.FINEST, "Attaching Bitbucket payload to run [{0}] from multibranch indexing", run.getExternalizableId());
-        run.addAction(new BitBucketPayload(cause, payload.getPayload()));
+        LOGGER.log(Level.FINEST, "Attaching Bitbucket payloads to run [{0}] from multibranch indexing", run.getExternalizableId());
+        for (BitBucketPayload p: payloads) {
+            run.addAction(new BitBucketPayload(cause, p.getPayload()));
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketMultibranchRunListener.class.getName());
