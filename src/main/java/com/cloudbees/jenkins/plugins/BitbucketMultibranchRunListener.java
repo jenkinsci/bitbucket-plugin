@@ -37,13 +37,13 @@ public class BitbucketMultibranchRunListener extends RunListener<Run<?, ?>> {
         }
 
         BitBucketPayload payload = indexing.getAction(BitBucketPayload.class);
-        if (payload == null) {
+        if ((payload == null) || (payload.getIndependentActions().isEmpty())) {
             LOGGER.log(Level.FINEST, "No Bitbucket payload action found on active indexing for multibranch project [{0}]", multiBranchProject.getFullName());
             return;
         }
 
         LOGGER.log(Level.FINEST, "Attaching Bitbucket payload to run [{0}] from multibranch indexing", run.getExternalizableId());
-        run.addAction(new BitBucketPayload(payload.getPayload()));
+        run.addAction(new BitBucketPayload(payload));
     }
 
     private static final Logger LOGGER = Logger.getLogger(BitbucketMultibranchRunListener.class.getName());
