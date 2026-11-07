@@ -3,6 +3,7 @@ package com.cloudbees.jenkins.plugins;
 import hudson.Util;
 import hudson.model.CauseAction;
 import hudson.model.Job;
+import hudson.model.Queue;
 import hudson.util.StreamTaskListener;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.triggers.SCMTriggerItem;
@@ -96,6 +97,8 @@ public class BitBucketTriggerRunnable implements Runnable {
 
         if (runPolling()) {
             buildJob();
+        } else {
+            logger.info("No SCM changes detected. Not triggering the job [" + job + "]");
         }
 
 
@@ -110,15 +113,12 @@ public class BitBucketTriggerRunnable implements Runnable {
             logger.log(Level.WARNING, "Failed to parse the polling log", e);
             cause = new BitBucketPushCause(pushBy);
         }
-        ParameterizedJobMixIn pJob = new ParameterizedJobMixIn() {
-            @Override
-            protected Job asJob() {
-                return job;
-            }
-        };
-        BitBucketPayload bitBucketPayload = new BitBucketPayload(payload);
-        pJob.scheduleBuild2(5, new CauseAction(cause), bitBucketPayload);
-        if (pJob.scheduleBuild(cause)) {
+
+        // -1 means inherit the quiet period value from the job settings
+        Queue.Item item = ParameterizedJobMixIn.scheduleBuild2(job, -1, new CauseAction(cause), new BitBucketPayload(payload));
+        if (item == null) {
+            logger.info("SCM changes detected in " + job.getName() + ", but Jenkins refused to trigger the build!");
+        } else if (!(item instanceof Queue.BlockedItem)) {
             if ( this.branchName == null || this.branchName.isEmpty()){
                 logger.info("SCM changes detected in [" + job.getName() + "]. Triggering [" + name + "]");
             } else {
